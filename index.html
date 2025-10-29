@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZHOBCHAT Full Chat</title>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:Arial,sans-serif;background:#f0f0f0;display:flex;justify-content:center;align-items:center;height:100vh;color:#000;}
+#joinScreen,#chatScreen{width:95%;max-width:480px;height:95vh;display:flex;flex-direction:column;background:white;padding:10px;border-radius:10px;overflow:hidden;}
+#chatScreen{display:none;}
+.dp-preview{width:60px;height:60px;border-radius:50%;margin-bottom:10px;object-fit:cover;}
+.message-box{flex:1;overflow-y:auto;border:1px solid #ccc;padding:10px;border-radius:5px;background:#fafafa;margin-bottom:10px;}
+.input-area{display:flex;width:100%;gap:5px;margin-top:5px;}
+.input-area input[type="text"]{flex:1;padding:8px;border:1px solid #ccc;border-radius:5px;}
+#sendBtn{padding:8px 12px;border:none;background:#007bff;color:white;border-radius:5px;cursor:pointer;}
+#sendBtn:hover{background:#0056b3;}
+#userList{width:100%;border:1px solid #ccc;padding:8px;border-radius:5px;background:#fafafa;margin-bottom:10px;max-height:120px;overflow-y:auto;}
+.user-item{display:flex;align-items:center;gap:5px;margin-bottom:5px;}
+.status-dot{width:10px;height:10px;border-radius:50%;}
+</style>
+</head>
+
+<body>
+
+<!-- Join Screen -->
+<div id="joinScreen">
+<h2>Join ZHOBCHAT</h2>
+<input type="email" id="email" placeholder="Enter Gmail" style="width:100%;padding:8px;margin-bottom:10px;">
+<input type="password" id="password" placeholder="Enter Password" style="width:100%;padding:8px;margin-bottom:10px;">
+<input type="text" id="usernameInput" placeholder="Enter Name" style="width:100%;padding:8px;margin-bottom:10px;">
+<input type="file" id="dpInput" accept="image/*" style="margin-bottom:10px;">
+<img id="dpPreview" class="dp-preview" src="default_dp.png" alt="DP">
+<input type="color" id="textColor" value="#000000" style="width:100%;margin-bottom:10px;">
+<button id="joinBtn" style="width:100%;padding:8px;background:#28a745;color:white;border:none;border-radius:5px;">Join Chat</button>
+</div>
+
+<!-- Chat Screen -->
+<div id="chatScreen">
+<h2>ZHOBCHAT Chat Room
+<button id="logoutBtn" style="float:right;">Logout</button>
+</h2>
+<div id="userList"></div>
+<div id="messages" class="message-box"></div>
+<div class="input-area">
+<input type="text" id="message" placeholder="Type your message">
+<button id="sendBtn">Send</button>
+</div>
+</div>
+
+<script>
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+  authDomain: "zhobchat-33d8e.firebaseapp.com",
+  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "zhobchat-33d8e",
+  storageBucket: "zhobchat-33d8e.firebasestorage.app",
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
+  measurementId: "G-LX9P9LRLV8"
+};
+firebase.initializeApp(firebaseConfig);
+firebase.analytics();
+
+// Variables
+let currentUser={email:'',name:'',dp:'default_dp.png',color:'#000000',password:''};
+const joinBtn=document.getElementById('joinBtn');
+const logoutBtn=document.getElementById('logoutBtn');
+const joinScreen=document.getElementById('joinScreen');
+const chatScreen=document.getElementById('chatScreen');
+const emailInput=document.getElementById('email');
+const passwordInput=document.getElementById('password');
+const usernameInput=document.getElementById('usernameInput');
+const dpInput=document.getElementById('dpInput');
+const dpPreview=document.getElementById('dpPreview');
+const textColorInput=document.getElementById('textColor');
+const userListDiv=document.getElementById('userList');
+const messageInput=document.getElementById('message');
+const sendBtn=document.getElementById('sendBtn');
+const messagesBox=document.getElementById('messages');
+
+// DP Preview
+dpInput.addEventListener('change',()=>{
+  const file=dpInput.files[0];
+  if(file){
+    const reader=new FileReader();
+    reader.onload=function(e){dpPreview.src=e.target.result;}
+    reader.readAsDataURL(file);
+  }
+});
+
+// Join Button
+joinBtn.addEventListener('click',()=>{
+  const email=emailInput.value.trim();
+  const name=usernameInput.value.trim();
+  const pass=passwordInput.value.trim();
+  if(!email||!name||!pass){alert('Fill all fields');return;}
+  currentUser={email,name,password:pass,dp:dpPreview.src,color:textColorInput.value};
+  firebase.database().ref('users/'+name).set({...currentUser,status:'online'});
+  joinScreen.style.display='none'; chatScreen.style.display='flex';
+});
+
+// Logout
+logoutBtn.addEventListener('click',()=>{
+  if(currentUser.name) firebase.database().ref('users/'+currentUser.name+'/status').set('offline');
+  joinScreen.style.display='flex'; chatScreen.style.display='none';
+  currentUser={email:'',name:'',dp:'default_dp.png',color:'#000000',password:''};
+  emailInput.value=''; passwordInput.value=''; usernameInput.value='';
+});
+
+// Send Message
+sendBtn.addEventListener('click',()=>{
+  const text=messageInput.value.trim();
+  if(!text)return;
+  firebase.database().ref('messages/').push({
+    name:currentUser.name,
+    dp:currentUser.dp,
+    color:currentUser.color,
+    text,
+    timestamp:Date.now()
+  }).then(()=>{messageInput.value='';});
+});
+
+// Show Messages
+firebase.database().ref('messages/').on('child_added',snapshot=>{
+  const msg=snapshot.val();
+  const p=document.createElement('p');
+  p.innerHTML=`<img src="${msg.dp}" style="width:30px;height:30px;border-radius:50%;vertical-align:middle;margin-right:5px;"><strong>${msg.name}:</strong> <span style="color:${msg.color}">${msg.text}</span>`;
+  messagesBox.appendChild(p);
+  messagesBox.scrollTop=messagesBox.scrollHeight;
+});
+
+// Show Users
+function updateUsers(){
+  firebase.database().ref('users/').on('value',snapshot=>{
+    const users=snapshot.val(); userListDiv.innerHTML='';
+    for(let key in users){
+      const user=users[key];
+      const div=document.createElement('div');
+      div.className='user-item';
+      const dot=document.createElement('div');
+      dot.className='status-dot';
+      dot.style.background=user.status==='online'?'green':'black';
+      div.appendChild(dot);
+      const span=document.createElement('span');
+      span.textContent=user.name;
+      div.appendChild(span);
+      userListDiv.appendChild(div);
+    }
+  });
+}
+updateUsers();
+
+// Auto Offline on Close/Refresh
+window.addEventListener('beforeunload',()=>{if(currentUser.name) firebase.database().ref('users/'+currentUser.name+'/status').set('offline');});
+</script>
+
+</body>
+</html>
