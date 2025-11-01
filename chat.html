@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>ZHOBCHAT Chat Room</title>
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="style.css">
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
-  <script src="firebase_config.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZHOB Chat</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+    <script src="firebase_config.js"></script>
 </head>
 <body>
-  <div class="container">
-    <img src="default_dp.png" alt="DP" class="dp">
-    <h1>ZHOBCHAT Chat Room</h1>
+    <h1>ZHOB Chat Room</h1>
 
-    <div id="messages"></div>
+    <div id="chatContainer">
+        <div id="messageBox" style="border:1px solid #ccc; height:300px; overflow-y:scroll; padding:5px;"></div>
 
-    <div class="input-area">
-      <input type="text" id="username" placeholder="Enter your name">
-      <input type="text" id="message" placeholder="Type your message">
-      <button id="sendBtn">Send</button>
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <button id="sendButton">Send</button>
     </div>
-  </div>
 
-  <script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
