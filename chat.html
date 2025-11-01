@@ -1,25 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZHOB Chat</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
-    <script src="firebase_config.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT Room</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>ZHOB Chat Room</h1>
+  <div class="chat-container">
+    <header>
+      <h2>ZHOBCHAT</h2>
+      <span id="onlineStatus"></span>
+    </header>
 
-    <div id="chatContainer">
-        <div id="messageBox" style="border:1px solid #ccc; height:300px; overflow-y:scroll; padding:5px;"></div>
+    <div class="users-list" id="usersList"></div>
+    <div class="messages" id="messages"></div>
 
-        <input type="text" id="messageInput" placeholder="Type your message...">
-        <button id="sendButton">Send</button>
+    <div class="input-area">
+      <input id="msgInput" placeholder="Type a message..." />
+      <button id="sendBtn">Send</button>
     </div>
+  </div>
 
-    <script src="app.js"></script>
+  <script src="firebase_config.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
