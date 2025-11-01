@@ -48,3 +48,24 @@ onChildAdded(messagesRef, (snapshot) => {
   messagesDiv.appendChild(msgDiv);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
+
+// ----------------- ERROR LOGGING -----------------
+window.onerror = function (msg, url, line, col, error) {
+  const errBox = document.createElement("div");
+  errBox.style.background = "#300";
+  errBox.style.color = "#fff";
+  errBox.style.padding = "10px";
+  errBox.style.fontSize = "14px";
+  errBox.style.position = "fixed";
+  errBox.style.bottom = "0";
+  errBox.style.left = "0";
+  errBox.style.width = "100%";
+  errBox.style.zIndex = "9999";
+  errBox.innerHTML = `
+    <b>⚠️ JavaScript Error:</b><br>
+    ${msg}<br>
+    <small>${url}:${line}:${col}</small>
+  `;
+  document.body.appendChild(errBox);
+  return false;
+};
