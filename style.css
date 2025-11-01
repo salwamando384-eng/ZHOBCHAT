@@ -1,97 +1,48 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: sans-serif;
+  background: #eef3f8;
   margin: 0;
-  padding: 0;
-  background: #f0f0f0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
 }
 
-#joinScreen, #chatScreen {
-  width: 95%;
-  max-width: 480px;
-  height: 90vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+.login-container, .chat-container {
+  max-width: 400px;
+  margin: auto;
+  padding: 20px;
   background: white;
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 0 10px #ccc;
 }
 
-#chatScreen {
-  display: none;
+.user-item, .my-msg, .their-msg {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
 }
 
-.message-box {
-  flex: 1;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 5px;
-  background: #fafafa;
-  margin-bottom: 10px;
+.user-dp, .msg-dp {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 8px;
 }
+
+.online { color: green; }
+.offline { color: red; }
 
 .input-area {
   display: flex;
-  width: 100%;
-  gap: 5px;
+  margin-top: 10px;
 }
 
-.input-area input[type="text"] {
+.input-area input {
   flex: 1;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 10px;
 }
 
-#sendBtn {
-  padding: 8px 12px;
-  border: none;
-  background: #007bff;
+.input-area button {
+  padding: 10px 15px;
+  background: #2196f3;
   color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: .2s;
-}
-
-#sendBtn:hover {
-  background: #0056b3;
-}
-
-.dp-preview {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  margin-bottom: 10px;
-  object-fit: cover;
-}
-
-#userList {
-  width: 100%;
-  border: 1px solid #ccc;
-  padding: 8px;
-  border-radius: 5px;
-  background: #fafafa;
-  margin-bottom: 10px;
-  max-height: 120px;
-  overflow-y: auto;
-}
-
-.user-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 5px;
-}
-
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  border: none;
+  border-radius: 6px;
 }
