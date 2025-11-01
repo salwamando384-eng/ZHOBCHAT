@@ -11,7 +11,6 @@ firebase.auth().onAuthStateChanged(user => {
 const messageInput = document.getElementById('messageInput');
 const sendButton = document.getElementById('sendButton');
 const messageBox = document.getElementById('messageBox');
-const onlineBox = document.getElementById('onlineBox'); // div for online users
 
 // Send message
 sendButton.addEventListener('click', () => {
@@ -37,26 +36,4 @@ firebase.database().ref('messages/').on('child_added', snapshot => {
     p.textContent = (msg.user || 'Guest') + ": " + msg.text;
     messageBox.appendChild(p);
     messageBox.scrollTop = messageBox.scrollHeight;
-});
-
-// Track online users
-firebase.database().ref('.info/connected').on('value', snapshot => {
-    if (snapshot.val() === false) return;
-
-    const user = firebase.auth().currentUser;
-    if (user) {
-        const userStatusRef = firebase.database().ref('online/' + user.uid);
-        userStatusRef.set(user.email);
-        userStatusRef.onDisconnect().remove();
-    }
-});
-
-// Display online users
-firebase.database().ref('online/').on('value', snapshot => {
-    onlineBox.innerHTML = '';
-    snapshot.forEach(childSnapshot => {
-        const p = document.createElement('p');
-        p.textContent = childSnapshot.val();
-        onlineBox.appendChild(p);
-    });
 });
