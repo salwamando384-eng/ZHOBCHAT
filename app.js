@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getDatabase, ref, onChildAdded, push, set, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { getDatabase, ref, onChildAdded, push, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
@@ -9,13 +9,12 @@ const dp = localStorage.getItem("dp") || "default_dp.png";
 
 const usersRef = ref(db, "users/");
 const messagesRef = ref(db, "messages/");
-const onlineStatus = document.getElementById("onlineStatus");
 const usersList = document.getElementById("usersList");
 const messagesDiv = document.getElementById("messages");
 
 const userRef = ref(db, `users/${username}`);
 set(userRef, { name: username, dp: dp, status: "online" });
-onDisconnect(userRef).update({ status: "offline" });
+onDisconnect(userRef).set({ name: username, dp: dp, status: "offline" });
 
 onChildAdded(usersRef, (snapshot) => {
   const user = snapshot.val();
