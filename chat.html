@@ -22,7 +22,10 @@
     </div>
   </div>
 
-  <script src="firebase_config.js"></script>
+  <!-- Firebase config must load as module -->
+  <script type="module" src="firebase_config.js"></script>
+
+  <!-- Main App Script -->
   <script type="module" src="app.js"></script>
 </body>
 </html>
