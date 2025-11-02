@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZHOBCHAT</title>
+<title>ZHOB CHAT</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<h1 style="text-align:center; margin-top:10px;">ZHOB CHAT</h1>
 <div class="chat-container">
   <div class="users-section">
     <h3>Users</h3>
@@ -16,24 +17,25 @@
   <div class="messages-section">
     <div class="messages" id="messages"></div>
     <div class="input-area">
-      <input type="text" id="msgInput" placeholder="Type your message" />
+      <input type="text" id="msgInput" placeholder="Type message..." />
       <input type="file" id="imgUpload" accept="image/*"/>
-      <button id="emojiBtn">😊</button>
+      <button id="emojiBtn">👥 Users</button>
       <button id="sendBtn">Send</button>
-      <button id="clearAllBtn" style="background:#e6194b;">Clear All</button>
-      <button id="logoutBtn" style="background:#f58231;">Log Out</button>
+      <button id="clearAllBtn">Clear All</button>
+      <button id="logoutBtn">Log Out</button>
     </div>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, set, onDisconnect, remove, get } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { getDatabase, ref, push, set, onDisconnect, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 import { firebaseConfig } from "./firebase_config.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// Logged in user info
 const name = localStorage.getItem("username");
 const age = localStorage.getItem("age");
 const gender = localStorage.getItem("gender");
@@ -41,22 +43,23 @@ const email = localStorage.getItem("email");
 const dp = localStorage.getItem("dp") || "default_dp.png";
 const username = localStorage.getItem("loggedInUser");
 
-if(!username){ window.location.href = "index.html"; throw new Error("Not logged in"); }
+if(!username){ window.location.href="index.html"; throw new Error("Not logged in"); }
 
-const usersRef = ref(db, "users/");
-const messagesRef = ref(db, "messages/");
-const botsRef = ref(db, "bots/");
+const usersRef = ref(db,"users/");
+const messagesRef = ref(db,"messages/");
+const botsRef = ref(db,"bots/");
 
 const usersDiv = document.getElementById("usersList");
 const messagesDiv = document.getElementById("messages");
 const msgInput = document.getElementById("msgInput");
 const imgUpload = document.getElementById("imgUpload");
 
-// Dynamic background
+// Background color dynamic
 document.body.style.background = ['#f9f9f9','#ffe4e1','#e6ffe6','#e0f7ff','#fff0f5'][Math.floor(Math.random()*5)];
 
-const userRef = ref(db, `users/${name}`);
-set(userRef,{name,age,gender,email,dp,status:"online",role:"owner"}); // Owner role for demo
+// Owner setup
+const userRef = ref(db,`users/${name}`);
+set(userRef,{name,age,gender,email,dp,status:"online",role:"owner"});
 onDisconnect(userRef).set({name,age,gender,email,dp,status:"offline",role:"owner"});
 
 // Color per user
@@ -69,6 +72,7 @@ function getColor(name){
   return userColors[name];
 }
 
+// Update Users List
 function updateUsersList(){
   get(usersRef).then(snapshot=>{
     usersDiv.innerHTML="";
@@ -81,16 +85,16 @@ function updateUsersList(){
         <span class="status-dot" style="background:${user.status==='online'?'green':'red'}"></span>`;
       div.style.cursor="pointer";
       div.onclick=()=>{
-        const privateChat=confirm(`${user.name} details:\nAge:${user.age}\nGender:${user.gender}\nEmail:${user.email}\n\nOpen private chat?`);
+        const privateChat = confirm(`${user.name} details:\nAge:${user.age}\nGender:${user.gender}\nEmail:${user.email}\n\nOpen private chat?`);
         if(privateChat){ openPrivateChat(user.name); }
-      };
+      }
       usersDiv.appendChild(div);
     });
   });
 }
 onChildAdded(usersRef,()=>updateUsersList());
 
-// Send messages + images
+// Send messages
 document.getElementById("sendBtn").onclick=()=>{
   const text=msgInput.value.trim();
   if(!text && !imgUpload.files[0]) return alert("Enter message or select image");
@@ -108,10 +112,10 @@ document.getElementById("sendBtn").onclick=()=>{
   }
 }
 
-// Emoji button
+// Emoji button -> Show users list
 document.getElementById("emojiBtn").onclick=()=>{
-  const emoji = prompt("Enter emoji or text to send to all users:");
-  if(emoji){ push(messagesRef,{name,age,gender,email,dp,text:emoji,time:new Date().toLocaleTimeString()}); }
+  updateUsersList();
+  alert("Check the Users section on left for online/offline users!");
 }
 
 // Delete all messages (Owner)
@@ -126,8 +130,8 @@ onChildAdded(messagesRef,(snapshot)=>{
   const msg = snapshot.val();
   const msgDiv=document.createElement("div");
   msgDiv.className= msg.name===name?"my-msg":"their-msg";
-  let imgTag=msg.imgUrl? `<br><img src="${msg.imgUrl}" class="msg-img"/>`:"";
-  let delBtn= msg.name===name || username==="owner"? `<button class="deleteBtn">Delete</button>`:"";
+  let imgTag = msg.imgUrl? `<br><img src="${msg.imgUrl}" class="msg-img"/>`:"";
+  let delBtn = (msg.name===name || username==="owner")? `<button class="deleteBtn">Delete</button>`:"";
   msgDiv.innerHTML=`<img src="${msg.dp}" class="msg-dp"/>
     <div><b style="color:${getColor(msg.name)}">${msg.name}</b>: ${msg.text}${imgTag} ${delBtn}<br><small>${msg.time}</small></div>`;
   if(delBtn){
@@ -159,7 +163,10 @@ function updateBot(botId,name,gender,dp){
 
 // Example bots
 updateBot("bot1","Robo Ali","Male","bot1.png");
-updateBot("bot2","Robo Sara","Female","bot2.png");
+updateBot("bot2","Robo Ahmed","Male","bot2.png");
+updateBot("bot3","Robo Sara","Female","bot3.png");
+updateBot("bot4","Robo Laila","Female","bot4.png");
+updateBot("bot5","Robo Fatima","Female","bot5.png");
 
 </script>
 </body>
