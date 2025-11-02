@@ -1,5 +1,5 @@
 // firebase_config.js
-// Your Firebase config (ready). Uses your existing project (zhobchatroomweb).
+// Uses your existing Firebase project (zhobchatroomweb)
 export const firebaseConfig = {
   apiKey: "AIzaSyDizxUxGmSea7O9PeIvyVCFkDNDuYQ5QhE",
   authDomain: "zhobchatroomweb.firebaseapp.com",
