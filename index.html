@@ -10,6 +10,8 @@
 <div class="login-container">
   <h2>ZHOBCHAT Register</h2>
   <input type="text" id="username" placeholder="Enter your name" />
+  <input type="number" id="age" placeholder="Enter your age" />
+  <input type="text" id="gender" placeholder="Enter your gender" />
   <input type="email" id="email" placeholder="Enter your Gmail" />
   <input type="password" id="password" placeholder="Enter your password" />
   <input type="file" id="dpUpload" accept="image/*" />
@@ -20,15 +22,19 @@
 const registerBtn = document.getElementById("registerBtn");
 registerBtn.addEventListener("click", () => {
   const name = document.getElementById("username").value.trim();
+  const age = document.getElementById("age").value.trim();
+  const gender = document.getElementById("gender").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
   const file = document.getElementById("dpUpload").files[0];
 
-  if(!name || !email || !password) return alert("All fields are required!");
+  if(!name || !age || !gender || !email || !password) return alert("All fields are required!");
 
   let dpURL = "default_dp.png";
   function saveAndGo(dp){
     localStorage.setItem("username", name);
+    localStorage.setItem("age", age);
+    localStorage.setItem("gender", gender);
     localStorage.setItem("email", email);
     localStorage.setItem("password", password);
     localStorage.setItem("dp", dp);
