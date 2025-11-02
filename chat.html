@@ -1,31 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT Room</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZHOBCHAT</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="chat-container">
-    <header>
-      <h2>ZHOBCHAT</h2>
-      <span id="onlineStatus"></span>
-    </header>
-
     <div class="users-list" id="usersList"></div>
     <div class="messages" id="messages"></div>
-
-    <div class="input-area">
-      <input id="msgInput" placeholder="Type a message..." />
-      <button id="sendBtn">Send</button>
-    </div>
+    <input type="text" id="msgInput" placeholder="Type your message" />
+    <button id="sendBtn">Send</button>
   </div>
 
-  <!-- Firebase config must load as module -->
-  <script type="module" src="firebase_config.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getDatabase, ref, onChildAdded, push, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+    import { firebaseConfig } from "./firebase_config.js";
 
-  <!-- Main App Script -->
-  <script type="module" src="app.js"></script>
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Get username and DP from localStorage
+    const username = localStorage.getItem("username");
+    const dp = localStorage.getItem("dp") || "default_dp.png";
+
+    if (!username) {
+      alert("Username not found. Please login first!");
+      window.location.href = "index.html";
+      throw new Error("Username not set");
+    }
+
+    const usersRef = ref(db, "users/");
+    const messagesRef = ref(db, "messages/");
+    const usersList = document.getElementById("usersList");
+    const messagesDiv = document.getElementById("messages");
+
+    // Set user online status
+    const userRef = ref(db, `users/${username}`);
+    set(userRef, { name: username, dp: dp, status: "online" });
+    onDisconnect(userRef).set({ name: username, dp: dp, status: "offline" });
+
+    // Listen for users
+    onChildAdded(usersRef, (snapshot) => {
+      const user = snapshot.val();
+      const div = document.createElement("div");
+      div.className = "user-item";
+      div.innerHTML = `
+        <img src="${user.dp}" class="user-dp"/>
+        <span>${user.name}</span>
+        <span class="${user.status === "online" ? "online" : "offline"}">${user.status}</span>
+      `;
+      usersList.appendChild(div);
+    });
+
+    // Send message
+    document.getElementById("sendBtn").onclick = () => {
+      const msgInput = document.getElementById("msgInput");
+      const text = msgInput.value.trim();
+      if (!text) return;
+      const msgData = { name: username, dp: dp, text: text, time: new Date().toLocaleTimeString() };
+      push(messagesRef, msgData);
+      msgInput.value = "";
+    };
+
+    // Listen for messages
+    onChildAdded(messagesRef, (snapshot) => {
+      const msg = snapshot.val();
+      const msgDiv = document.createElement("div");
+      msgDiv.className = msg.name === username ? "my-msg" : "their-msg";
+      msgDiv.innerHTML = `
+        <img src="${msg.dp}" class="msg-dp"/>
+        <div><b>${msg.name}:</b> ${msg.text}<br><small>${msg.time}</small></div>
+      `;
+      messagesDiv.appendChild(msgDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+
+    // Error logging
+    window.onerror = function(msg, url, line, col, error) {
+      const errBox = document.createElement("div");
+      errBox.style.background = "#300";
+      errBox.style.color = "#fff";
+      errBox.style.padding = "10px";
+      errBox.style.fontSize = "14px";
+      errBox.style.position = "fixed";
+      errBox.style.bottom = "0";
+      errBox.style.left = "0";
+      errBox.style.width = "100%";
+      errBox.style.zIndex = "9999";
+      errBox.innerHTML = `<b>⚠️ JS Error:</b><br>${msg}<br><small>${url}:${line}:${col}</small>`;
+      document.body.appendChild(errBox);
+      return false;
+    };
+  </script>
 </body>
 </html>
