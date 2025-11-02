@@ -1,173 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZHOB CHAT</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOB CHAT - Room</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-<h1 style="text-align:center; margin-top:10px;">ZHOB CHAT</h1>
-<div class="chat-container">
-  <div class="users-section">
-    <h3>Users</h3>
-    <div id="usersList"></div>
-  </div>
+<body class="chat-page">
 
-  <div class="messages-section">
-    <div class="messages" id="messages"></div>
-    <div class="input-area">
-      <input type="text" id="msgInput" placeholder="Type message..." />
-      <input type="file" id="imgUpload" accept="image/*"/>
-      <button id="emojiBtn">👥 Users</button>
-      <button id="sendBtn">Send</button>
-      <button id="clearAllBtn">Clear All</button>
-      <button id="logoutBtn">Log Out</button>
-    </div>
-  </div>
-</div>
+  <header class="chat-header">
+    <h1>💬 ZHOB CHAT</h1>
+    <button id="logoutBtn">🚪 Logout</button>
+  </header>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getDatabase, ref, push, set, onDisconnect, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
-import { firebaseConfig } from "./firebase_config.js";
+  <main class="chat-container">
+    <aside class="user-list">
+      <h3>👥 Users</h3>
+      <ul id="usersOnline"></ul>
+    </aside>
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+    <section class="chat-box">
+      <div id="messages" class="messages"></div>
+      <div class="chat-input">
+        <button id="emojiBtn">😊</button>
+        <input type="text" id="messageInput" placeholder="میسج لکھیں...">
+        <button id="sendBtn">📤 Send</button>
+      </div>
+    </section>
+  </main>
 
-// Logged in user info
-const name = localStorage.getItem("username");
-const age = localStorage.getItem("age");
-const gender = localStorage.getItem("gender");
-const email = localStorage.getItem("email");
-const dp = localStorage.getItem("dp") || "default_dp.png";
-const username = localStorage.getItem("loggedInUser");
+  <script src="firebase_config.js"></script>
+  <script src="app.js"></script>
 
-if(!username){ window.location.href="index.html"; throw new Error("Not logged in"); }
+  <script>
+    // 🚀 Example ROBOTS (You can change them anytime)
+    const robots = [
+      { name: "Robo Ali", gender: "Male", dp: "https://i.pravatar.cc/40?img=1" },
+      { name: "Robo Sara", gender: "Female", dp: "https://i.pravatar.cc/40?img=2" },
+      { name: "Robo Khan", gender: "Male", dp: "https://i.pravatar.cc/40?img=3" },
+      { name: "Robo Ayesha", gender: "Female", dp: "https://i.pravatar.cc/40?img=4" },
+      { name: "Robo Noor", gender: "Female", dp: "https://i.pravatar.cc/40?img=5" }
+    ];
 
-const usersRef = ref(db,"users/");
-const messagesRef = ref(db,"messages/");
-const botsRef = ref(db,"bots/");
+    // Example messages from robots
+    const robotReplies = [
+      "ہیلو! 😊 کیسے ہو؟",
+      "میں ایک روبوٹ ہوں 🤖",
+      "آج کا دن کیسا جا رہا ہے؟",
+      "واہ! یہ زبردست بات تھی 😄",
+      "ہاہا، مزے کی بات ہے 😂"
+    ];
 
-const usersDiv = document.getElementById("usersList");
-const messagesDiv = document.getElementById("messages");
-const msgInput = document.getElementById("msgInput");
-const imgUpload = document.getElementById("imgUpload");
-
-// Background color dynamic
-document.body.style.background = ['#f9f9f9','#ffe4e1','#e6ffe6','#e0f7ff','#fff0f5'][Math.floor(Math.random()*5)];
-
-// Owner setup
-const userRef = ref(db,`users/${name}`);
-set(userRef,{name,age,gender,email,dp,status:"online",role:"owner"});
-onDisconnect(userRef).set({name,age,gender,email,dp,status:"offline",role:"owner"});
-
-// Color per user
-const userColors = {};
-function getColor(name){
-  if(!userColors[name]){
-    const colors = ['#e6194b','#3cb44b','#ffe119','#4363d8','#f58231','#911eb4','#46f0f0','#f032e6'];
-    userColors[name] = colors[Math.floor(Math.random()*colors.length)];
-  }
-  return userColors[name];
-}
-
-// Update Users List
-function updateUsersList(){
-  get(usersRef).then(snapshot=>{
-    usersDiv.innerHTML="";
-    snapshot.forEach(userSnap=>{
-      const user = userSnap.val();
+    // Function to simulate a robot reply
+    function robotRespond() {
+      const randomBot = robots[Math.floor(Math.random() * robots.length)];
+      const msg = robotReplies[Math.floor(Math.random() * robotReplies.length)];
       const div = document.createElement("div");
-      div.className="user-item";
-      div.innerHTML=`<img src="${user.dp}" class="user-dp"/>
-        <span style="color:${getColor(user.name)}">${user.name}</span>
-        <span class="status-dot" style="background:${user.status==='online'?'green':'red'}"></span>`;
-      div.style.cursor="pointer";
-      div.onclick=()=>{
-        const privateChat = confirm(`${user.name} details:\nAge:${user.age}\nGender:${user.gender}\nEmail:${user.email}\n\nOpen private chat?`);
-        if(privateChat){ openPrivateChat(user.name); }
-      }
-      usersDiv.appendChild(div);
-    });
-  });
-}
-onChildAdded(usersRef,()=>updateUsersList());
-
-// Send messages
-document.getElementById("sendBtn").onclick=()=>{
-  const text=msgInput.value.trim();
-  if(!text && !imgUpload.files[0]) return alert("Enter message or select image");
-
-  if(imgUpload.files[0]){
-    const reader=new FileReader();
-    reader.onload=function(e){
-      push(messagesRef,{name,age,gender,email,dp,text,imgUrl:e.target.result,time:new Date().toLocaleTimeString()});
-      msgInput.value=""; imgUpload.value="";
+      div.classList.add("message", "robot");
+      div.innerHTML = `
+        <img src="${randomBot.dp}" class="avatar">
+        <span><strong>${randomBot.name}:</strong> ${msg}</span>
+      `;
+      document.getElementById("messages").appendChild(div);
     }
-    reader.readAsDataURL(imgUpload.files[0]);
-  } else {
-    push(messagesRef,{name,age,gender,email,dp,text,time:new Date().toLocaleTimeString()});
-    msgInput.value="";
-  }
-}
 
-// Emoji button -> Show users list
-document.getElementById("emojiBtn").onclick=()=>{
-  updateUsersList();
-  alert("Check the Users section on left for online/offline users!");
-}
+    // Respond after user sends a message
+    document.getElementById("sendBtn").addEventListener("click", () => {
+      setTimeout(robotRespond, 2000);
+    });
+  </script>
 
-// Delete all messages (Owner)
-document.getElementById("clearAllBtn").onclick=()=>{
-  if(confirm("Are you sure you want to delete all messages?")){
-    remove(messagesRef);
-  }
-}
-
-// Display messages
-onChildAdded(messagesRef,(snapshot)=>{
-  const msg = snapshot.val();
-  const msgDiv=document.createElement("div");
-  msgDiv.className= msg.name===name?"my-msg":"their-msg";
-  let imgTag = msg.imgUrl? `<br><img src="${msg.imgUrl}" class="msg-img"/>`:"";
-  let delBtn = (msg.name===name || username==="owner")? `<button class="deleteBtn">Delete</button>`:"";
-  msgDiv.innerHTML=`<img src="${msg.dp}" class="msg-dp"/>
-    <div><b style="color:${getColor(msg.name)}">${msg.name}</b>: ${msg.text}${imgTag} ${delBtn}<br><small>${msg.time}</small></div>`;
-  if(delBtn){
-    msgDiv.querySelector(".deleteBtn").onclick=()=>{ remove(ref(db, `messages/${snapshot.key}`)); }
-  }
-  messagesDiv.appendChild(msgDiv);
-  messagesDiv.scrollTop=messagesDiv.scrollHeight;
-});
-
-// Private chat
-function openPrivateChat(otherUser){
-  const privateRoom=[name,otherUser].sort().join("_");
-  const privateRef=ref(db, `private/${privateRoom}`);
-  let privateMsg=prompt(`Send private message to ${otherUser}:`);
-  if(privateMsg){ push(privateRef,{from:name,to:otherUser,text:privateMsg,time:new Date().toLocaleTimeString()}); alert("Private message sent!"); }
-}
-
-// Logout
-document.getElementById("logoutBtn").onclick=()=>{
-  localStorage.removeItem("loggedInUser");
-  set(userRef,{name,age,gender,email,dp,status:"offline",role:"owner"});
-  window.location.href="index.html";
-};
-
-// Bots example
-function updateBot(botId,name,gender,dp){
-  set(ref(db, `bots/${botId}`), {name,gender,dp});
-}
-
-// Example bots
-updateBot("bot1","Robo Ali","Male","bot1.png");
-updateBot("bot2","Robo Ahmed","Male","bot2.png");
-updateBot("bot3","Robo Sara","Female","bot3.png");
-updateBot("bot4","Robo Laila","Female","bot4.png");
-updateBot("bot5","Robo Fatima","Female","bot5.png");
-
-</script>
 </body>
 </html>
