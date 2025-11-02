@@ -3,139 +3,112 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZHOB CHAT - Room</title>
+  <title>ZHOB CHAT</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="chat-container">
-    <div class="chat-header">
-      <h3>ZHOB CHAT</h3>
-      <button id="logoutBtn">Logout</button>
-    </div>
+    <header class="chat-header">
+      <h2>ZHOB CHAT 💬</h2>
+      <button id="userListBtn" class="emoji-btn">👥</button>
+    </header>
 
-    <div id="messages"></div>
+    <main class="chat-main">
+      <div id="usersList" class="users-list hidden"></div>
+      <div id="messages" class="messages"></div>
+    </main>
 
-    <ul id="usersOnline"></ul>
-
-    <div class="input-area">
-      <button id="emojiBtn">👥</button>
-      <input id="messageInput" type="text" placeholder="Type a message..." />
-      <button id="sendBtn">➤</button>
-    </div>
+    <footer class="chat-footer">
+      <input type="text" id="msgInput" placeholder="Type your message..." />
+      <button id="sendBtn">📩</button>
+    </footer>
   </div>
 
-  <script src="firebase_config.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-    import { getDatabase, ref, push, set, onChildAdded, remove, onDisconnect, update, get, child } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+    import { getDatabase, ref, push, onChildAdded, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+    import { firebaseConfig } from "./firebase_config.js";
+    import { robots } from "./robots.js";
 
+    // Firebase Init
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const name = localStorage.getItem("name");
-    const email = localStorage.getItem("email");
-    const gender = localStorage.getItem("gender");
-    const isOwner = email === "admin@gmail.com"; // Owner email
+    // User info
+    const username = localStorage.getItem("username");
+    const dp = localStorage.getItem("dp") || "default_dp.png";
 
-    const messagesRef = ref(db, "messages/");
     const usersRef = ref(db, "users/");
-    const usersList = document.getElementById("usersOnline");
+    const messagesRef = ref(db, "messages/");
+    const userRef = ref(db, `users/${username}`);
+
+    // Set user online
+    set(userRef, { name: username, dp: dp, status: "online" });
+    onDisconnect(userRef).set({ name: username, dp: dp, status: "offline" });
+
+    const usersList = document.getElementById("usersList");
     const messagesDiv = document.getElementById("messages");
 
-    const me = ref(db, "users/" + email.replace(/\./g, "_"));
-    update(me, { status: "online" });
-    onDisconnect(me).update({ status: "offline" });
-
-    // ===== Show messages =====
-    onChildAdded(messagesRef, (snap) => {
-      const msg = snap.val();
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "message";
-
-      msgDiv.innerHTML = `
-        <img src="${msg.dp || 'default_dp.png'}" class="avatar">
-        <div>
-          <strong>${msg.name}</strong> <small>${msg.time}</small><br>
-          ${msg.text}
-        </div>
+    // Show users (online/offline + robots)
+    function updateUserList(snapshot, isRobot = false) {
+      const user = snapshot.val ? snapshot.val() : snapshot;
+      const div = document.createElement("div");
+      div.className = "user-item";
+      div.innerHTML = `
+        <img src="${user.dp}" class="user-dp"/>
+        <span>${user.name}</span>
+        <span class="${user.status === "online" ? "online" : "offline"}">
+          ${user.status === "online" ? "●" : "○"}
+        </span>
       `;
+      usersList.appendChild(div);
+    }
 
-      // Delete button for owner or sender
-      if (isOwner || msg.email === email) {
-        const delBtn = document.createElement("button");
-        delBtn.textContent = "✖";
-        delBtn.onclick = () => remove(ref(db, "messages/" + snap.key));
-        msgDiv.appendChild(delBtn);
-      }
+    // Firebase users
+    onChildAdded(usersRef, (snapshot) => {
+      updateUserList(snapshot);
+    });
 
+    // Add robots to list
+    robots.forEach(bot => {
+      updateUserList({ name: bot.name, dp: bot.dp, status: "online" }, true);
+    });
+
+    // Send message
+    document.getElementById("sendBtn").onclick = () => {
+      const msgInput = document.getElementById("msgInput");
+      const text = msgInput.value.trim();
+      if (!text) return;
+      const msgData = { name: username, dp: dp, text: text, time: new Date().toLocaleTimeString() };
+      push(messagesRef, msgData);
+      msgInput.value = "";
+    };
+
+    // Display messages
+    onChildAdded(messagesRef, (snapshot) => {
+      const msg = snapshot.val();
+      const msgDiv = document.createElement("div");
+      msgDiv.className = msg.name === username ? "my-msg" : "their-msg";
+      msgDiv.innerHTML = `
+        <img src="${msg.dp}" class="msg-dp"/>
+        <div><b>${msg.name}:</b> ${msg.text}<br><small>${msg.time}</small></div>
+      `;
       messagesDiv.appendChild(msgDiv);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     });
 
-    // ===== Send message =====
-    document.getElementById("sendBtn").onclick = () => sendMessage();
-    document.getElementById("messageInput").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") sendMessage();
-    });
-
-    function sendMessage() {
-      const text = document.getElementById("messageInput").value.trim();
-      if (!text) return;
-      const msgData = {
-        name, email, text,
-        dp: "default_dp.png",
-        time: new Date().toLocaleTimeString()
-      };
-      push(messagesRef, msgData);
-      document.getElementById("messageInput").value = "";
-    }
-
-    // ===== Emoji / Users List Toggle =====
-    document.getElementById("emojiBtn").onclick = async () => {
-      usersList.style.display = usersList.style.display === "block" ? "none" : "block";
-      usersList.innerHTML = "<b>Users List</b><hr>";
-
-      const dbRef = ref(db);
-      const snapshot = await get(child(dbRef, "users"));
-      if (snapshot.exists()) {
-        Object.values(snapshot.val()).forEach(u => {
-          const li = document.createElement("li");
-          const color = u.status === "online" ? "🟢" : "⚪";
-          li.textContent = `${color} ${u.name} (${u.gender || "?"})`;
-          li.onclick = () => showUserDetails(u);
-          usersList.appendChild(li);
-        });
-      }
-    };
-
-    // ===== Show user details =====
-    function showUserDetails(user) {
-      alert(`👤 Name: ${user.name}\n📧 Gmail: ${user.email}\n🧠 Gender: ${user.gender}\n📅 Age: ${user.age}`);
-    }
-
-    // ===== Logout =====
-    document.getElementById("logoutBtn").onclick = () => {
-      update(me, { status: "offline" });
-      localStorage.clear();
-      window.location.href = "index.html";
-    };
-
-    // ===== ROBOTS AUTO CHAT =====
-    const robots = [
-      { name: "Bot Ali", gender: "Male", dp: "bot_male1.png" },
-      { name: "Bot Rehan", gender: "Male", dp: "bot_male2.png" },
-      { name: "Bot Areeba", gender: "Female", dp: "bot_female1.png" },
-      { name: "Bot Sadaf", gender: "Female", dp: "bot_female2.png" },
-      { name: "Bot Hina", gender: "Female", dp: "bot_female3.png" }
-    ];
-
+    // Bot auto-reply
     setInterval(() => {
-      const r = robots[Math.floor(Math.random() * robots.length)];
-      const phrases = ["Hello everyone!", "How are you?", "ZHOB Chat is fun!", "Nice to meet you!", "😂👍🔥"];
-      const text = phrases[Math.floor(Math.random() * phrases.length)];
-      const msgData = { name: r.name, dp: r.dp, text, time: new Date().toLocaleTimeString() };
+      const bot = robots[Math.floor(Math.random() * robots.length)];
+      const message = bot.messages[Math.floor(Math.random() * bot.messages.length)];
+      const msgData = { name: bot.name, dp: bot.dp, text: message, time: new Date().toLocaleTimeString() };
       push(messagesRef, msgData);
-    }, 25000);
+    }, 20000); // 20 sec delay between bot replies
+
+    // Toggle user list
+    document.getElementById("userListBtn").addEventListener("click", () => {
+      usersList.classList.toggle("hidden");
+    });
   </script>
 </body>
 </html>
