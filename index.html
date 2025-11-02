@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZHOBCHAT Register</title>
+<title>ZHOB CHAT Register</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="login-container">
-  <h2>ZHOBCHAT Register</h2>
+  <h2>ZHOB CHAT</h2>
   <input type="text" id="username" placeholder="Enter your name" />
   <input type="number" id="age" placeholder="Enter your age" />
   <input type="text" id="gender" placeholder="Enter your gender" />
@@ -44,13 +44,9 @@ registerBtn.addEventListener("click", () => {
 
   if(file){
     const reader = new FileReader();
-    reader.onload = function(e){
-      saveAndGo(e.target.result);
-    };
+    reader.onload = function(e){ saveAndGo(e.target.result); }
     reader.readAsDataURL(file);
-  } else {
-    saveAndGo(dpURL);
-  }
+  } else { saveAndGo(dpURL); }
 });
 </script>
 </body>
