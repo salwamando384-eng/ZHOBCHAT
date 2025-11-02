@@ -1,5 +1,5 @@
 // robots.js
-// Predefined bots (names only — no "Robot" word). You can change names/messages here if needed.
+// Predefined bots (names only — no "Robot" word). Fixed set.
 export const robots = [
   {
     name: "Ali",
