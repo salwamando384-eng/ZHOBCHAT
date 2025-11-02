@@ -14,25 +14,27 @@
     <button id="loginBtn">Join Chat</button>
   </div>
 
-  <script src="firebase_config.js"></script>
   <script>
-    document.getElementById('loginBtn').addEventListener('click', async () => {
+    document.getElementById('loginBtn').addEventListener('click', () => {
       const name = document.getElementById('username').value.trim();
       const file = document.getElementById('dpUpload').files[0];
       if (!name) return alert("Enter your name");
 
       let dpURL = "default_dp.png";
+
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
           localStorage.setItem("dp", e.target.result);
+          localStorage.setItem("username", name);
+          window.location.href = "chat.html";
         };
         reader.readAsDataURL(file);
+      } else {
+        localStorage.setItem("dp", dpURL);
+        localStorage.setItem("username", name);
+        window.location.href = "chat.html";
       }
-
-      localStorage.setItem("username", name);
-      localStorage.setItem("dp", localStorage.getItem("dp") || dpURL);
-      window.location.href = "chat.html";
     });
   </script>
 </body>
