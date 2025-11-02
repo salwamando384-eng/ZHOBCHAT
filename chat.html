@@ -1,74 +1,141 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ZHOB CHAT - Room</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="chat-page">
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h3>ZHOB CHAT</h3>
+      <button id="logoutBtn">Logout</button>
+    </div>
 
-  <header class="chat-header">
-    <h1>💬 ZHOB CHAT</h1>
-    <button id="logoutBtn">🚪 Logout</button>
-  </header>
+    <div id="messages"></div>
 
-  <main class="chat-container">
-    <aside class="user-list">
-      <h3>👥 Users</h3>
-      <ul id="usersOnline"></ul>
-    </aside>
+    <ul id="usersOnline"></ul>
 
-    <section class="chat-box">
-      <div id="messages" class="messages"></div>
-      <div class="chat-input">
-        <button id="emojiBtn">😊</button>
-        <input type="text" id="messageInput" placeholder="میسج لکھیں...">
-        <button id="sendBtn">📤 Send</button>
-      </div>
-    </section>
-  </main>
+    <div class="input-area">
+      <button id="emojiBtn">👥</button>
+      <input id="messageInput" type="text" placeholder="Type a message..." />
+      <button id="sendBtn">➤</button>
+    </div>
+  </div>
 
   <script src="firebase_config.js"></script>
-  <script src="app.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getDatabase, ref, push, set, onChildAdded, remove, onDisconnect, update, get, child } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
-  <script>
-    // 🚀 Example ROBOTS (You can change them anytime)
-    const robots = [
-      { name: "Robo Ali", gender: "Male", dp: "https://i.pravatar.cc/40?img=1" },
-      { name: "Robo Sara", gender: "Female", dp: "https://i.pravatar.cc/40?img=2" },
-      { name: "Robo Khan", gender: "Male", dp: "https://i.pravatar.cc/40?img=3" },
-      { name: "Robo Ayesha", gender: "Female", dp: "https://i.pravatar.cc/40?img=4" },
-      { name: "Robo Noor", gender: "Female", dp: "https://i.pravatar.cc/40?img=5" }
-    ];
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    // Example messages from robots
-    const robotReplies = [
-      "ہیلو! 😊 کیسے ہو؟",
-      "میں ایک روبوٹ ہوں 🤖",
-      "آج کا دن کیسا جا رہا ہے؟",
-      "واہ! یہ زبردست بات تھی 😄",
-      "ہاہا، مزے کی بات ہے 😂"
-    ];
+    const name = localStorage.getItem("name");
+    const email = localStorage.getItem("email");
+    const gender = localStorage.getItem("gender");
+    const isOwner = email === "admin@gmail.com"; // Owner email
 
-    // Function to simulate a robot reply
-    function robotRespond() {
-      const randomBot = robots[Math.floor(Math.random() * robots.length)];
-      const msg = robotReplies[Math.floor(Math.random() * robotReplies.length)];
-      const div = document.createElement("div");
-      div.classList.add("message", "robot");
-      div.innerHTML = `
-        <img src="${randomBot.dp}" class="avatar">
-        <span><strong>${randomBot.name}:</strong> ${msg}</span>
+    const messagesRef = ref(db, "messages/");
+    const usersRef = ref(db, "users/");
+    const usersList = document.getElementById("usersOnline");
+    const messagesDiv = document.getElementById("messages");
+
+    const me = ref(db, "users/" + email.replace(/\./g, "_"));
+    update(me, { status: "online" });
+    onDisconnect(me).update({ status: "offline" });
+
+    // ===== Show messages =====
+    onChildAdded(messagesRef, (snap) => {
+      const msg = snap.val();
+      const msgDiv = document.createElement("div");
+      msgDiv.className = "message";
+
+      msgDiv.innerHTML = `
+        <img src="${msg.dp || 'default_dp.png'}" class="avatar">
+        <div>
+          <strong>${msg.name}</strong> <small>${msg.time}</small><br>
+          ${msg.text}
+        </div>
       `;
-      document.getElementById("messages").appendChild(div);
+
+      // Delete button for owner or sender
+      if (isOwner || msg.email === email) {
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "✖";
+        delBtn.onclick = () => remove(ref(db, "messages/" + snap.key));
+        msgDiv.appendChild(delBtn);
+      }
+
+      messagesDiv.appendChild(msgDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+
+    // ===== Send message =====
+    document.getElementById("sendBtn").onclick = () => sendMessage();
+    document.getElementById("messageInput").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    function sendMessage() {
+      const text = document.getElementById("messageInput").value.trim();
+      if (!text) return;
+      const msgData = {
+        name, email, text,
+        dp: "default_dp.png",
+        time: new Date().toLocaleTimeString()
+      };
+      push(messagesRef, msgData);
+      document.getElementById("messageInput").value = "";
     }
 
-    // Respond after user sends a message
-    document.getElementById("sendBtn").addEventListener("click", () => {
-      setTimeout(robotRespond, 2000);
-    });
-  </script>
+    // ===== Emoji / Users List Toggle =====
+    document.getElementById("emojiBtn").onclick = async () => {
+      usersList.style.display = usersList.style.display === "block" ? "none" : "block";
+      usersList.innerHTML = "<b>Users List</b><hr>";
 
+      const dbRef = ref(db);
+      const snapshot = await get(child(dbRef, "users"));
+      if (snapshot.exists()) {
+        Object.values(snapshot.val()).forEach(u => {
+          const li = document.createElement("li");
+          const color = u.status === "online" ? "🟢" : "⚪";
+          li.textContent = `${color} ${u.name} (${u.gender || "?"})`;
+          li.onclick = () => showUserDetails(u);
+          usersList.appendChild(li);
+        });
+      }
+    };
+
+    // ===== Show user details =====
+    function showUserDetails(user) {
+      alert(`👤 Name: ${user.name}\n📧 Gmail: ${user.email}\n🧠 Gender: ${user.gender}\n📅 Age: ${user.age}`);
+    }
+
+    // ===== Logout =====
+    document.getElementById("logoutBtn").onclick = () => {
+      update(me, { status: "offline" });
+      localStorage.clear();
+      window.location.href = "index.html";
+    };
+
+    // ===== ROBOTS AUTO CHAT =====
+    const robots = [
+      { name: "Bot Ali", gender: "Male", dp: "bot_male1.png" },
+      { name: "Bot Rehan", gender: "Male", dp: "bot_male2.png" },
+      { name: "Bot Areeba", gender: "Female", dp: "bot_female1.png" },
+      { name: "Bot Sadaf", gender: "Female", dp: "bot_female2.png" },
+      { name: "Bot Hina", gender: "Female", dp: "bot_female3.png" }
+    ];
+
+    setInterval(() => {
+      const r = robots[Math.floor(Math.random() * robots.length)];
+      const phrases = ["Hello everyone!", "How are you?", "ZHOB Chat is fun!", "Nice to meet you!", "😂👍🔥"];
+      const text = phrases[Math.floor(Math.random() * phrases.length)];
+      const msgData = { name: r.name, dp: r.dp, text, time: new Date().toLocaleTimeString() };
+      push(messagesRef, msgData);
+    }, 25000);
+  </script>
 </body>
 </html>
