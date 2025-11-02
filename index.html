@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT Register</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZHOBCHAT Register</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="login-container">
@@ -16,38 +16,36 @@
     <button id="registerBtn">Join Chat</button>
   </div>
 
-  <script type="module">
-    const registerBtn = document.getElementById("registerBtn");
+<script type="module">
+const registerBtn = document.getElementById("registerBtn");
+registerBtn.addEventListener("click", () => {
+  const name = document.getElementById("username").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const file = document.getElementById("dpUpload").files[0];
 
-    registerBtn.addEventListener("click", () => {
-      const name = document.getElementById("username").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const file = document.getElementById("dpUpload").files[0];
+  if(!name || !email || !password) return alert("All fields are required!");
 
-      if (!name || !email || !password) return alert("All fields are required!");
+  let dpURL = "default_dp.png";
+  function saveAndGo(dp){
+    localStorage.setItem("username", name);
+    localStorage.setItem("email", email);
+    localStorage.setItem("password", password);
+    localStorage.setItem("dp", dp);
+    localStorage.setItem("loggedInUser", name);
+    window.location.href = "chat.html";
+  }
 
-      let dpURL = "default_dp.png";
-
-      function saveAndGo(dp){
-        localStorage.setItem("username", name);
-        localStorage.setItem("email", email);
-        localStorage.setItem("password", password);
-        localStorage.setItem("dp", dp);
-        localStorage.setItem("loggedInUser", name);
-        window.location.href = "chat.html";
-      }
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          saveAndGo(e.target.result);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        saveAndGo(dpURL);
-      }
-    });
-  </script>
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      saveAndGo(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    saveAndGo(dpURL);
+  }
+});
+</script>
 </body>
 </html>
