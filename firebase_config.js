@@ -1,10 +1,11 @@
-export const firebaseConfig = {
-  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain: "zhobchat-33d8e.firebaseapp.com",
-  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "zhobchat-33d8e",
-  storageBucket: "zhobchat-33d8e.appspot.com",
-  messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-  measurementId: "G-LX9P9LRLV8"
+// 🔥 ZHOB CHAT Firebase Configuration
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDizxUxGmSea7O9PeIvyVCFkDNDuYQ5QhE",
+  authDomain: "zhobchatroomweb.firebaseapp.com",
+  databaseURL: "https://zhobchatroomweb-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "zhobchatroomweb",
+  storageBucket: "zhobchatroomweb.appspot.com",
+  messagingSenderId: "139582858900",
+  appId: "1:139582858900:web:d86d7058d0e31089c3ac6d"
 };
