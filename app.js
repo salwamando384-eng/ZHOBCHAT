@@ -1,201 +1,122 @@
-// app.js
-// Main chat logic: Firebase initialization, load users + robots, send/receive messages, admin delete, private rooms.
+// ===== FIREBASE CONFIG =====
+const firebaseConfig = {
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+  authDomain: "zhobchat-33d8e.firebaseapp.com",
+  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "zhobchat-33d8e",
+  storageBucket: "zhobchat-33d8e.firebasestorage.app",
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const auth = firebase.auth();
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import {
-  getDatabase, ref, push, onChildAdded, set, get, remove
-} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
-import { firebaseConfig } from "./firebase_config.js";
-import { robots } from "./robots.js";
+const authPage = document.getElementById("authPage");
+const chatPage = document.getElementById("chatPage");
+const signupForm = document.getElementById("signupForm");
+const loginForm = document.getElementById("loginForm");
+const userList = document.getElementById("userList");
+const messages = document.getElementById("messages");
+const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+const emojiBtn = document.getElementById("emojiBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+// === Switch between login & signup ===
+document.getElementById("loginSwitch").onclick = () => {
+  signupForm.classList.add("hidden");
+  loginForm.classList.remove("hidden");
+};
+document.getElementById("signupSwitch").onclick = () => {
+  loginForm.classList.add("hidden");
+  signupForm.classList.remove("hidden");
+};
 
-// DOM
-const userListEl = document.getElementById('userList');
-const messagesEl = document.getElementById('messages');
-const messageInput = document.getElementById('messageInput');
-const sendBtn = document.getElementById('sendBtn');
-const emojiBtn = document.getElementById('emojiBtn');
-const clearChatBtn = document.getElementById('clearChatBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const userDetailDp = document.getElementById('userDetailDp');
-const userDetailName = document.getElementById('userDetailName');
-const userDetailAge = document.getElementById('userDetailAge');
-const userDetailGender = document.getElementById('userDetailGender');
-const privateChatBtn = document.getElementById('privateChatBtn');
-const roomTitle = document.getElementById('roomTitle');
+// === Signup ===
+signupForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
+  const gender = document.getElementById("gender").value;
+  const age = document.getElementById("age").value;
 
-const username = localStorage.getItem('username');
-const email = localStorage.getItem('email') || '';
-if (!username) { window.location.href = 'index.html'; throw new Error('Not logged in'); }
-
-const isAdmin = (email === 'admin@gmail.com');
-
-const usersRef = ref(db, 'users/');
-const messagesBaseRef = ref(db, 'messages/');
-
-// Save current user (status remains online until explicit logout)
-await set(ref(db, 'users/' + username), {
-  name: username,
-  email: email,
-  dp: 'https://i.ibb.co/0F8VbW5/default_dp.png',
-  status: 'online',
-  role: isAdmin ? 'admin' : 'user',
-  age: localStorage.getItem('age') || '',
-  gender: localStorage.getItem('gender') || ''
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(user => {
+      db.ref("users/" + user.user.uid).set({ name, email, gender, age, online: true });
+      localStorage.setItem("userName", name);
+      loadChat();
+    })
+    .catch(err => alert(err.message));
 });
 
-// current room (global by default)
-let currentRoom = localStorage.getItem('currentRoom') || 'global';
-roomTitle.textContent = currentRoom === 'global' ? 'General Chat' : localStorage.getItem('currentRoomName') || currentRoom;
+// === Login ===
+loginForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const email = document.getElementById("loginEmail").value;
+  const pass = document.getElementById("loginPassword").value;
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(() => loadChat())
+    .catch(err => alert(err.message));
+});
 
-// load users + robots
-async function loadUsers(){
-  userListEl.innerHTML = '';
-  const snap = await get(usersRef);
-  if (snap.exists()){
-    const obj = snap.val();
-    Object.keys(obj).forEach(k=>{
-      const u = obj[k];
-      addUserRow(u);
+// === Auto login if already logged in ===
+auth.onAuthStateChanged(user => {
+  if (user) loadChat();
+});
+
+// === Load chat ===
+function loadChat() {
+  authPage.classList.add("hidden");
+  chatPage.classList.remove("hidden");
+  updateUserList();
+  loadMessages();
+}
+
+// === Logout ===
+logoutBtn.onclick = () => {
+  auth.signOut();
+  chatPage.classList.add("hidden");
+  authPage.classList.remove("hidden");
+};
+
+// === Send Message ===
+sendBtn.onclick = () => {
+  const msg = messageInput.value.trim();
+  if (!msg) return;
+  const user = auth.currentUser;
+  db.ref("messages").push({
+    name: localStorage.getItem("userName"),
+    text: msg,
+    time: Date.now()
+  });
+  messageInput.value = "";
+};
+
+// === Load Messages ===
+function loadMessages() {
+  db.ref("messages").on("value", snap => {
+    messages.innerHTML = "";
+    snap.forEach(child => {
+      const msg = child.val();
+      const div = document.createElement("div");
+      div.className = "message other";
+      if (msg.name === localStorage.getItem("userName")) div.classList.add("self");
+      div.innerHTML = `<div class="sender">${msg.name}</div><div>${msg.text}</div>`;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
     });
-  }
-  // add robots after real users
-  robots.forEach(r => addUserRow({ name: r.name, dp: r.dp, status: 'online', gender: r.gender }));
-}
-function addUserRow(u){
-  const li = document.createElement('li');
-  li.className = 'user-row';
-  li.innerHTML = `
-    <img src="${u.dp || 'https://i.ibb.co/0F8VbW5/default_dp.png'}" class="user-dp" />
-    <div>
-      <div class="user-name">${u.name}</div>
-      <div style="font-size:12px;color:#666">${u.gender ? u.gender + (u.age ? ' • ' + u.age + ' yrs' : '') : ''}</div>
-    </div>
-  `;
-  li.onclick = ()=> { showUserDetails(u); };
-  userListEl.appendChild(li);
-}
-function showUserDetails(u){
-  userDetailDp.src = u.dp || 'https://i.ibb.co/0F8VbW5/default_dp.png';
-  userDetailName.textContent = 'Name: ' + (u.name || '');
-  userDetailAge.textContent = u.age ? 'Age: ' + u.age : '';
-  userDetailGender.textContent = u.gender ? 'Gender: ' + u.gender : '';
-  privateChatBtn.onclick = ()=> {
-    const roomId = [username, u.name].sort().join('_');
-    localStorage.setItem('currentRoom', roomId);
-    localStorage.setItem('currentRoomName', 'Private: ' + u.name);
-    currentRoom = roomId;
-    roomTitle.textContent = 'Private: ' + u.name;
-    messagesEl.innerHTML = '';
-    bindMessages(currentRoom);
-  };
-}
-
-// messages binding
-function bindMessages(roomId){
-  messagesEl.innerHTML = '';
-  const rRef = ref(db, `messages/${roomId}/`);
-  onChildAdded(rRef, (snap)=>{
-    const m = snap.val();
-    const key = snap.key;
-    renderMessage(m, key, roomId);
   });
 }
-function renderMessage(m, key, roomId){
-  const div = document.createElement('div');
-  const isMe = m.name === username;
-  div.className = 'msg ' + (isMe ? 'me' : '');
-  const img = document.createElement('img');
-  img.className = 'user-dp';
-  img.src = m.dp || 'https://i.ibb.co/0F8VbW5/default_dp.png';
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble';
-  bubble.innerHTML = `<strong>${m.name}</strong><div style="font-size:13px;margin-top:6px;">${m.text || ''}</div><div class="meta">${m.time || ''}</div>`;
-  div.appendChild(img);
-  div.appendChild(bubble);
 
-  if (isMe || isAdmin) {
-    const del = document.createElement('button');
-    del.textContent = 'Delete';
-    del.className = 'icon-btn';
-    del.style.marginLeft = '8px';
-    del.onclick = async ()=>{
-      if (confirm('Delete this message?')) {
-        await remove(ref(db, `messages/${roomId}/${key}`));
-      }
-    };
-    div.appendChild(del);
-  }
-
-  messagesEl.appendChild(div);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-
-// initial bind
-bindMessages(currentRoom);
-
-// send message
-sendBtn.addEventListener('click', async ()=>{
-  const text = messageInput.value.trim();
-  if (!text) return;
-  const payload = {
-    name: username,
-    email,
-    dp: 'https://i.ibb.co/0F8VbW5/default_dp.png',
-    text,
-    time: new Date().toLocaleTimeString()
-  };
-  await push(ref(db, `messages/${currentRoom}`), payload);
-  messageInput.value = '';
-});
-
-// enter key sends
-messageInput.addEventListener('keypress', (e)=> { if(e.key === 'Enter') sendBtn.click(); });
-
-// toggle users list (emoji button)
-emojiBtn.addEventListener('click', ()=> {
-  const ul = document.querySelector('.users-list');
-  ul.style.display = ul.style.display === 'none' ? 'block' : 'none';
-});
-
-// clear room (admin)
-clearChatBtn.addEventListener('click', async ()=>{
-  if (!isAdmin) return alert('Only admin can clear this room');
-  if (confirm('Clear all messages in this room?')) {
-    await remove(ref(db, `messages/${currentRoom}`));
-    messagesEl.innerHTML = '';
-  }
-});
-
-// logout
-logoutBtn.addEventListener('click', async ()=>{
-  await set(ref(db, 'users/' + username + '/status'), 'offline');
-  localStorage.removeItem('username');
-  localStorage.removeItem('email');
-  localStorage.removeItem('currentRoom');
-  localStorage.removeItem('currentRoomName');
-  window.location.href = 'index.html';
-});
-
-// refresh users periodically
-setInterval(loadUsers, 6000);
-loadUsers();
-
-// start bots: each bot pushes to global room at staggered intervals
-function startBots(){
-  robots.forEach((bot, idx)=>{
-    setInterval(async ()=>{
-      const text = bot.messages[Math.floor(Math.random() * bot.messages.length)];
-      const payload = {
-        name: bot.name,
-        dp: bot.dp,
-        text,
-        time: new Date().toLocaleTimeString()
-      };
-      await push(ref(db, 'messages/global'), payload);
-    }, 25000 + idx * 8000);
+// === User List with Robots ===
+function updateUserList() {
+  userList.innerHTML = "";
+  robots.forEach(r => {
+    const li = document.createElement("li");
+    li.className = "online";
+    li.innerHTML = `<img src="${r.dp}" style="width:24px;height:24px;border-radius:50%;margin-right:5px;"> ${r.name}`;
+    userList.appendChild(li);
   });
 }
-startBots();
