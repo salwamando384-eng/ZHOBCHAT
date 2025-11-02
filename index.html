@@ -1,32 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOB CHAT</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZHOB CHAT — Sign up / Login</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="auth-page">
+<body style="background: linear-gradient(135deg, #00b4db 0%, #0083b0 50%, #72c6a0 100%); min-height:100vh;">
   <div class="container">
     <h1 class="title">Welcome to <span>ZHOB CHAT</span></h1>
-    <div class="auth-box">
-      <input type="text" id="name" placeholder="Full Name" required>
-      <input type="email" id="email" placeholder="Email" required>
-      <input type="password" id="password" placeholder="Password" required>
-      <input type="text" id="gender" placeholder="Gender (Male/Female)">
-      <input type="number" id="age" placeholder="Age">
-      <button id="signupBtn">Sign Up</button>
-      <p>Already use? <a href="#" id="showLogin">Login</a></p>
-    </div>
+    <p style="text-align:center;color:#444;margin-top:8px;">Join the chat — enter details below</p>
 
-    <div class="login-box" style="display:none;">
-      <input type="email" id="loginEmail" placeholder="Email" required>
-      <input type="password" id="loginPassword" placeholder="Password" required>
-      <button id="loginBtn">Login</button>
-      <p>New user? <a href="#" id="showSignup">Sign Up</a></p>
+    <div class="auth-box">
+      <input id="in_name" placeholder="Full Name" />
+      <input id="in_email" placeholder="Email (Gmail)" />
+      <input id="in_password" placeholder="Password" type="password" />
+      <select id="in_gender">
+        <option value="">Select Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+      </select>
+      <input id="in_age" type="number" placeholder="Age" />
+
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button id="signupBtn" class="btn primary" style="flex:1">Sign Up</button>
+        <button id="goLogin" class="btn ghost" style="flex:1">Already user? Login</button>
+      </div>
+
+      <div id="loginBox" style="display:none;margin-top:12px;">
+        <p style="margin:6px 0;">Login — enter name and password</p>
+        <input id="login_name" placeholder="Name" />
+        <input id="login_password" placeholder="Password" type="password" />
+        <button id="loginBtn" class="btn primary" style="width:100%;">Login</button>
+      </div>
     </div>
   </div>
 
-  <script src="app.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+  import { firebaseConfig } from "./firebase_config.js";
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const signupBtn = document.getElementById('signupBtn');
+  const goLogin = document.getElementById('goLogin');
+  const loginBox = document.getElementById('loginBox');
+  const loginBtn = document.getElementById('loginBtn');
+
+  goLogin.addEventListener('click', ()=> { loginBox.style.display = loginBox.style.display === 'block' ? 'none' : 'block'; });
+
+  signupBtn.addEventListener('click', async ()=>{
+    const name = document.getElementById('in_name').value.trim();
+    const email = document.getElementById('in_email').value.trim();
+    const password = document.getElementById('in_password').value.trim();
+    const gender = document.getElementById('in_gender').value;
+    const age = document.getElementById('in_age').value.trim();
+
+    if(!name || !email || !password || !gender || !age) return alert('Please fill all fields');
+
+    // Save to Firebase users/<name>
+    await set(ref(db, 'users/' + name), {
+      name, email, password, gender, age,
+      dp: 'https://i.ibb.co/0F8VbW5/default_dp.png',
+      status: 'online',
+      role: email === 'admin@gmail.com' ? 'admin' : 'user'
+    });
+
+    // persist locally
+    localStorage.setItem('username', name);
+    localStorage.setItem('email', email);
+    localStorage.setItem('gender', gender);
+    localStorage.setItem('age', age);
+
+    window.location.href = 'chat.html';
+  });
+
+  loginBtn.addEventListener('click', async ()=>{
+    const name = document.getElementById('login_name').value.trim();
+    const password = document.getElementById('login_password').value.trim();
+    if(!name || !password) return alert('Enter details');
+
+    const dbRef = ref(db);
+    const snap = await get(child(dbRef, 'users/' + name));
+    if(!snap.exists()) return alert('User not found');
+    const data = snap.val();
+    if(data.password !== password) return alert('Wrong password');
+    localStorage.setItem('username', data.name);
+    localStorage.setItem('email', data.email || '');
+    localStorage.setItem('gender', data.gender || '');
+    localStorage.setItem('age', data.age || '');
+    window.location.href = 'chat.html';
+  });
+</script>
 </body>
 </html>
