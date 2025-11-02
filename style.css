@@ -10,7 +10,7 @@ body {
   color: #111;
 }
 
-/* Center app */
+/* container app */
 .app {
   width: 100%;
   max-width: 1100px;
@@ -24,7 +24,7 @@ body {
   min-height: 78vh;
 }
 
-/* Left: chats / users */
+/* Left: users */
 .left {
   background: #fafafa;
   border-right: 1px solid #eee;
@@ -71,7 +71,7 @@ body {
 .user-dp { width: 42px; height:42px; border-radius:50%; object-fit:cover; }
 .user-name { font-weight:600; }
 
-/* Center: messages */
+/* Center chat */
 .center {
   display: flex;
   flex-direction: column;
@@ -114,15 +114,7 @@ body {
 .msg.me .bubble { background: #0b8f76; color: #fff; }
 .msg .meta { font-size:12px; color:#555; margin-top:6px; }
 
-/* right panel: details / admin */
-.right {
-  padding: 12px;
-  border-left: 1px solid #eee;
-  background: #fafafa;
-}
-.card { background:#fff; padding:12px; border-radius:8px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom:12px; }
-
-/* input area */
+/* composer */
 .composer {
   display:flex;
   gap:8px;
@@ -145,11 +137,35 @@ body {
 }
 .send-btn { background:#0b8f76; color:#fff; border:none; padding:8px 12px; border-radius:8px; }
 
-/* user details */
+/* right panel */
+.right {
+  padding: 12px;
+  border-left: 1px solid #eee;
+  background: #fafafa;
+}
+.card { background:#fff; padding:12px; border-radius:8px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom:12px; }
+
 .detail-dp { width:86px; height:86px; border-radius:50%; object-fit:cover; margin-bottom:8px; }
 .detail-row { margin-bottom:6px; }
 
-/* small screens */
+/* index / auth page */
+.auth-page .container {
+  max-width:420px;
+  margin:60px auto;
+  padding:28px;
+  background:rgba(255,255,255,0.95);
+  border-radius:14px;
+  box-shadow:0 12px 35px rgba(0,0,0,0.15);
+}
+.title { margin:0;text-align:center;color:#0b6b63; }
+.title span{ color:#0b8f76; }
+.auth-box input, .login-box input, select {
+  width:100%;
+  padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:8px;
+}
+.auth-box button { width:100%; padding:10px; border-radius:8px; background:#0b8f76; color:#fff; border:none; cursor:pointer; }
+
+/* responsive */
 @media (max-width: 920px) {
   .app { grid-template-columns: 1fr; gap: 0; min-height:100vh; }
   .right { display:none; }
