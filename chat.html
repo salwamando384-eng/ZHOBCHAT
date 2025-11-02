@@ -1,117 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZHOBCHAT</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="chat-container">
-    <div class="users-section">
-      <h3>Online Users</h3>
-      <div id="onlineUsers"></div>
-      <h3>Offline Users</h3>
-      <div id="offlineUsers"></div>
-    </div>
-
-    <div class="messages-section">
-      <div class="messages" id="messages"></div>
-      <input type="text" id="msgInput" placeholder="Type your message" />
-      <button id="sendBtn">Send</button>
-      <button id="logoutBtn">Log Out</button>
-    </div>
+<div class="chat-container">
+  <div class="users-section">
+    <h3>Users</h3>
+    <div id="usersList"></div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, set, onDisconnect, get, child } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
-    import { firebaseConfig } from "./firebase_config.js";
+  <div class="messages-section">
+    <div class="messages" id="messages"></div>
+    <input type="text" id="msgInput" placeholder="Type your message" />
+    <input type="file" id="imgUpload" accept="image/*"/>
+    <button id="sendBtn">Send</button>
+    <button id="logoutBtn">Log Out</button>
+  </div>
+</div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded, set, onDisconnect, remove, get } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+import { firebaseConfig } from "./firebase_config.js";
 
-    const username = localStorage.getItem("loggedInUser");
-    const name = localStorage.getItem("username");
-    const email = localStorage.getItem("email");
-    const dp = localStorage.getItem("dp") || "default_dp.png";
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-    if (!username) {
-      window.location.href = "index.html";
-      throw new Error("Not logged in");
-    }
+const name = localStorage.getItem("username");
+const email = localStorage.getItem("email");
+const dp = localStorage.getItem("dp") || "default_dp.png";
+const username = localStorage.getItem("loggedInUser");
 
-    const usersRef = ref(db, "users/");
-    const messagesRef = ref(db, "messages/");
+if(!username){ window.location.href = "index.html"; throw new Error("Not logged in"); }
 
-    const onlineDiv = document.getElementById("onlineUsers");
-    const offlineDiv = document.getElementById("offlineUsers");
-    const messagesDiv = document.getElementById("messages");
+const usersRef = ref(db, "users/");
+const messagesRef = ref(db, "messages/");
 
-    const userColors = {};
-    function getColor(name){
-      if(!userColors[name]){
-        const colors = ['#e6194b','#3cb44b','#ffe119','#4363d8','#f58231','#911eb4','#46f0f0','#f032e6'];
-        userColors[name] = colors[Math.floor(Math.random()*colors.length)];
-      }
-      return userColors[name];
-    }
+const usersDiv = document.getElementById("usersList");
+const messagesDiv = document.getElementById("messages");
+const msgInput = document.getElementById("msgInput");
+const imgUpload = document.getElementById("imgUpload");
 
-    // Set user online
-    const userRef = ref(db, `users/${name}`);
-    set(userRef, { name, email, dp, status: "online" });
-    onDisconnect(userRef).set({ name, email, dp, status: "offline" });
+const userColors = {};
+function getColor(name){ if(!userColors[name]){ const colors = ['#e6194b','#3cb44b','#ffe119','#4363d8','#f58231','#911eb4','#46f0f0','#f032e6']; userColors[name] = colors[Math.floor(Math.random()*colors.length)]; } return userColors[name]; }
 
-    // Fetch all users and display online/offline
-    onChildAdded(usersRef, (snapshot) => {
-      updateUsersList();
+document.body.style.background = ['#f9f9f9','#ffe4e1','#e6ffe6','#e0f7ff','#fff0f5'][Math.floor(Math.random()*5)];
+
+const userRef = ref(db, `users/${name}`);
+set(userRef,{name,email,dp,status:"online",role:"user"});
+onDisconnect(userRef).set({name,email,dp,status:"offline",role:"user"});
+
+function updateUsersList(){
+  get(usersRef).then(snapshot=>{
+    usersDiv.innerHTML="";
+    snapshot.forEach(userSnap=>{
+      const user = userSnap.val();
+      const div = document.createElement("div");
+      div.className="user-item";
+      div.innerHTML=`<img src="${user.dp}" class="user-dp"/>
+        <span style="color:${getColor(user.name)}">${user.name}</span>
+        <span class="status-dot" style="background:${user.status==='online'?'green':'red'}"></span>`;
+      div.style.cursor="pointer";
+      div.onclick=()=>{
+        const privateChat=confirm(`${user.name} details:\nEmail:${user.email}\nStatus:${user.status}\n\nOpen private chat?`);
+        if(privateChat){ openPrivateChat(user.name); }
+      };
+      usersDiv.appendChild(div);
     });
+  });
+}
+onChildAdded(usersRef,()=>updateUsersList());
 
-    function updateUsersList(){
-      get(usersRef).then(snapshot=>{
-        onlineDiv.innerHTML = "";
-        offlineDiv.innerHTML = "";
-        snapshot.forEach(userSnap=>{
-          const user = userSnap.val();
-          const div = document.createElement("div");
-          div.style.cursor = "pointer";
-          div.innerHTML = `<img src="${user.dp}" class="user-dp"/> <span style="color:${getColor(user.name)}">${user.name}</span>`;
-          div.onclick = () => {
-            alert(`Name: ${user.name}\nEmail: ${user.email}\nStatus: ${user.status}`);
-          }
-          if(user.status === "online") onlineDiv.appendChild(div);
-          else offlineDiv.appendChild(div);
-        });
-      });
+document.getElementById("sendBtn").onclick=()=>{
+  const text=msgInput.value.trim();
+  if(!text && !imgUpload.files[0]) return alert("Enter message or select image");
+
+  if(imgUpload.files[0]){
+    const reader=new FileReader();
+    reader.onload=function(e){
+      push(messagesRef,{name,email,dp,text,imgUrl:e.target.result,time:new Date().toLocaleTimeString()});
+      msgInput.value=""; imgUpload.value="";
     }
+    reader.readAsDataURL(imgUpload.files[0]);
+  } else {
+    push(messagesRef,{name,email,dp,text,time:new Date().toLocaleTimeString()});
+    msgInput.value="";
+  }
+}
 
-    // Send message
-    document.getElementById("sendBtn").onclick = () => {
-      const msgInput = document.getElementById("msgInput");
-      const text = msgInput.value.trim();
-      if(!text) return;
-      const msgData = { name, email, dp, text, time: new Date().toLocaleTimeString() };
-      push(messagesRef, msgData);
-      msgInput.value = "";
-    };
+onChildAdded(messagesRef,(snapshot)=>{
+  const msg = snapshot.val();
+  const msgDiv=document.createElement("div");
+  msgDiv.className= msg.name===name?"my-msg":"their-msg";
+  let imgTag=msg.imgUrl? `<br><img src="${msg.imgUrl}" class="msg-img"/>`:"";
+  let delBtn= msg.name===name? `<button class="deleteBtn">Delete</button>`:"";
+  msgDiv.innerHTML=`<img src="${msg.dp}" class="msg-dp"/>
+    <div><b style="color:${getColor(msg.name)}">${msg.name}</b>: ${msg.text}${imgTag} ${delBtn}<br><small>${msg.time}</small></div>`;
+  if(delBtn){
+    msgDiv.querySelector(".deleteBtn").onclick=()=>{ remove(ref(db, `messages/${snapshot.key}`)); }
+  }
+  messagesDiv.appendChild(msgDiv);
+  messagesDiv.scrollTop=messagesDiv.scrollHeight;
+});
 
-    // Listen messages
-    onChildAdded(messagesRef, (snapshot)=>{
-      const msg = snapshot.val();
-      const msgDiv = document.createElement("div");
-      msgDiv.className = msg.name===name ? "my-msg":"their-msg";
-      msgDiv.innerHTML = `<img src="${msg.dp}" class="msg-dp"/> <div><b style="color:${getColor(msg.name)}">${msg.name}</b>: ${msg.text}<br><small>${msg.time}</small></div>`;
-      messagesDiv.appendChild(msgDiv);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    });
+function openPrivateChat(otherUser){
+  const privateRoom=[name,otherUser].sort().join("_");
+  const privateRef=ref(db, `private/${privateRoom}`);
+  let privateMsg=prompt(`Send private message to ${otherUser}:`);
+  if(privateMsg){ push(privateRef,{from:name,to:otherUser,text:privateMsg,time:new Date().toLocaleTimeString()}); alert("Private message sent!"); }
+}
 
-    // Logout
-    document.getElementById("logoutBtn").onclick = () => {
-      localStorage.removeItem("loggedInUser");
-      const userRef = ref(db, `users/${name}`);
-      set(userRef, { name, email, dp, status: "offline" });
-      window.location.href = "index.html";
-    };
-  </script>
+document.getElementById("logoutBtn").onclick=()=>{
+  localStorage.removeItem("loggedInUser");
+  set(userRef,{name,email,dp,status:"offline",role:"user"});
+  window.location.href="index.html";
+};
+</script>
 </body>
 </html>
