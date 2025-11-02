@@ -1,198 +1,184 @@
-/* ---------------------- General ---------------------- */
+/* ============ GENERAL STYLING ============ */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background: #f9f9f9;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #00b09b, #96c93d);
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* ---------------------- Login / Register ---------------------- */
-.login-container {
-    max-width: 400px;
-    margin: 100px auto;
-    padding: 25px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    text-align: center;
-}
-
-.login-container h2 {
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.login-container input {
-    width: 90%;
-    padding: 10px;
-    margin: 8px 0;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
-
-.login-container button {
-    width: 95%;
-    padding: 10px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 5px;
-    background: #4363d8;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.login-container button:hover {
-    background: #3750b0;
-}
-
-/* ---------------------- Chat Container ---------------------- */
+/* CHAT CONTAINER */
 .chat-container {
-    display: flex;
-    height: calc(100vh - 60px);
-    padding: 10px;
-    gap: 10px;
+  width: 95%;
+  max-width: 700px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
 }
 
-/* Users Section */
-.users-section {
-    width: 200px;
-    background: #fff;
-    border-radius: 10px;
-    padding: 10px;
-    overflow-y: auto;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+/* HEADER */
+.chat-header {
+  background: #128C7E;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  position: relative;
 }
 
-.users-section h3 {
-    text-align: center;
-    margin-bottom: 10px;
+.chat-header span {
+  font-size: 14px;
+  display: block;
 }
 
-.user-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 5px;
-    border-bottom: 1px solid #eee;
+/* LOGOUT BUTTON */
+#logoutBtn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  background: #075E54;
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
-.user-dp {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    object-fit: cover;
+/* MESSAGES AREA */
+#messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  background: #ECE5DD;
 }
 
-.status-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-left: auto;
+/* MESSAGE BOX */
+.message {
+  display: flex;
+  align-items: center;
+  background: #dcf8c6;
+  border-radius: 10px;
+  margin: 6px 0;
+  padding: 8px;
+  word-break: break-word;
+  animation: fadeIn 0.3s ease-in-out;
+}
+.message:nth-child(odd) {
+  background: #ffffff;
 }
 
-/* Messages Section */
-.messages-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: #fff;
-    border-radius: 10px;
-    padding: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+.message strong {
+  color: #075E54;
+}
+.message small {
+  display: block;
+  color: gray;
+  font-size: 10px;
 }
 
-.messages {
-    flex: 1;
-    overflow-y: auto;
-    margin-bottom: 10px;
+/* AVATAR (DP) */
+.avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover;
 }
 
-.my-msg, .their-msg {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 8px;
-    align-items: flex-start;
+/* DELETE BUTTON */
+.message button {
+  background: transparent;
+  border: none;
+  color: red;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: auto;
 }
 
-.my-msg {
-    justify-content: flex-end;
-}
-
-.their-msg {
-    justify-content: flex-start;
-}
-
-.my-msg div, .their-msg div {
-    max-width: 60%;
-    background: #e6f3ff;
-    padding: 8px;
-    border-radius: 8px;
-    position: relative;
-}
-
-.their-msg div {
-    background: #f1f1f1;
-}
-
-.msg-dp {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-/* Message input area */
+/* INPUT AREA */
 .input-area {
-    display: flex;
-    gap: 5px;
-    align-items: center;
+  display: flex;
+  background: #fff;
+  border-top: 2px solid #ccc;
+  padding: 8px;
+  align-items: center;
 }
 
-.input-area input[type="text"] {
-    flex: 1;
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+#messageInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  background: #f0f0f0;
 }
 
-.input-area input[type="file"] {
-    display: none;
+#sendBtn {
+  background: #128C7E;
+  border: none;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 16px;
 }
 
-.input-area button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    background: #4363d8;
-    color: #fff;
-    cursor: pointer;
+#emojiBtn {
+  background: #25D366;
+  border: none;
+  color: white;
+  font-size: 18px;
+  padding: 10px;
+  border-radius: 8px;
+  margin-right: 6px;
+  cursor: pointer;
 }
 
-.input-area button:hover {
-    background: #3750b0;
+/* USERS ONLINE LIST */
+#usersOnline {
+  display: none;
+  position: absolute;
+  right: 10px;
+  top: 70px;
+  background: #fff;
+  width: 180px;
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  list-style: none;
+  padding: 10px;
+  z-index: 100;
+}
+#usersOnline li {
+  padding: 6px 4px;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+}
+#usersOnline li:hover {
+  background: #f5f5f5;
 }
 
-/* Delete Button in message */
-.deleteBtn {
-    margin-left: 5px;
-    padding: 2px 6px;
-    background: #e61919;
-    color: #fff;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 12px;
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(5px);}
+  to {opacity: 1; transform: translateY(0);}
 }
 
-.deleteBtn:hover {
-    background: #b20000;
-}
-
-/* Message image */
-.msg-img {
-    max-width: 150px;
-    max-height: 150px;
-    border-radius: 5px;
-    margin-top: 5px;
+/* MOBILE RESPONSIVE */
+@media (max-width: 600px) {
+  .chat-container {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
 }
