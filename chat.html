@@ -1,114 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZHOB CHAT</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="chat-container">
-    <header class="chat-header">
-      <h2>ZHOB CHAT 💬</h2>
-      <button id="userListBtn" class="emoji-btn">👥</button>
-    </header>
 
-    <main class="chat-main">
-      <div id="usersList" class="users-list hidden"></div>
-      <div id="messages" class="messages"></div>
-    </main>
+  <header class="chat-header">
+    <h1>💬 ZHOB CHAT</h1>
+    <button id="logoutBtn">لاگ آؤٹ</button>
+  </header>
 
-    <footer class="chat-footer">
-      <input type="text" id="msgInput" placeholder="Type your message..." />
-      <button id="sendBtn">📩</button>
-    </footer>
-  </div>
+  <main class="chat-container">
+    <aside class="user-list">
+      <h3>👥 یوزرز</h3>
+      <ul id="userList"></ul>
+    </aside>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
-    import { firebaseConfig } from "./firebase_config.js";
-    import { robots } from "./robots.js";
+    <section class="chat-box">
+      <div id="messages"></div>
 
-    // Firebase Init
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+      <div class="input-area">
+        <input type="text" id="messageInput" placeholder="میسج لکھیں...">
+        <button id="emojiBtn">🙂</button>
+        <button id="sendBtn">📤 بھیجیں</button>
+      </div>
+    </section>
 
-    // User info
-    const username = localStorage.getItem("username");
-    const dp = localStorage.getItem("dp") || "default_dp.png";
+    <aside class="user-details" id="userDetails">
+      <h3>یوزر تفصیل</h3>
+      <img id="userDetailDp" src="" alt="DP">
+      <p id="userDetailName"></p>
+      <p id="userDetailAge"></p>
+      <p id="userDetailGender"></p>
+      <button id="privateChatBtn">پرائیوٹ چیٹ</button>
+    </aside>
+  </main>
 
-    const usersRef = ref(db, "users/");
-    const messagesRef = ref(db, "messages/");
-    const userRef = ref(db, `users/${username}`);
+  <footer class="chat-footer">
+    <button id="clearChatBtn" class="admin-only">🗑️ سب میسج ڈیلیٹ کریں</button>
+  </footer>
 
-    // Set user online
-    set(userRef, { name: username, dp: dp, status: "online" });
-    onDisconnect(userRef).set({ name: username, dp: dp, status: "offline" });
-
-    const usersList = document.getElementById("usersList");
-    const messagesDiv = document.getElementById("messages");
-
-    // Show users (online/offline + robots)
-    function updateUserList(snapshot, isRobot = false) {
-      const user = snapshot.val ? snapshot.val() : snapshot;
-      const div = document.createElement("div");
-      div.className = "user-item";
-      div.innerHTML = `
-        <img src="${user.dp}" class="user-dp"/>
-        <span>${user.name}</span>
-        <span class="${user.status === "online" ? "online" : "offline"}">
-          ${user.status === "online" ? "●" : "○"}
-        </span>
-      `;
-      usersList.appendChild(div);
-    }
-
-    // Firebase users
-    onChildAdded(usersRef, (snapshot) => {
-      updateUserList(snapshot);
-    });
-
-    // Add robots to list
-    robots.forEach(bot => {
-      updateUserList({ name: bot.name, dp: bot.dp, status: "online" }, true);
-    });
-
-    // Send message
-    document.getElementById("sendBtn").onclick = () => {
-      const msgInput = document.getElementById("msgInput");
-      const text = msgInput.value.trim();
-      if (!text) return;
-      const msgData = { name: username, dp: dp, text: text, time: new Date().toLocaleTimeString() };
-      push(messagesRef, msgData);
-      msgInput.value = "";
-    };
-
-    // Display messages
-    onChildAdded(messagesRef, (snapshot) => {
-      const msg = snapshot.val();
-      const msgDiv = document.createElement("div");
-      msgDiv.className = msg.name === username ? "my-msg" : "their-msg";
-      msgDiv.innerHTML = `
-        <img src="${msg.dp}" class="msg-dp"/>
-        <div><b>${msg.name}:</b> ${msg.text}<br><small>${msg.time}</small></div>
-      `;
-      messagesDiv.appendChild(msgDiv);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    });
-
-    // Bot auto-reply
-    setInterval(() => {
-      const bot = robots[Math.floor(Math.random() * robots.length)];
-      const message = bot.messages[Math.floor(Math.random() * bot.messages.length)];
-      const msgData = { name: bot.name, dp: bot.dp, text: message, time: new Date().toLocaleTimeString() };
-      push(messagesRef, msgData);
-    }, 20000); // 20 sec delay between bot replies
-
-    // Toggle user list
-    document.getElementById("userListBtn").addEventListener("click", () => {
-      usersList.classList.toggle("hidden");
-    });
-  </script>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="robots.js"></script>
 </body>
 </html>
