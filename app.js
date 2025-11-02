@@ -1,71 +1,111 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getDatabase, ref, onChildAdded, push, set, onDisconnect } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+// 🔥 Initialize Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js";
+import { firebaseConfig } from "./firebase_config.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const username = localStorage.getItem("username");
-const dp = localStorage.getItem("dp") || "default_dp.png";
-
-const usersRef = ref(db, "users/");
-const messagesRef = ref(db, "messages/");
-const usersList = document.getElementById("usersList");
+// 🎯 Get Elements
+const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
 const messagesDiv = document.getElementById("messages");
+const emojiBtn = document.getElementById("emojiBtn");
+const usersOnlineList = document.getElementById("usersOnline");
 
-const userRef = ref(db, `users/${username}`);
-set(userRef, { name: username, dp: dp, status: "online" });
-onDisconnect(userRef).set({ name: username, dp: dp, status: "offline" });
-
-onChildAdded(usersRef, (snapshot) => {
-  const user = snapshot.val();
-  const div = document.createElement("div");
-  div.className = "user-item";
-  div.innerHTML = `
-    <img src="${user.dp}" class="user-dp"/>
-    <span>${user.name}</span>
-    <span class="${user.status === "online" ? "online" : "offline"}">${user.status}</span>
-  `;
-  usersList.appendChild(div);
-});
-
-document.getElementById("sendBtn").onclick = () => {
-  const msgInput = document.getElementById("msgInput");
-  const text = msgInput.value.trim();
-  if (!text) return;
-  const msgData = { name: username, dp: dp, text: text, time: new Date().toLocaleTimeString() };
-  push(messagesRef, msgData);
-  msgInput.value = "";
+// 👤 Current user (temporary)
+const currentUser = JSON.parse(localStorage.getItem("currentUser")) || {
+  name: "Guest" + Math.floor(Math.random() * 1000),
+  dp: "https://i.pravatar.cc/40?u=" + Math.random()
 };
 
-onChildAdded(messagesRef, (snapshot) => {
-  const msg = snapshot.val();
-  const msgDiv = document.createElement("div");
-  msgDiv.className = msg.name === username ? "my-msg" : "their-msg";
-  msgDiv.innerHTML = `
-    <img src="${msg.dp}" class="msg-dp"/>
-    <div><b>${msg.name}:</b> ${msg.text}<br><small>${msg.time}</small></div>
-  `;
-  messagesDiv.appendChild(msgDiv);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+// ✅ Save current user
+localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+// 💬 Send Message
+sendBtn.addEventListener("click", () => {
+  const text = messageInput.value.trim();
+  if (text === "") return;
+
+  const msgRef = ref(db, "messages");
+  push(msgRef, {
+    name: currentUser.name,
+    dp: currentUser.dp,
+    text: text,
+    time: new Date().toLocaleTimeString(),
+  });
+
+  messageInput.value = "";
+
+  // 🤖 Trigger random robot reply
+  setTimeout(sendRobotReply, 2000);
 });
 
-// ----------------- ERROR LOGGING -----------------
-window.onerror = function (msg, url, line, col, error) {
-  const errBox = document.createElement("div");
-  errBox.style.background = "#300";
-  errBox.style.color = "#fff";
-  errBox.style.padding = "10px";
-  errBox.style.fontSize = "14px";
-  errBox.style.position = "fixed";
-  errBox.style.bottom = "0";
-  errBox.style.left = "0";
-  errBox.style.width = "100%";
-  errBox.style.zIndex = "9999";
-  errBox.innerHTML = `
-    <b>⚠️ JavaScript Error:</b><br>
-    ${msg}<br>
-    <small>${url}:${line}:${col}</small>
-  `;
-  document.body.appendChild(errBox);
-  return false;
-};
+// 🧹 Delete message (for owner only)
+function deleteMessage(id) {
+  remove(ref(db, "messages/" + id));
+}
+
+// 📥 Listen for messages
+onValue(ref(db, "messages"), (snapshot) => {
+  messagesDiv.innerHTML = "";
+  snapshot.forEach((child) => {
+    const msg = child.val();
+    const div = document.createElement("div");
+    div.classList.add("message");
+    div.innerHTML = `
+      <img src="${msg.dp}" class="avatar">
+      <div>
+        <strong>${msg.name}</strong>: ${msg.text}
+        <small>${msg.time}</small>
+      </div>
+      ${currentUser.name === "Owner" ? `<button onclick="deleteMessage('${child.key}')">🗑️</button>` : ""}
+    `;
+    messagesDiv.appendChild(div);
+  });
+});
+
+// 🤖 Robots setup
+const robots = [
+  { name: "Robo Ali", dp: "https://i.pravatar.cc/40?img=1" },
+  { name: "Robo Sara", dp: "https://i.pravatar.cc/40?img=2" },
+  { name: "Robo Khan", dp: "https://i.pravatar.cc/40?img=3" },
+  { name: "Robo Ayesha", dp: "https://i.pravatar.cc/40?img=4" },
+  { name: "Robo Noor", dp: "https://i.pravatar.cc/40?img=5" }
+];
+const replies = [
+  "ہیلو! 😊 کیسے ہو؟",
+  "میں ایک روبوٹ ہوں 🤖",
+  "آج کا دن کیسا جا رہا ہے؟",
+  "زبردست بات ہے 😄",
+  "ہاہا، یہ دلچسپ ہے 😂"
+];
+function sendRobotReply() {
+  const robot = robots[Math.floor(Math.random() * robots.length)];
+  const msgRef = ref(db, "messages");
+  push(msgRef, {
+    name: robot.name,
+    dp: robot.dp,
+    text: replies[Math.floor(Math.random() * replies.length)],
+    time: new Date().toLocaleTimeString(),
+  });
+}
+
+// 😄 Emoji Button → Show Users List
+emojiBtn.addEventListener("click", () => {
+  if (usersOnlineList.style.display === "block") {
+    usersOnlineList.style.display = "none";
+  } else {
+    usersOnlineList.style.display = "block";
+    usersOnlineList.innerHTML = "<li>👤 " + currentUser.name + " (You)</li>";
+    robots.forEach((bot) => {
+      usersOnlineList.innerHTML += `<li>🤖 ${bot.name}</li>`;
+    });
+  }
+});
+
+// 🚪 Logout Button
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("currentUser");
+  window.location.href = "index.html";
+});
