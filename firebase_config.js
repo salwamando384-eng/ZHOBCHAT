@@ -1,6 +1,6 @@
-// 🔥 ZHOB CHAT Firebase Configuration
-
-const firebaseConfig = {
+// firebase_config.js
+// Your Firebase config (ready). Uses your existing project (zhobchatroomweb).
+export const firebaseConfig = {
   apiKey: "AIzaSyDizxUxGmSea7O9PeIvyVCFkDNDuYQ5QhE",
   authDomain: "zhobchatroomweb.firebaseapp.com",
   databaseURL: "https://zhobchatroomweb-default-rtdb.asia-southeast1.firebasedatabase.app",
