@@ -41,6 +41,7 @@ let currentUser = null;
 let chatTarget = null;
 const userColors = {};
 
+// Random color for each user
 function getRandomColor(){ return "#"+Math.floor(Math.random()*16777215).toString(16); }
 
 // Signup
@@ -48,7 +49,7 @@ signupBtn.addEventListener("click",()=>{
   const name=document.getElementById("name").value.trim();
   const email=document.getElementById("email").value.trim();
   const password=document.getElementById("password").value.trim();
-  if(!name||!email||!password)return alert("Fill all fields");
+  if(!name||!email||!password) return alert("Fill all fields");
   createUserWithEmailAndPassword(auth,email,password)
   .then(()=>{ currentUser={name,email}; startChat(); })
   .catch(err=>alert(err.message));
@@ -59,18 +60,18 @@ loginBtn.addEventListener("click",()=>{
   const name=document.getElementById("name").value.trim();
   const email=document.getElementById("email").value.trim();
   const password=document.getElementById("password").value.trim();
-  if(!name||!email||!password)return alert("Fill all fields");
+  if(!name||!email||!password) return alert("Fill all fields");
   signInWithEmailAndPassword(auth,email,password)
   .then(()=>{ currentUser={name,email}; startChat(); })
   .catch(err=>alert(err.message));
 });
 
-// Start chat after login/signup
+// Start Chat
 function startChat(){
   authSection.classList.add("hidden");
   chatSection.classList.remove("hidden");
-  if(!userColors[currentUser.name])userColors[currentUser.name]=getRandomColor();
-  set(ref(db,"online/"+currentUser.name),{email:currentUser.email,color:userColors[currentUser.name]});
+  if(!userColors[currentUser.name]) userColors[currentUser.name] = getRandomColor();
+  set(ref(db,"online/"+currentUser.name), {email:currentUser.email,color:userColors[currentUser.name]});
   loadUsers();
   loadMessages("messages");
 }
@@ -87,14 +88,15 @@ logoutBtn.addEventListener("click",()=>{
 });
 
 // Send message
-sendBtn.addEventListener("click",sendMessage);
+sendBtn.addEventListener("click", sendMessage);
 function sendMessage(){
-  const text=messageInput.value.trim(); if(!text)return;
-  const path=chatTarget?`private/${[currentUser.name,chatTarget].sort().join("_")}`:"messages";
+  const text = messageInput.value.trim();
+  if(!text) return;
+  const path = chatTarget ? `private/${[currentUser.name,chatTarget].sort().join("_")}` : "messages";
   push(ref(db,path),{
     name:currentUser.name,
     target:chatTarget||"",
-    text,
+    text:text,
     color:userColors[currentUser.name],
     time:new Date().toLocaleTimeString()
   });
@@ -104,24 +106,24 @@ function sendMessage(){
 // Load messages
 function loadMessages(path){
   messagesDiv.innerHTML="";
-  onChildAdded(ref(db,path),snapshot=>{
-    const msg=snapshot.val();
-    if(chatTarget && msg.target!==currentUser.name && msg.target!==chatTarget)return;
-    const div=document.createElement("div");
+  onChildAdded(ref(db,path), snapshot=>{
+    const msg = snapshot.val();
+    if(chatTarget && msg.target!==currentUser.name && msg.target!==chatTarget) return;
+    const div = document.createElement("div");
     div.classList.add("message");
-    div.classList.add(msg.name===currentUser.name?"user":"other");
+    div.classList.add(msg.name===currentUser.name ? "user" : "other");
     div.style.color=msg.color;
-    div.textContent=`[${msg.time}] ${msg.name}: ${msg.text}`;
+    div.textContent = `[${msg.time}] ${msg.name}: ${msg.text}`;
     messagesDiv.appendChild(div);
-    messagesDiv.scrollTop=messagesDiv.scrollHeight;
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
 }
 
 // Load online/offline users
 function loadUsers(){
-  onValue(ref(db,"online"),snapshot=>{
+  onValue(ref(db,"online"), snapshot=>{
     onlineUsers.innerHTML="";
-    const users=snapshot.val()||{};
+    const users = snapshot.val() || {};
     Object.keys(users).forEach(name=>{
       const li=document.createElement("li");
       li.textContent=name;
@@ -136,24 +138,24 @@ function loadUsers(){
 function showProfile(name,email){
   profileName.textContent=name;
   profileEmail.textContent=email;
-  chatTarget=name;
+  chatTarget = name;
   userProfile.classList.remove("hidden");
 }
 
 // Close profile
-closeProfile.addEventListener("click",()=>{
+closeProfile.addEventListener("click", ()=>{
   userProfile.classList.add("hidden");
   chatTarget=null;
 });
 
-// Private chat button
-privateChatBtn.addEventListener("click",()=>{
+// Start private chat
+privateChatBtn.addEventListener("click", ()=>{
   loadMessages(`private/${[currentUser.name,chatTarget].sort().join("_")}`);
   userProfile.classList.add("hidden");
 });
 
-// Admin delete all
-deleteAllBtn.addEventListener("click",()=>{
+// Admin delete all messages
+deleteAllBtn.addEventListener("click", ()=>{
   if(currentUser.name==="Admin") remove(ref(db,"messages"));
   else alert("Only Admin can delete messages");
 });
