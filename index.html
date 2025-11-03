@@ -5,13 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZHOB CHAT</title>
 <link rel="stylesheet" href="style.css">
-
-<!-- Firebase CDN -->
-<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js"></script>
-
+<script type="module" src="app.js"></script>
 </head>
 <body>
 
@@ -21,11 +15,13 @@
   <input type="text" id="name" placeholder="Enter Name">
   <input type="email" id="email" placeholder="Enter Email">
   <input type="password" id="password" placeholder="Enter Password">
-  <button id="signupBtn">Sign Up</button>
-  <button id="loginBtn">Login</button>
+  <div class="auth-buttons">
+    <button id="signupBtn">Sign Up</button>
+    <button id="loginBtn">Login</button>
+  </div>
 </div>
 
-<!-- Chat -->
+<!-- Chat Section -->
 <div id="chat-section" class="hidden">
   <div class="chat-header">
     <h2>ZHOB CHAT</h2>
@@ -40,19 +36,12 @@
       <div id="messages"></div>
       <div class="chat-input">
         <input type="text" id="messageInput" placeholder="Type a message...">
-        <button id="emojiBtn">😊</button>
-        <input type="file" id="fileInput" style="display:none;">
-        <button id="fileBtn">📎</button>
         <button id="sendBtn">Send</button>
-      </div>
-      <div id="emojiPicker" class="hidden">
-        <span>😀</span><span>😂</span><span>😍</span><span>😎</span><span>😢</span><span>👍</span><span>❤️</span>
       </div>
     </div>
   </div>
   <button id="deleteAllBtn" class="admin-btn">Delete All Messages (Admin)</button>
 </div>
 
-<script src="app.js"></script>
 </body>
 </html>
