@@ -1,11 +1,10 @@
-// firebase_config.js
-// Uses your existing Firebase project (zhobchatroomweb)
+// Replace with your own Firebase project config
 export const firebaseConfig = {
-  apiKey: "AIzaSyDizxUxGmSea7O9PeIvyVCFkDNDuYQ5QhE",
-  authDomain: "zhobchatroomweb.firebaseapp.com",
-  databaseURL: "https://zhobchatroomweb-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "zhobchatroomweb",
-  storageBucket: "zhobchatroomweb.appspot.com",
-  messagingSenderId: "139582858900",
-  appId: "1:139582858900:web:d86d7058d0e31089c3ac6d"
+  apiKey: "AIzaSyExampleKey123456789",
+  authDomain: "zhobchat-example.firebaseapp.com",
+  databaseURL: "https://zhobchat-example-default-rtdb.firebaseio.com",
+  projectId: "zhobchat-example",
+  storageBucket: "zhobchat-example.appspot.com",
+  messagingSenderId: "1234567890",
+  appId: "1:1234567890:web:abcdef123456"
 };
