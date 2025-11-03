@@ -1,67 +1,106 @@
-// ✅ Initialize Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+// Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.getAuth(app);
+const db = firebase.getDatabase(app);
 
-const firebaseConfig = {
-  apiKey: "AIzaSyXXXXX-REPLACE-WITH-YOURS",
-  authDomain: "zhobchat.firebaseapp.com",
-  databaseURL: "https://zhobchat-default-rtdb.firebaseio.com/",
-  projectId: "zhobchat",
-  storageBucket: "zhobchat.appspot.com",
-  messagingSenderId: "0000000000",
-  appId: "1:0000000000:web:xxxxxxxxxxxxxx"
+// Elements
+const authContainer = document.getElementById('auth-container');
+const chatContainer = document.getElementById('chat-container');
+const loginBtn = document.getElementById('login-btn');
+const signupBtn = document.getElementById('signup-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const authMsg = document.getElementById('auth-msg');
+const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+const messagesDiv = document.getElementById('messages');
+const userListDiv = document.getElementById('user-list');
+
+let currentUser = null;
+let activeChatUser = "public";
+
+// Login
+loginBtn.onclick = async () => {
+  const email = email.value.trim();
+  const password = password.value.trim();
+  try {
+    await firebase.signInWithEmailAndPassword(auth, email, password);
+  } catch (err) {
+    authMsg.textContent = err.message;
+  }
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+// Signup
+signupBtn.onclick = async () => {
+  const email = email.value.trim();
+  const password = password.value.trim();
+  try {
+    await firebase.createUserWithEmailAndPassword(auth, email, password);
+  } catch (err) {
+    authMsg.textContent = err.message;
+  }
+};
 
-// ✅ DOM Elements
-const userList = document.getElementById("userList");
-const chatMessages = document.getElementById("chatMessages");
-const messageInput = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
-const chatWith = document.getElementById("chatWith");
-
-let currentUser = "You";
-let chattingWith = "General Room";
-
-// Sample Users List (can come from Firebase later)
-const users = ["Ali", "Sara", "Bilal", "Hamza", "Ayesha"];
-users.forEach(u => {
-  const li = document.createElement("li");
-  li.textContent = u;
-  li.addEventListener("click", () => {
-    chattingWith = u;
-    chatWith.textContent = "Chat with " + u;
-    chatMessages.innerHTML = "";
-  });
-  userList.appendChild(li);
+// Auth state
+firebase.onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    authContainer.classList.add('hidden');
+    chatContainer.classList.remove('hidden');
+    loadUsers();
+    loadMessages(activeChatUser);
+  } else {
+    currentUser = null;
+    chatContainer.classList.add('hidden');
+    authContainer.classList.remove('hidden');
+  }
 });
 
-// ✅ Send Message
-sendBtn.addEventListener("click", () => {
-  const message = messageInput.value.trim();
-  if (message === "") return;
+// Logout
+logoutBtn.onclick = () => firebase.signOut(auth);
 
-  const msgRef = ref(db, "messages/" + chattingWith);
-  push(msgRef, {
-    sender: currentUser,
-    text: message
+// Send message
+sendBtn.onclick = () => {
+  const text = messageInput.value.trim();
+  if (!text) return;
+
+  const msgRef = firebase.push(firebase.ref(db, `messages/${activeChatUser}`));
+  firebase.set(msgRef, {
+    text,
+    sender: currentUser.email,
+    time: new Date().toLocaleTimeString(),
   });
-
   messageInput.value = "";
-});
+};
 
-// ✅ Receive Messages
-users.forEach(u => {
-  const msgRef = ref(db, "messages/" + u);
-  onChildAdded(msgRef, (data) => {
-    const msg = data.val();
-    const div = document.createElement("div");
-    div.classList.add("message");
-    if (msg.sender === currentUser) div.classList.add("self");
-    div.textContent = msg.sender + ": " + msg.text;
-    chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+// Load messages
+function loadMessages(chatId) {
+  messagesDiv.innerHTML = "";
+  const msgRef = firebase.ref(db, `messages/${chatId}`);
+  firebase.onChildAdded(msgRef, (snap) => {
+    const msg = snap.val();
+    const div = document.createElement('div');
+    div.textContent = `${msg.sender}: ${msg.text}`;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
-});
+}
+
+// Load users
+function loadUsers() {
+  const userRef = firebase.ref(db, "users");
+  firebase.onValue(userRef, (snap) => {
+    const data = snap.val() || {};
+    userListDiv.innerHTML = "<h3>Users</h3>";
+    Object.keys(data).forEach(uid => {
+      const user = data[uid];
+      const div = document.createElement('div');
+      div.textContent = user.email;
+      div.onclick = () => {
+        activeChatUser = uid;
+        messagesDiv.innerHTML = "";
+        loadMessages(uid);
+      };
+      userListDiv.appendChild(div);
+    });
+  });
+}
