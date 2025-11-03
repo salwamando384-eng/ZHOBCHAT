@@ -22,11 +22,12 @@ const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const sendBtn = document.getElementById("sendBtn");
-const deleteAllBtn = document.getElementById("deleteAllBtn");
 const messageInput = document.getElementById("messageInput");
 const messagesDiv = document.getElementById("messages");
 const usersToggle = document.getElementById("usersToggle");
-const userList = document.getElementById("userList");
+const usersPanel = document.querySelector(".users-panel");
+const onlineList = document.getElementById("onlineList");
+const offlineList = document.getElementById("offlineList");
 const authSection = document.getElementById("auth-section");
 const chatSection = document.getElementById("chat-section");
 const emojiBtn = document.getElementById("emojiBtn");
@@ -51,11 +52,15 @@ signupBtn.addEventListener("click",()=>{
   const name=document.getElementById("name").value.trim();
   const email=document.getElementById("email").value.trim();
   const password=document.getElementById("password").value.trim();
+  const gender=document.getElementById("gender").value.trim();
+  const age=document.getElementById("age").value.trim();
+  const city=document.getElementById("city").value.trim();
+  
   if(!name||!email||!password){ alert("Fill Name, Email, Password!"); return; }
 
   createUserWithEmailAndPassword(auth,email,password)
   .then(u=>{
-    currentUser={name,email,dp:"default.png"};
+    currentUser={name,email,gender,age,city,dp:"default.png"};
     userColors[name]=getRandomColor();
     set(ref(db,"users/"+name),currentUser);
     authSection.classList.add("hidden");
@@ -72,6 +77,7 @@ loginBtn.addEventListener("click",()=>{
     const name=email.split("@")[0];
     currentUser={name,email,dp:"default.png"};
     userColors[name]=getRandomColor();
+    set(ref(db,"users/"+name+"/online"),true);
     authSection.classList.add("hidden");
     chatSection.classList.remove("hidden");
   }).catch(e=>alert(e.message));
@@ -80,6 +86,7 @@ loginBtn.addEventListener("click",()=>{
 // ===== Logout =====
 logoutBtn.addEventListener("click",()=>{
   signOut(auth);
+  if(currentUser) remove(ref(db,"users/"+currentUser.name+"/online"));
   currentUser=null;
   authSection.classList.remove("hidden");
   chatSection.classList.add("hidden");
@@ -111,19 +118,21 @@ onChildAdded(ref(db,"messages"),snapshot=>{
   messagesDiv.scrollTop=messagesDiv.scrollHeight;
 });
 
-// ===== Toggle Users List =====
-usersToggle.addEventListener("click",()=>userList.classList.toggle("hidden"));
+// ===== Toggle Users Panel =====
+usersToggle.addEventListener("click",()=>usersPanel.classList.toggle("hidden"));
 
 // ===== Online / Offline Users =====
 onValue(ref(db,"users"),snapshot=>{
-  userList.innerHTML="";
+  onlineList.innerHTML="";
+  offlineList.innerHTML="";
   snapshot.forEach(snap=>{
     const user=snap.val();
     const li=document.createElement("li");
     li.textContent=user.name;
     li.style.color=userColors[user.name]||getRandomColor();
     li.addEventListener("click",()=>showProfile(user.name));
-    userList.appendChild(li);
+    if(user.online) onlineList.appendChild(li);
+    else offlineList.appendChild(li);
   });
 });
 
@@ -158,6 +167,3 @@ emojiPicker.querySelectorAll("span").forEach(span=>{
     emojiPicker.classList.add("hidden");
   });
 });
-
-// ===== Delete All Messages =====
-deleteAllBtn.addEventListener("click",()=>{ if(confirm("Delete all messages?")) remove(ref(db,"messages")); });
