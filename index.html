@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZHOB CHAT</title>
+<title>ZHOB CHAT Ultimate</title>
 <link rel="stylesheet" href="style.css">
 <script type="module" src="app.js"></script>
 </head>
@@ -36,11 +36,25 @@
       <div id="messages"></div>
       <div class="chat-input">
         <input type="text" id="messageInput" placeholder="Type a message...">
+        <button id="emojiBtn">😊</button>
         <button id="sendBtn">Send</button>
+      </div>
+      <div id="emojiPicker" class="hidden">
+        <span>😀</span><span>😂</span><span>😍</span><span>😎</span><span>😢</span><span>👍</span><span>❤️</span>
       </div>
     </div>
   </div>
   <button id="deleteAllBtn" class="admin-btn">Delete All Messages (Admin)</button>
+</div>
+
+<!-- User Profile Modal -->
+<div id="userProfile" class="hidden profile-modal">
+  <div class="profile-content">
+    <h3 id="profileName"></h3>
+    <p>Email: <span id="profileEmail"></span></p>
+    <button id="privateChatBtn">Start Private Chat</button>
+    <button id="closeProfile">Close</button>
+  </div>
 </div>
 
 </body>
