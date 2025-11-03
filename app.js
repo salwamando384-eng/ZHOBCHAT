@@ -1,6 +1,4 @@
-// ------------------------
-// Firebase config & initialization
-// ------------------------
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -8,21 +6,20 @@ const firebaseConfig = {
   projectId: "zhobchat-33d8e",
   storageBucket: "zhobchat-33d8e.appspot.com",
   messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-  measurementId: "G-LX9P9LRLV8"
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
 };
 
-const app = firebase.initializeApp(firebaseConfig);
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 const db = firebase.database();
 const storage = firebase.storage();
 
-// ------------------------
-// DOM elements
-// ------------------------
+// DOM Elements
 const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
-const sendBtn = document.getElementById("sendBtn");
 const logoutBtn = document.getElementById("logoutBtn");
+const sendBtn = document.getElementById("sendBtn");
 const messageInput = document.getElementById("messageInput");
 const messagesDiv = document.getElementById("messages");
 const usersList = document.getElementById("usersList");
@@ -36,61 +33,64 @@ const authSection = document.getElementById("auth-section");
 const chatSection = document.getElementById("chat-section");
 const userDetail = document.getElementById("user-detail");
 const detailName = document.getElementById("detailName");
-const detailEmail = document.getElementById("detailEmail");
-const detailStatus = document.getElementById("detailStatus");
 const privateMsgBtn = document.getElementById("privateMsgBtn");
 const closeDetailBtn = document.getElementById("closeDetailBtn");
 
-// ------------------------
-// Variables
-// ------------------------
 let currentUser = null;
 let privateTarget = null;
 
-// ------------------------
+// --------------------
 // Signup
-// ------------------------
 signupBtn.addEventListener("click", () => {
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
 
-  if(name && email && password){
-    currentUser = { name, email };
-    localStorage.setItem("zhobUser", JSON.stringify(currentUser));
-    db.ref("online/"+name).set(true);
-    authSection.classList.add("hidden");
-    chatSection.classList.remove("hidden");
-  } else { alert("Please fill all fields for signup"); }
+  if(!name || !email || !password) return alert("Fill all fields");
+
+  auth.createUserWithEmailAndPassword(email, password)
+      .then(userCred => {
+        currentUser = { name, email };
+        localStorage.setItem("zhobUser", JSON.stringify(currentUser));
+        db.ref("online/"+name).set(true);
+        authSection.classList.add("hidden");
+        chatSection.classList.remove("hidden");
+      })
+      .catch(err => alert(err.message));
 });
 
-// ------------------------
+// --------------------
 // Login
-// ------------------------
 loginBtn.addEventListener("click", () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
   const name = document.getElementById("name").value.trim();
-  if(!name) return alert("Enter your name to login");
-  currentUser = { name };
-  localStorage.setItem("zhobUser", JSON.stringify(currentUser));
-  db.ref("online/"+name).set(true);
-  authSection.classList.add("hidden");
-  chatSection.classList.remove("hidden");
+  if(!email || !password || !name) return alert("Fill all fields");
+
+  auth.signInWithEmailAndPassword(email,password)
+      .then(userCred => {
+        currentUser = { name, email };
+        localStorage.setItem("zhobUser", JSON.stringify(currentUser));
+        db.ref("online/"+name).set(true);
+        authSection.classList.add("hidden");
+        chatSection.classList.remove("hidden");
+      })
+      .catch(err => alert(err.message));
 });
 
-// ------------------------
+// --------------------
 // Logout
-// ------------------------
-logoutBtn.addEventListener("click", () => {
+logoutBtn.addEventListener("click", ()=>{
   if(currentUser) db.ref("online/"+currentUser.name).remove();
+  auth.signOut();
   localStorage.removeItem("zhobUser");
   chatSection.classList.add("hidden");
   authSection.classList.remove("hidden");
 });
 
-// ------------------------
+// --------------------
 // Send message
-// ------------------------
-sendBtn.addEventListener("click", () => { sendMessage(messageInput.value); messageInput.value=""; });
+sendBtn.addEventListener("click", ()=>{ sendMessage(messageInput.value); messageInput.value=""; });
 function sendMessage(text, fileURL=null){
   if(!text && !fileURL) return;
   db.ref("messages").push({
@@ -102,9 +102,8 @@ function sendMessage(text, fileURL=null){
   });
 }
 
-// ------------------------
-// Show messages
-// ------------------------
+// --------------------
+// Display messages
 db.ref("messages").on("child_added", snapshot=>{
   const msg = snapshot.val();
   if(msg.private && msg.private!==currentUser.name && msg.name!==currentUser.name) return;
@@ -118,9 +117,8 @@ db.ref("messages").on("child_added", snapshot=>{
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
 
-// ------------------------
+// --------------------
 // Online users
-// ------------------------
 db.ref("online").on("value", snapshot=>{
   usersList.innerHTML="";
   const users = snapshot.val()||{};
@@ -132,29 +130,23 @@ db.ref("online").on("value", snapshot=>{
   });
 });
 
-// ------------------------
-// User detail & private message
-// ------------------------
+// --------------------
+// User detail / private message
 function showUserDetail(u){
   detailName.textContent = u;
-  detailEmail.textContent = "Email: hidden";
-  detailStatus.textContent = "Status: Online";
   privateTarget = u;
   userDetail.classList.remove("hidden");
 }
-
 closeDetailBtn.addEventListener("click", ()=>{ userDetail.classList.add("hidden"); privateTarget=null; });
 privateMsgBtn.addEventListener("click", ()=>{ messageInput.placeholder="Private message to "+privateTarget; userDetail.classList.add("hidden"); });
 
-// ------------------------
+// --------------------
 // Emoji picker
-// ------------------------
 emojiBtn.addEventListener("click", ()=> emojiPicker.classList.toggle("hidden"));
 emojiPicker.addEventListener("click", e=>{ if(e.target.tagName==="SPAN") messageInput.value+=e.target.textContent; });
 
-// ------------------------
+// --------------------
 // File upload
-// ------------------------
 fileBtn.addEventListener("click", ()=> fileInput.click());
 fileInput.addEventListener("change", ()=>{
   const file = fileInput.files[0];
@@ -163,26 +155,21 @@ fileInput.addEventListener("change", ()=>{
   storageRef.put(file).then(()=>{ storageRef.getDownloadURL().then(url=> sendMessage("",url)); });
 });
 
-// ------------------------
+// --------------------
 // Delete all messages (Admin)
 deleteAllBtn.addEventListener("click", ()=>{
-  if(confirm("Are you sure to delete all messages?")) db.ref("messages").remove();
+  if(confirm("Delete all messages?")) db.ref("messages").remove();
 });
 
-// ------------------------
-// Auto login if user exists
-// ------------------------
+// --------------------
+// Auto-login
 window.addEventListener("load", ()=>{
-  const storedUser = localStorage.getItem("zhobUser");
-  if(storedUser){
-    currentUser = JSON.parse(storedUser);
+  const stored = localStorage.getItem("zhobUser");
+  if(stored){
+    currentUser = JSON.parse(stored);
     authSection.classList.add("hidden");
     chatSection.classList.remove("hidden");
     db.ref("online/"+currentUser.name).set(true);
   }
 });
-
-// ------------------------
-// Remove user from online list on close
-// ------------------------
 window.addEventListener("beforeunload", ()=>{ if(currentUser) db.ref("online/"+currentUser.name).remove(); });
