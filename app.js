@@ -61,6 +61,11 @@ function createMessageDiv(msg) {
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
+// ===== Utility: safe email key =====
+function emailKey(email){
+  return email.split('.').join('_');
+}
+
 // ===== Signup =====
 signupBtn.addEventListener("click", async () => {
   const name = document.getElementById("name").value.trim();
@@ -74,40 +79,52 @@ signupBtn.addEventListener("click", async () => {
   const dpFile = dpUpload.files[0];
 
   if(!name || !email || !password){
-    alert("Please fill Name, Email, Password"); return;
+    alert("Please fill Name, Email, Password"); 
+    return;
   }
 
   let dpURL = "default.png";
-  if(dpFile){
-    const storageRef = sRef(storage, "dp/"+email);
-    await uploadBytes(storageRef, dpFile);
-    dpURL = await getDownloadURL(storageRef);
-  }
+  try{
+    if(dpFile){
+      const storageRef = sRef(storage, "dp/"+emailKey(email));
+      await uploadBytes(storageRef, dpFile);
+      dpURL = await getDownloadURL(storageRef);
+    }
 
-  createUserWithEmailAndPassword(auth, email, password)
-  .then(() => {
+    await createUserWithEmailAndPassword(auth, email, password);
+
     currentUser = {name,email,gender,age,city,nameColor,msgColor,dpURL,online:true};
     localStorage.setItem("zhobUser", JSON.stringify(currentUser));
-    update(ref(db,"users/"+email.replace(".","_")), currentUser);
+
+    update(ref(db,"users/"+emailKey(email)), currentUser);
+    
     authSection.classList.add("hidden");
     chatSection.classList.remove("hidden");
+
     listenMessages();
     listenUsers();
-  })
-  .catch(err => alert(err.message));
+
+  } catch(err){
+    alert("Signup Error: "+err.message);
+  }
 });
 
 // ===== Login =====
-loginBtn.addEventListener("click", ()=>{
+loginBtn.addEventListener("click", async ()=>{
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
   if(!email || !password){ alert("Enter Email and Password"); return; }
 
-  signInWithEmailAndPassword(auth,email,password)
-  .then(()=>{
-    const userRef = ref(db,"users/"+email.replace(".","_"));
+  try{
+    await signInWithEmailAndPassword(auth,email,password);
+    
+    const userRef = ref(db,"users/"+emailKey(email));
     onValue(userRef, snapshot=>{
       currentUser = snapshot.val();
+      if(!currentUser){
+        alert("User data not found in database!");
+        return;
+      }
       currentUser.online = true;
       localStorage.setItem("zhobUser", JSON.stringify(currentUser));
       authSection.classList.add("hidden");
@@ -116,14 +133,16 @@ loginBtn.addEventListener("click", ()=>{
       listenMessages();
       listenUsers();
     });
-  })
-  .catch(err => alert(err.message));
+    
+  } catch(err){
+    alert("Login Error: "+err.message);
+  }
 });
 
 // ===== Logout =====
 logoutBtn.addEventListener("click", ()=>{
   if(currentUser){
-    const userRef = ref(db,"users/"+currentUser.email.replace(".","_"));
+    const userRef = ref(db,"users/"+emailKey(currentUser.email));
     update(userRef,{online:false});
   }
   signOut(auth);
@@ -146,7 +165,7 @@ sendBtn.addEventListener("click", ()=>{
     time: new Date().toLocaleTimeString(),
     private: chatTarget || null
   };
-  push(ref(db, chatTarget ? "private/"+chatTarget+"/"+currentUser.email.replace(".","_") : "messages"), msg);
+  push(ref(db, chatTarget ? "private/"+chatTarget+"/"+emailKey(currentUser.email) : "messages"), msg);
   messageInput.value="";
 });
 
@@ -190,7 +209,7 @@ function showUserProfile(u){
   profileCity.textContent=u.city;
   profileDP.src=u.dpURL || "default.png";
   userProfile.classList.remove("hidden");
-  chatTarget = u.email.replace(".","_");
+  chatTarget = emailKey(u.email);
 }
 
 // ===== Close Profile =====
@@ -208,6 +227,6 @@ window.addEventListener("load",()=>{
     chatSection.classList.remove("hidden");
     listenMessages();
     listenUsers();
-    update(ref(db,"users/"+currentUser.email.replace(".","_")), {...currentUser, online:true});
+    update(ref(db,"users/"+emailKey(currentUser.email)), {...currentUser, online:true});
   }
 });
