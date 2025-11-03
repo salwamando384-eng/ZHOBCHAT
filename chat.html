@@ -1,60 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ZHOB CHAT — Room</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT Room</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
-    <div class="left">
-      <div class="app-title">ZHOB CHAT</div>
-      <div style="display:flex;gap:8px;">
-        <input id="searchBox" placeholder="Search users or chats" style="flex:1;padding:8px;border-radius:8px;border:1px solid #ddd;" />
-        <button id="newChatBtn" class="btn ghost">New</button>
-      </div>
-      <div class="users-list card" style="margin-top:10px;">
-        <ul id="userList" style="list-style:none;padding:0;margin:0;"></ul>
+  <div class="chat-container">
+    
+    <!-- Left Side: User List -->
+    <div class="user-list" id="userList">
+      <h3>Online Users</h3>
+      <ul id="users"></ul>
+    </div>
+
+    <!-- Center: Chat Messages -->
+    <div class="chat-box">
+      <div id="messages"></div>
+      <div class="chat-input">
+        <button id="emojiBtn">😊</button>
+        <input type="text" id="messageInput" placeholder="Type here...">
+        <button id="sendBtn">➤</button>
       </div>
     </div>
 
-    <div class="center">
-      <div class="chat-top">
-        <div class="room-title" id="roomTitle">General Chat</div>
-        <div>
-          <button id="clearChatBtn" class="btn ghost">Clear</button>
-          <button id="logoutBtn" class="btn ghost">Logout</button>
-        </div>
-      </div>
-
-      <div id="messages" class="messages"></div>
-
-      <div class="composer">
-        <input id="messageInput" type="text" placeholder="Write a message..." />
-        <button id="emojiBtn" class="icon-btn">👥</button>
-        <button id="sendBtn" class="send-btn">Send</button>
-      </div>
-    </div>
-
-    <div class="right">
-      <div class="card">
-        <h4>Selected User</h4>
-        <img id="userDetailDp" src="https://i.ibb.co/0F8VbW5/default_dp.png" class="detail-dp" alt="dp" />
-        <div id="userDetailName" class="detail-row">Name: —</div>
-        <div id="userDetailAge" class="detail-row">Age: —</div>
-        <div id="userDetailGender" class="detail-row">Gender: —</div>
-        <button id="privateChatBtn" class="btn primary">Start Private Chat</button>
-      </div>
-
-      <div class="card">
-        <h4>Info</h4>
-        <p>Admin: admin@gmail.com</p>
-        <p>Robots: Ali, Bilal, Ahsan, Meena, Hina</p>
-      </div>
+    <!-- Right Side: User Profile Popup -->
+    <div class="user-profile" id="userProfile">
+      <img id="profileDp" src="default_dp.png" alt="DP">
+      <h4 id="profileName">User Name</h4>
+      <p id="profileAge">Age: --</p>
+      <p id="profileGender">Gender: --</p>
+      <button id="privateBtn">Private</button>
+      <button id="closeProfile">Close</button>
     </div>
   </div>
 
-  <script type="module" src="app.js"></script>
+  <script src="firebase_config.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
