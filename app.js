@@ -1,13 +1,25 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, set, onValue, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { firebaseConfig } from "./firebase-config.js";
+// ------------------------
+// Firebase config & initialization
+// ------------------------
+const firebaseConfig = {
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+  authDomain: "zhobchat-33d8e.firebaseapp.com",
+  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "zhobchat-33d8e",
+  storageBucket: "zhobchat-33d8e.appspot.com",
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
+  measurementId: "G-LX9P9LRLV8"
+};
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const storage = getStorage(app);
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const storage = firebase.storage();
 
+// ------------------------
+// DOM elements
+// ------------------------
 const signupBtn = document.getElementById("signupBtn");
 const sendBtn = document.getElementById("sendBtn");
 const logoutBtn = document.getElementById("logoutBtn");
@@ -29,75 +41,99 @@ const detailStatus = document.getElementById("detailStatus");
 const privateMsgBtn = document.getElementById("privateMsgBtn");
 const closeDetailBtn = document.getElementById("closeDetailBtn");
 
+// ------------------------
+// Variables
+// ------------------------
 let currentUser = null;
 let privateTarget = null;
 
-// --- Sign up / login ---
+// ------------------------
+// Sign up / login
+// ------------------------
 signupBtn.addEventListener("click", () => {
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
+  
   if(name && email && password){
-    currentUser = {name,email};
+    currentUser = { name, email };
     localStorage.setItem("zhobUser", JSON.stringify(currentUser));
-    set(ref(db, "online/"+name), true);
+    db.ref("online/"+name).set(true); // mark user online
     authSection.classList.add("hidden");
     chatSection.classList.remove("hidden");
-  }else{ alert("Please fill all fields"); }
+  } else {
+    alert("Please fill all fields");
+  }
 });
 
-// --- Logout ---
-logoutBtn.addEventListener("click", ()=>{
-  remove(ref(db,"online/"+currentUser.name));
+// ------------------------
+// Logout
+// ------------------------
+logoutBtn.addEventListener("click", () => {
+  if(currentUser){
+    db.ref("online/"+currentUser.name).remove();
+  }
   localStorage.removeItem("zhobUser");
   chatSection.classList.add("hidden");
   authSection.classList.remove("hidden");
 });
 
-// --- Send message ---
-sendBtn.addEventListener("click", ()=>{
+// ------------------------
+// Send message
+// ------------------------
+sendBtn.addEventListener("click", () => {
   sendMessage(messageInput.value);
   messageInput.value = "";
 });
 
 function sendMessage(text, fileURL=null){
   if(!text && !fileURL) return;
-  push(ref(db,"messages"),{
-    name:currentUser.name,
-    text:text || "",
-    file:fileURL||"",
-    time:new Date().toLocaleTimeString(),
+  db.ref("messages").push({
+    name: currentUser.name,
+    text: text || "",
+    file: fileURL || "",
+    time: new Date().toLocaleTimeString(),
     private: privateTarget || null
   });
 }
 
-// --- Show messages ---
-onChildAdded(ref(db,"messages"), snapshot=>{
+// ------------------------
+// Show messages
+// ------------------------
+db.ref("messages").on("child_added", snapshot => {
   const msg = snapshot.val();
+  
+  // Show private messages only to sender/receiver
+  if(msg.private && msg.private !== currentUser.name && msg.name !== currentUser.name) return;
+
   const div = document.createElement("div");
-  div.classList.add("message");
-  div.classList.add(msg.name===currentUser.name?"user":"other");
-  if(msg.private && msg.private!==currentUser.name && msg.name!==currentUser.name) return;
+  div.classList.add("message", msg.name===currentUser.name?"user":"other");
+  
   let content = `[${msg.time}] ${msg.name}: ${msg.text}`;
   if(msg.file) content += ` 📎 <a href="${msg.file}" target="_blank">file</a>`;
+  
   div.innerHTML = content;
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
 
-// --- Online users ---
-onValue(ref(db,"online"), snapshot=>{
-  usersList.innerHTML="";
-  const users = snapshot.val()||{};
-  Object.keys(users).forEach(u=>{
+// ------------------------
+// Online users
+// ------------------------
+db.ref("online").on("value", snapshot => {
+  usersList.innerHTML = "";
+  const users = snapshot.val() || {};
+  Object.keys(users).forEach(u => {
     const li = document.createElement("li");
     li.textContent = u;
-    li.addEventListener("click", ()=> showUserDetail(u));
+    li.addEventListener("click", () => showUserDetail(u));
     usersList.appendChild(li);
   });
 });
 
-// --- User detail ---
+// ------------------------
+// Show user detail + private message
+// ------------------------
 function showUserDetail(u){
   detailName.textContent = u;
   detailEmail.textContent = "Email: hidden";
@@ -105,48 +141,62 @@ function showUserDetail(u){
   privateTarget = u;
   userDetail.classList.remove("hidden");
 }
-closeDetailBtn.addEventListener("click", ()=> { userDetail.classList.add("hidden"); privateTarget=null; });
 
-// --- Private message button ---
-privateMsgBtn.addEventListener("click", ()=>{
-  messageInput.placeholder = "Private message to "+privateTarget;
+closeDetailBtn.addEventListener("click", () => {
+  userDetail.classList.add("hidden");
+  privateTarget = null;
+});
+
+privateMsgBtn.addEventListener("click", () => {
+  messageInput.placeholder = "Private message to " + privateTarget;
   userDetail.classList.add("hidden");
 });
 
-// --- Emoji ---
-emojiBtn.addEventListener("click", ()=> emojiPicker.classList.toggle("hidden"));
-emojiPicker.addEventListener("click",(e)=>{ if(e.target.tagName==="SPAN") messageInput.value+=e.target.textContent; });
+// ------------------------
+// Emoji picker
+// ------------------------
+emojiBtn.addEventListener("click", () => emojiPicker.classList.toggle("hidden"));
+emojiPicker.addEventListener("click", (e) => {
+  if(e.target.tagName==="SPAN") messageInput.value += e.target.textContent;
+});
 
-// --- File upload ---
-fileBtn.addEventListener("click", ()=>fileInput.click());
-fileInput.addEventListener("change", ()=>{
+// ------------------------
+// File upload
+// ------------------------
+fileBtn.addEventListener("click", () => fileInput.click());
+fileInput.addEventListener("change", () => {
   const file = fileInput.files[0];
   if(!file) return;
-  const storageRef = sRef(storage,"files/"+Date.now()+"_"+file.name);
-  uploadBytes(storageRef,file).then(()=>getDownloadURL(storageRef)).then(url=>{
-    sendMessage("",url);
+  const storageRef = storage.ref("files/"+Date.now()+"_"+file.name);
+  storageRef.put(file).then(() => {
+    storageRef.getDownloadURL().then(url => sendMessage("", url));
   });
 });
 
-// --- Delete all messages (Admin) ---
-deleteAllBtn.addEventListener("click", ()=>{
+// ------------------------
+// Delete all messages (Admin)
+deleteAllBtn.addEventListener("click", () => {
   if(confirm("Are you sure to delete all messages?")){
-    remove(ref(db,"messages"));
+    db.ref("messages").remove();
   }
 });
 
-// --- Auto login ---
-window.addEventListener("load", ()=>{
+// ------------------------
+// Auto login if user exists
+// ------------------------
+window.addEventListener("load", () => {
   const storedUser = localStorage.getItem("zhobUser");
   if(storedUser){
     currentUser = JSON.parse(storedUser);
     authSection.classList.add("hidden");
     chatSection.classList.remove("hidden");
-    set(ref(db,"online/"+currentUser.name),true);
+    db.ref("online/"+currentUser.name).set(true);
   }
 });
 
-// --- Remove user on close ---
-window.addEventListener("beforeunload", ()=>{
-  if(currentUser) remove(ref(db,"online/"+currentUser.name));
+// ------------------------
+// Remove user from online list on close
+// ------------------------
+window.addEventListener("beforeunload", () => {
+  if(currentUser) db.ref("online/"+currentUser.name).remove();
 });
