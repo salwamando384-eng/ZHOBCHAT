@@ -8,19 +8,22 @@
 </head>
 <body>
 
+<!-- ===== AUTH SECTION ===== -->
 <div id="auth-section" class="card">
   <h2>Welcome to <span>ZHOB CHAT</span></h2>
-  <input type="text" id="name" placeholder="Enter Name" required>
-  <input type="email" id="email" placeholder="Enter Email" required>
-  <input type="password" id="password" placeholder="Enter Password" required>
+
+  <input type="text" id="name" placeholder="Enter Name">
+  <input type="email" id="email" placeholder="Enter Email">
+  <input type="password" id="password" placeholder="Enter Password">
   <input type="text" id="gender" placeholder="Gender">
-  <input type="number" id="age" placeholder="Age">
+  <input type="text" id="age" placeholder="Age">
   <input type="text" id="city" placeholder="City">
-  <input type="file" id="dp" accept="image/*">
+
   <button id="signupBtn">Sign Up</button>
   <button id="loginBtn">Login</button>
 </div>
 
+<!-- ===== CHAT SECTION ===== -->
 <div id="chat-section" class="hidden">
   <div class="chat-header">
     <h2>ZHOB CHAT</h2>
@@ -28,19 +31,11 @@
     <button id="logoutBtn">Logout</button>
   </div>
 
-  <div class="chat-container">
-    <div class="chat-area">
-      <div id="messages"></div>
-      <div class="chat-input">
-        <input type="text" id="messageInput" placeholder="Type your message...">
-        <button id="emojiBtn">😀</button>
-        <button id="sendBtn">Send</button>
-        <div id="emojiPicker" class="hidden">
-          <span>😀</span><span>😂</span><span>😍</span><span>😎</span><span>😢</span>
-        </div>
-      </div>
-    </div>
+  <div class="main-content">
+    <!-- Messages -->
+    <div id="messages" class="messages"></div>
 
+    <!-- Users Panel -->
     <div class="users-panel hidden">
       <h3>Online Users</h3>
       <ul id="onlineList"></ul>
@@ -48,12 +43,24 @@
       <ul id="offlineList"></ul>
     </div>
   </div>
+
+  <!-- Message Input -->
+  <div class="chat-input">
+    <input type="text" id="messageInput" placeholder="Type a message...">
+    <button id="emojiBtn">😀</button>
+    <button id="sendBtn">Send</button>
+  </div>
+  
+  <!-- Emoji Picker -->
+  <div id="emojiPicker" class="emoji-picker hidden">
+    <span>😀</span><span>😂</span><span>😍</span><span>😎</span><span>😢</span>
+  </div>
 </div>
 
-<!-- User Profile Modal -->
-<div id="userProfile" class="hidden profile-modal">
-  <img id="profileDP" src="default.png" width="80" height="80" style="border-radius:50%">
-  <h3 id="profileName"></h3>
+<!-- ===== USER PROFILE ===== -->
+<div id="userProfile" class="user-profile hidden">
+  <img id="profileDP" src="default.png" alt="DP">
+  <p>Name: <span id="profileName"></span></p>
   <p>Email: <span id="profileEmail"></span></p>
   <p>Gender: <span id="profileGender"></span></p>
   <p>Age: <span id="profileAge"></span></p>
