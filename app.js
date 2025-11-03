@@ -1,57 +1,67 @@
-// Firebase initialization
-const db = firebase.database();
+// ✅ Initialize Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// User list load
-const userList = document.getElementById('users');
-const userProfile = document.getElementById('userProfile');
-const messagesDiv = document.getElementById('messages');
-const messageInput = document.getElementById('messageInput');
-const sendBtn = document.getElementById('sendBtn');
-const closeProfile = document.getElementById('closeProfile');
+const firebaseConfig = {
+  apiKey: "AIzaSyXXXXX-REPLACE-WITH-YOURS",
+  authDomain: "zhobchat.firebaseapp.com",
+  databaseURL: "https://zhobchat-default-rtdb.firebaseio.com/",
+  projectId: "zhobchat",
+  storageBucket: "zhobchat.appspot.com",
+  messagingSenderId: "0000000000",
+  appId: "1:0000000000:web:xxxxxxxxxxxxxx"
+};
 
-db.ref("users").on("value", (snapshot) => {
-  userList.innerHTML = "";
-  snapshot.forEach(child => {
-    const user = child.val();
-    const li = document.createElement("li");
-    li.innerHTML = `<img src="${user.dp || 'default_dp.png'}"><span>${user.name}</span>`;
-    li.onclick = () => showProfile(user);
-    userList.appendChild(li);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ✅ DOM Elements
+const userList = document.getElementById("userList");
+const chatMessages = document.getElementById("chatMessages");
+const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+const chatWith = document.getElementById("chatWith");
+
+let currentUser = "You";
+let chattingWith = "General Room";
+
+// Sample Users List (can come from Firebase later)
+const users = ["Ali", "Sara", "Bilal", "Hamza", "Ayesha"];
+users.forEach(u => {
+  const li = document.createElement("li");
+  li.textContent = u;
+  li.addEventListener("click", () => {
+    chattingWith = u;
+    chatWith.textContent = "Chat with " + u;
+    chatMessages.innerHTML = "";
   });
+  userList.appendChild(li);
 });
 
-function showProfile(user) {
-  document.getElementById('profileDp').src = user.dp || "default_dp.png";
-  document.getElementById('profileName').textContent = user.name;
-  document.getElementById('profileAge').textContent = `Age: ${user.age || '--'}`;
-  document.getElementById('profileGender').textContent = `Gender: ${user.gender || '--'}`;
-  userProfile.style.display = "flex";
-}
+// ✅ Send Message
+sendBtn.addEventListener("click", () => {
+  const message = messageInput.value.trim();
+  if (message === "") return;
 
-closeProfile.onclick = () => {
-  userProfile.style.display = "none";
-};
+  const msgRef = ref(db, "messages/" + chattingWith);
+  push(msgRef, {
+    sender: currentUser,
+    text: message
+  });
 
-// Send message
-sendBtn.onclick = () => {
-  const msg = messageInput.value.trim();
-  if (msg !== "") {
-    const newMsg = db.ref("messages").push();
-    newMsg.set({
-      name: "You",
-      text: msg,
-      time: new Date().toLocaleTimeString()
-    });
-    messageInput.value = "";
-  }
-};
+  messageInput.value = "";
+});
 
-// Load messages
-db.ref("messages").on("child_added", (snapshot) => {
-  const msg = snapshot.val();
-  const div = document.createElement("div");
-  div.className = "message";
-  div.innerHTML = `<strong>${msg.name}:</strong> ${msg.text}`;
-  messagesDiv.appendChild(div);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+// ✅ Receive Messages
+users.forEach(u => {
+  const msgRef = ref(db, "messages/" + u);
+  onChildAdded(msgRef, (data) => {
+    const msg = data.val();
+    const div = document.createElement("div");
+    div.classList.add("message");
+    if (msg.sender === currentUser) div.classList.add("self");
+    div.textContent = msg.sender + ": " + msg.text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
 });
