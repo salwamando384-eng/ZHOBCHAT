@@ -8,63 +8,63 @@
 </head>
 <body>
 
-  <div id="auth-section" class="card">
-    <h2>Welcome to <span>ZHOB CHAT</span></h2>
+<div id="auth-section" class="card">
+  <h2>Welcome to <span>ZHOB CHAT</span></h2>
 
-    <input type="text" id="name" placeholder="Enter Name" required>
-    <input type="email" id="email" placeholder="Enter Email" required>
-    <input type="password" id="password" placeholder="Enter Password" required>
-    <input type="text" id="age" placeholder="Age">
-    <input type="text" id="city" placeholder="City">
-    <select id="gender">
-      <option>Male</option>
-      <option>Female</option>
-    </select>
-    <input type="color" id="nameColor" value="#00bfff" title="Select Name Color">
-    <input type="color" id="msgColor" value="#ffffff" title="Select Message Color">
+  <input type="text" id="name" placeholder="Enter Name" required>
+  <input type="email" id="email" placeholder="Enter Email" required>
+  <input type="password" id="password" placeholder="Enter Password" required>
+  <input type="text" id="age" placeholder="Age">
+  <input type="text" id="city" placeholder="City">
+  <select id="gender">
+    <option>Male</option>
+    <option>Female</option>
+  </select>
+  <input type="color" id="nameColor" value="#00bfff" title="Select Name Color">
+  <input type="color" id="msgColor" value="#ffffff" title="Select Message Color">
+  <input type="file" id="dpUpload" accept="image/*">
 
-    <button id="signupBtn">Sign Up</button>
-    <button id="loginBtn">Login</button>
+  <button id="signupBtn">Sign Up</button>
+  <button id="loginBtn">Login</button>
+</div>
+
+<div id="chat-section" class="hidden">
+  <div class="chat-header">
+    <h2>ZHOB CHAT</h2>
+    <button id="usersToggle">Users</button>
+    <button id="logoutBtn">Logout</button>
   </div>
 
-  <div id="chat-section" class="hidden">
-    <div class="chat-header">
-      <h2>ZHOB CHAT</h2>
-      <button id="logoutBtn">Logout</button>
-    </div>
+  <div class="chat-main">
+    <div class="chat-messages" id="messages"></div>
 
-    <div class="chat-main">
-      <div class="chat-messages" id="messages"></div>
-
-      <div class="users-panel-container">
-        <button id="usersToggle">Users</button>
-        <div class="users-panel hidden">
-          <h4>Online Users</h4>
-          <ul id="onlineList"></ul>
-          <h4>Offline Users</h4>
-          <ul id="offlineList"></ul>
-        </div>
+    <div class="users-panel-container">
+      <div class="users-panel hidden">
+        <h4>Online Users</h4>
+        <ul id="onlineList"></ul>
+        <h4>Offline Users</h4>
+        <ul id="offlineList"></ul>
       </div>
     </div>
-
-    <div class="chat-input">
-      <input type="text" id="messageInput" placeholder="Type your message...">
-      <button id="sendBtn">Send</button>
-    </div>
   </div>
 
-  <!-- User Profile Modal -->
-  <div id="userProfile" class="hidden profile-modal">
-    <button id="closeProfile">Close</button>
-    <img id="profileDP" src="default.png" alt="DP">
-    <p>Name: <span id="profileName"></span></p>
-    <p>Email: <span id="profileEmail"></span></p>
-    <p>Gender: <span id="profileGender"></span></p>
-    <p>Age: <span id="profileAge"></span></p>
-    <p>City: <span id="profileCity"></span></p>
-    <button id="privateChatBtn">Start Private Chat</button>
+  <div class="chat-input">
+    <input type="text" id="messageInput" placeholder="Type your message...">
+    <button id="sendBtn">Send</button>
   </div>
+</div>
 
-  <script type="module" src="app.js"></script>
+<div id="userProfile" class="hidden profile-modal">
+  <button id="closeProfile">Close</button>
+  <img id="profileDP" src="default.png" alt="DP">
+  <p>Name: <span id="profileName"></span></p>
+  <p>Email: <span id="profileEmail"></span></p>
+  <p>Gender: <span id="profileGender"></span></p>
+  <p>Age: <span id="profileAge"></span></p>
+  <p>City: <span id="profileCity"></span></p>
+  <button id="privateChatBtn">Start Private Chat</button>
+</div>
+
+<script type="module" src="app.js"></script>
 </body>
 </html>
