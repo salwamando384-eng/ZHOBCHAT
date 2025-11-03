@@ -32,3 +32,47 @@ button{cursor:pointer}
 /* topbar */
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:rgba(0,0,0,0.12)}
 .brand{font-weight:800;font-size:20px}
+.brand span{color:var(--accent)}
+.top-actions{display:flex;align-items:center;gap:10px}
+.top-dp{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.06)}
+.current-name{font-weight:700}
+
+/* main area layout */
+.main-area{display:flex;flex:1;height:calc(100vh - 64px);gap:12px;padding:12px;align-items:stretch;overflow:hidden}
+
+/* users panel (left) */
+.users-panel{width:240px;background:var(--glass);padding:12px;border-radius:10px;overflow:auto}
+.user-list{list-style:none;padding:0;margin:8px 0}
+.user-list li{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer}
+.user-list img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.user-name{font-weight:700}
+
+/* messages area */
+.messages-area{flex:1;display:flex;flex-direction:column;background:rgba(0,0,0,0.03);border-radius:10px;padding:10px;overflow:hidden}
+.messages{flex:1;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:8px}
+.msg-row{display:flex;gap:10px;align-items:flex-start}
+.msg-dp{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.msg-bubble{background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:10px;position:relative;max-width:72%}
+.msg-meta{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.msg-name{font-weight:800}
+.msg-time{margin-left:8px;font-size:12px;color:var(--muted);position:absolute;right:8px;top:8px}
+
+/* composer */
+.composer{display:flex;gap:8px;padding:10px;align-items:center;border-top:1px solid rgba(255,255,255,0.02)}
+.composer input{flex:1;padding:12px;border-radius:10px;border:none;background:rgba(255,255,255,0.02);color:var(--white)}
+.emoji{background:transparent;border:none;font-size:20px}
+.primary{background:var(--accent);color:#111;padding:10px 12px;border-radius:10px}
+
+/* profile panel (right) */
+.profile-panel{width:300px;background:var(--glass);padding:12px;border-radius:10px;overflow:auto}
+.profile-panel.hidden{display:none}
+.profile-img{width:120px;height:120px;border-radius:50%;display:block;margin:8px auto;object-fit:cover}
+.profile-actions{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+
+/* responsive */
+@media(max-width:900px){
+  .main-area{flex-direction:column;padding:8px}
+  .users-panel{width:100%;order:2}
+  .profile-panel{width:100%;order:3;position:relative;right:0;top:0}
+  .top-dp{width:36px;height:36px}
+}
