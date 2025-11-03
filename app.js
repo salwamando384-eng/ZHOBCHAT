@@ -12,7 +12,6 @@ const firebaseConfig = {
   measurementId: "G-LX9P9LRLV8"
 };
 
-// Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const storage = firebase.storage();
@@ -21,6 +20,7 @@ const storage = firebase.storage();
 // DOM elements
 // ------------------------
 const signupBtn = document.getElementById("signupBtn");
+const loginBtn = document.getElementById("loginBtn");
 const sendBtn = document.getElementById("sendBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const messageInput = document.getElementById("messageInput");
@@ -48,31 +48,40 @@ let currentUser = null;
 let privateTarget = null;
 
 // ------------------------
-// Sign up / login
+// Signup
 // ------------------------
 signupBtn.addEventListener("click", () => {
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-  
+
   if(name && email && password){
     currentUser = { name, email };
     localStorage.setItem("zhobUser", JSON.stringify(currentUser));
-    db.ref("online/"+name).set(true); // mark user online
+    db.ref("online/"+name).set(true);
     authSection.classList.add("hidden");
     chatSection.classList.remove("hidden");
-  } else {
-    alert("Please fill all fields");
-  }
+  } else { alert("Please fill all fields for signup"); }
+});
+
+// ------------------------
+// Login
+// ------------------------
+loginBtn.addEventListener("click", () => {
+  const name = document.getElementById("name").value.trim();
+  if(!name) return alert("Enter your name to login");
+  currentUser = { name };
+  localStorage.setItem("zhobUser", JSON.stringify(currentUser));
+  db.ref("online/"+name).set(true);
+  authSection.classList.add("hidden");
+  chatSection.classList.remove("hidden");
 });
 
 // ------------------------
 // Logout
 // ------------------------
 logoutBtn.addEventListener("click", () => {
-  if(currentUser){
-    db.ref("online/"+currentUser.name).remove();
-  }
+  if(currentUser) db.ref("online/"+currentUser.name).remove();
   localStorage.removeItem("zhobUser");
   chatSection.classList.add("hidden");
   authSection.classList.remove("hidden");
@@ -81,37 +90,29 @@ logoutBtn.addEventListener("click", () => {
 // ------------------------
 // Send message
 // ------------------------
-sendBtn.addEventListener("click", () => {
-  sendMessage(messageInput.value);
-  messageInput.value = "";
-});
-
+sendBtn.addEventListener("click", () => { sendMessage(messageInput.value); messageInput.value=""; });
 function sendMessage(text, fileURL=null){
   if(!text && !fileURL) return;
   db.ref("messages").push({
     name: currentUser.name,
-    text: text || "",
-    file: fileURL || "",
-    time: new Date().toLocaleTimeString(),
-    private: privateTarget || null
+    text:text||"",
+    file:fileURL||"",
+    time:new Date().toLocaleTimeString(),
+    private:privateTarget||null
   });
 }
 
 // ------------------------
 // Show messages
 // ------------------------
-db.ref("messages").on("child_added", snapshot => {
+db.ref("messages").on("child_added", snapshot=>{
   const msg = snapshot.val();
-  
-  // Show private messages only to sender/receiver
-  if(msg.private && msg.private !== currentUser.name && msg.name !== currentUser.name) return;
+  if(msg.private && msg.private!==currentUser.name && msg.name!==currentUser.name) return;
 
   const div = document.createElement("div");
   div.classList.add("message", msg.name===currentUser.name?"user":"other");
-  
   let content = `[${msg.time}] ${msg.name}: ${msg.text}`;
   if(msg.file) content += ` 📎 <a href="${msg.file}" target="_blank">file</a>`;
-  
   div.innerHTML = content;
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -120,19 +121,19 @@ db.ref("messages").on("child_added", snapshot => {
 // ------------------------
 // Online users
 // ------------------------
-db.ref("online").on("value", snapshot => {
-  usersList.innerHTML = "";
-  const users = snapshot.val() || {};
-  Object.keys(users).forEach(u => {
+db.ref("online").on("value", snapshot=>{
+  usersList.innerHTML="";
+  const users = snapshot.val()||{};
+  Object.keys(users).forEach(u=>{
     const li = document.createElement("li");
     li.textContent = u;
-    li.addEventListener("click", () => showUserDetail(u));
+    li.addEventListener("click", ()=> showUserDetail(u));
     usersList.appendChild(li);
   });
 });
 
 // ------------------------
-// Show user detail + private message
+// User detail & private message
 // ------------------------
 function showUserDetail(u){
   detailName.textContent = u;
@@ -142,49 +143,36 @@ function showUserDetail(u){
   userDetail.classList.remove("hidden");
 }
 
-closeDetailBtn.addEventListener("click", () => {
-  userDetail.classList.add("hidden");
-  privateTarget = null;
-});
-
-privateMsgBtn.addEventListener("click", () => {
-  messageInput.placeholder = "Private message to " + privateTarget;
-  userDetail.classList.add("hidden");
-});
+closeDetailBtn.addEventListener("click", ()=>{ userDetail.classList.add("hidden"); privateTarget=null; });
+privateMsgBtn.addEventListener("click", ()=>{ messageInput.placeholder="Private message to "+privateTarget; userDetail.classList.add("hidden"); });
 
 // ------------------------
 // Emoji picker
 // ------------------------
-emojiBtn.addEventListener("click", () => emojiPicker.classList.toggle("hidden"));
-emojiPicker.addEventListener("click", (e) => {
-  if(e.target.tagName==="SPAN") messageInput.value += e.target.textContent;
-});
+emojiBtn.addEventListener("click", ()=> emojiPicker.classList.toggle("hidden"));
+emojiPicker.addEventListener("click", e=>{ if(e.target.tagName==="SPAN") messageInput.value+=e.target.textContent; });
 
 // ------------------------
 // File upload
 // ------------------------
-fileBtn.addEventListener("click", () => fileInput.click());
-fileInput.addEventListener("change", () => {
+fileBtn.addEventListener("click", ()=> fileInput.click());
+fileInput.addEventListener("change", ()=>{
   const file = fileInput.files[0];
   if(!file) return;
   const storageRef = storage.ref("files/"+Date.now()+"_"+file.name);
-  storageRef.put(file).then(() => {
-    storageRef.getDownloadURL().then(url => sendMessage("", url));
-  });
+  storageRef.put(file).then(()=>{ storageRef.getDownloadURL().then(url=> sendMessage("",url)); });
 });
 
 // ------------------------
 // Delete all messages (Admin)
-deleteAllBtn.addEventListener("click", () => {
-  if(confirm("Are you sure to delete all messages?")){
-    db.ref("messages").remove();
-  }
+deleteAllBtn.addEventListener("click", ()=>{
+  if(confirm("Are you sure to delete all messages?")) db.ref("messages").remove();
 });
 
 // ------------------------
 // Auto login if user exists
 // ------------------------
-window.addEventListener("load", () => {
+window.addEventListener("load", ()=>{
   const storedUser = localStorage.getItem("zhobUser");
   if(storedUser){
     currentUser = JSON.parse(storedUser);
@@ -197,6 +185,4 @@ window.addEventListener("load", () => {
 // ------------------------
 // Remove user from online list on close
 // ------------------------
-window.addEventListener("beforeunload", () => {
-  if(currentUser) db.ref("online/"+currentUser.name).remove();
-});
+window.addEventListener("beforeunload", ()=>{ if(currentUser) db.ref("online/"+currentUser.name).remove(); });
