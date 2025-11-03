@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebas
 import { getDatabase, ref, push, onChildAdded, set, onValue, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -22,13 +21,13 @@ const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const sendBtn = document.getElementById("sendBtn");
+const deleteAllBtn = document.getElementById("deleteAllBtn");
 const messageInput = document.getElementById("messageInput");
 const messagesDiv = document.getElementById("messages");
 const onlineUsers = document.getElementById("onlineUsers");
 const offlineUsers = document.getElementById("offlineUsers");
 const authSection = document.getElementById("auth-section");
 const chatSection = document.getElementById("chat-section");
-const deleteAllBtn = document.getElementById("deleteAllBtn");
 const emojiBtn = document.getElementById("emojiBtn");
 const emojiPicker = document.getElementById("emojiPicker");
 const userProfile = document.getElementById("userProfile");
@@ -41,7 +40,6 @@ let currentUser = null;
 let chatTarget = null;
 const userColors = {};
 
-// Random color for each user
 function getRandomColor(){ return "#"+Math.floor(Math.random()*16777215).toString(16); }
 
 // Signup
@@ -123,13 +121,29 @@ function loadMessages(path){
 function loadUsers(){
   onValue(ref(db,"online"), snapshot=>{
     onlineUsers.innerHTML="";
+    offlineUsers.innerHTML="";
     const users = snapshot.val() || {};
+    const allUsers = [];
     Object.keys(users).forEach(name=>{
-      const li=document.createElement("li");
-      li.textContent=name;
-      li.style.color=users[name].color;
-      li.addEventListener("click",()=>showProfile(name,users[name].email));
-      onlineUsers.appendChild(li);
+      allUsers.push({name,email:users[name].email,color:users[name].color,online:true});
+    });
+
+    // Offline users (all users from messages not online)
+    onValue(ref(db,"messages"), snap=>{
+      const msgs = snap.val() || {};
+      Object.keys(msgs).forEach(k=>{
+        const n = msgs[k].name;
+        if(!users[n] && !allUsers.find(u=>u.name===n)) allUsers.push({name:n,email:"-",color:getRandomColor(),online:false});
+      });
+
+      allUsers.forEach(u=>{
+        const li=document.createElement("li");
+        li.textContent=u.name;
+        li.style.color=u.color;
+        li.addEventListener("click",()=>showProfile(u.name,u.email));
+        if(u.online) onlineUsers.appendChild(li);
+        else offlineUsers.appendChild(li);
+      });
     });
   });
 }
