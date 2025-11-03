@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded, onValue, set, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // ===== Firebase Config =====
@@ -39,8 +39,6 @@ const profileCity=document.getElementById("profileCity");
 const profileDP=document.getElementById("profileDP");
 const privateChatBtn=document.getElementById("privateChatBtn");
 const closeProfile=document.getElementById("closeProfile");
-const emojiBtn=document.getElementById("emojiBtn");
-const emojiPicker=document.getElementById("emojiPicker");
 
 let currentUser=null;
 let chatTarget=null;
@@ -57,11 +55,11 @@ signupBtn.addEventListener("click",()=>{
   const gender=document.getElementById("gender").value.trim();
   const age=document.getElementById("age").value.trim();
   const city=document.getElementById("city").value.trim();
+  const nameColor=document.getElementById("nameColor").value.trim()||"#00bfff";
+  const msgColor=document.getElementById("msgColor").value.trim()||"#ffffff";
 
   if(!name||!email||!password){ alert("Fill Name, Email, Password!"); return; }
 
-  const nameColor=getRandomColor();
-  const msgColor=getRandomColor();
   userColors[name]=nameColor;
   messageColors[name]=msgColor;
 
@@ -110,17 +108,6 @@ usersToggle.addEventListener("click",()=>{
   usersPanel.classList.toggle("hidden");
 });
 
-// ===== Emoji Picker =====
-emojiBtn.addEventListener("click",()=>{
-  emojiPicker.classList.toggle("hidden");
-});
-
-emojiPicker.addEventListener("click",e=>{
-  if(e.target.tagName==="SPAN"){
-    messageInput.value+=e.target.textContent;
-  }
-});
-
 // ===== Send Message =====
 sendBtn.addEventListener("click",()=>{
   const text=messageInput.value.trim();
@@ -130,24 +117,25 @@ sendBtn.addEventListener("click",()=>{
     sender:currentUser.name,
     text,
     time:new Date().toLocaleTimeString(),
-    color:messageColors[currentUser.name],
+    nameColor:currentUser.nameColor,
+    msgColor:currentUser.msgColor,
     privateTo:chatTarget||null
   };
 
   push(ref(db,"messages"),msgData);
   messageInput.value="";
+  chatTarget=null; // reset after sending
 });
 
 // ===== Display Messages =====
 onChildAdded(ref(db,"messages"),snapshot=>{
   const msg=snapshot.val();
+  if(msg.privateTo && msg.privateTo!==currentUser?.name && msg.sender!==currentUser?.name) return;
+
   const div=document.createElement("div");
   div.classList.add("message");
-  if(msg.privateTo && msg.privateTo!==currentUser?.name && msg.sender!==currentUser?.name){
-    return; // skip others private messages
-  }
-  div.style.backgroundColor=msg.color;
-  div.textContent=`${msg.sender}: ${msg.text}`;
+  div.style.color=msg.msgColor;
+  div.innerHTML=`<span style="color:${msg.nameColor}; font-weight:bold;">${msg.sender}:</span> ${msg.text}`;
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop=messagesDiv.scrollHeight;
 });
