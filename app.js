@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// DOM
+// DOM Elements
 const signupBtn = document.getElementById("signupBtn");
 const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
@@ -65,11 +65,13 @@ loginBtn.addEventListener("click",()=>{
   .catch(err=>alert(err.message));
 });
 
+// Start chat after login/signup
 function startChat(){
   authSection.classList.add("hidden");
   chatSection.classList.remove("hidden");
   if(!userColors[currentUser.name])userColors[currentUser.name]=getRandomColor();
   set(ref(db,"online/"+currentUser.name),{email:currentUser.email,color:userColors[currentUser.name]});
+  loadUsers();
   loadMessages("messages");
 }
 
@@ -81,10 +83,12 @@ logoutBtn.addEventListener("click",()=>{
   chatSection.classList.add("hidden");
   currentUser=null;
   chatTarget=null;
+  messagesDiv.innerHTML="";
 });
 
 // Send message
-sendBtn.addEventListener("click",()=>{
+sendBtn.addEventListener("click",sendMessage);
+function sendMessage(){
   const text=messageInput.value.trim(); if(!text)return;
   const path=chatTarget?`private/${[currentUser.name,chatTarget].sort().join("_")}`:"messages";
   push(ref(db,path),{
@@ -95,7 +99,7 @@ sendBtn.addEventListener("click",()=>{
     time:new Date().toLocaleTimeString()
   });
   messageInput.value="";
-});
+}
 
 // Load messages
 function loadMessages(path){
@@ -104,40 +108,58 @@ function loadMessages(path){
     const msg=snapshot.val();
     if(chatTarget && msg.target!==currentUser.name && msg.target!==chatTarget)return;
     const div=document.createElement("div");
-    div.textContent=`[${msg.time}] ${msg.name}: ${msg.text}`;
-    div.style.color=msg.color||"#fff";
     div.classList.add("message");
+    div.classList.add(msg.name===currentUser.name?"user":"other");
+    div.style.color=msg.color;
+    div.textContent=`[${msg.time}] ${msg.name}: ${msg.text}`;
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop=messagesDiv.scrollHeight;
   });
 }
 
-// Online/Offline users
-onValue(ref(db,"online"),snapshot=>{
-  onlineUsers.innerHTML=""; offlineUsers.innerHTML="";
-  const users=snapshot.val()||{};
-  Object.keys(users).forEach(u=>{
-    if(u===currentUser?.name)return;
-    const li=document.createElement("li");
-    li.textContent=u; li.style.color=users[u].color;
-    li.addEventListener("click",()=>{
-      chatTarget=u; profileName.textContent=u; profileEmail.textContent=users[u].email;
-      userProfile.classList.remove("hidden");
+// Load online/offline users
+function loadUsers(){
+  onValue(ref(db,"online"),snapshot=>{
+    onlineUsers.innerHTML="";
+    const users=snapshot.val()||{};
+    Object.keys(users).forEach(name=>{
+      const li=document.createElement("li");
+      li.textContent=name;
+      li.style.color=users[name].color;
+      li.addEventListener("click",()=>showProfile(name,users[name].email));
+      onlineUsers.appendChild(li);
     });
-    onlineUsers.appendChild(li);
   });
+}
+
+// Show profile modal
+function showProfile(name,email){
+  profileName.textContent=name;
+  profileEmail.textContent=email;
+  chatTarget=name;
+  userProfile.classList.remove("hidden");
+}
+
+// Close profile
+closeProfile.addEventListener("click",()=>{
+  userProfile.classList.add("hidden");
+  chatTarget=null;
 });
 
-// Delete all messages
-deleteAllBtn.addEventListener("click",()=>{ if(confirm("Delete all messages?")) remove(ref(db,"messages")); });
-
-// Emoji
-emojiBtn.addEventListener("click",()=>emojiPicker.classList.toggle("hidden"));
-emojiPicker.querySelectorAll("span").forEach(e=>{ e.addEventListener("click",()=>{ messageInput.value+=e.textContent; }); });
-
-// Profile modal
-closeProfile.addEventListener("click",()=>userProfile.classList.add("hidden"));
+// Private chat button
 privateChatBtn.addEventListener("click",()=>{
-  if(chatTarget) loadMessages(`private/${[currentUser.name,chatTarget].sort().join("_")}`);
+  loadMessages(`private/${[currentUser.name,chatTarget].sort().join("_")}`);
   userProfile.classList.add("hidden");
+});
+
+// Admin delete all
+deleteAllBtn.addEventListener("click",()=>{
+  if(currentUser.name==="Admin") remove(ref(db,"messages"));
+  else alert("Only Admin can delete messages");
+});
+
+// Emoji picker
+emojiBtn.addEventListener("click",()=>emojiPicker.classList.toggle("hidden"));
+emojiPicker.querySelectorAll("span").forEach(e=>{
+  e.addEventListener("click",()=>{ messageInput.value+=e.textContent; });
 });
