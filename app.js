@@ -24,7 +24,8 @@ const logoutBtn=document.getElementById("logoutBtn");
 const sendBtn=document.getElementById("sendBtn");
 const messageInput=document.getElementById("messageInput");
 const messagesDiv=document.getElementById("messages");
-const usersList=document.getElementById("usersList");
+const onlineUsers=document.getElementById("onlineUsers");
+const offlineUsers=document.getElementById("offlineUsers");
 const authSection=document.getElementById("auth-section");
 const chatSection=document.getElementById("chat-section");
 const deleteAllBtn=document.getElementById("deleteAllBtn");
@@ -39,6 +40,14 @@ const closeProfile=document.getElementById("closeProfile");
 let currentUser=null;
 let chatTarget=null; // for private chat
 
+// User color map
+const userColors={};
+
+// Random color generator
+function getRandomColor(){
+  return '#'+Math.floor(Math.random()*16777215).toString(16);
+}
+
 // Signup
 signupBtn.addEventListener("click",()=>{
   const name=document.getElementById("name").value.trim();
@@ -50,7 +59,8 @@ signupBtn.addEventListener("click",()=>{
     currentUser={name,email};
     authSection.classList.add("hidden");
     chatSection.classList.remove("hidden");
-    set(ref(db,"online/"+name),true);
+    if(!userColors[name]) userColors[name]=getRandomColor();
+    set(ref(db,"online/"+name),{email, color:userColors[name]});
   }).catch(err=>alert(err.message));
 });
 
@@ -65,7 +75,8 @@ loginBtn.addEventListener("click",()=>{
     currentUser={name,email};
     authSection.classList.add("hidden");
     chatSection.classList.remove("hidden");
-    set(ref(db,"online/"+name),true);
+    if(!userColors[name]) userColors[name]=getRandomColor();
+    set(ref(db,"online/"+name),{email, color:userColors[name]});
   }).catch(err=>alert(err.message));
 });
 
@@ -86,12 +97,13 @@ sendBtn.addEventListener("click",()=>{
     name:currentUser.name,
     target:chatTarget||"",
     text,
+    color:userColors[currentUser.name],
     time:new Date().toLocaleTimeString()
   });
   messageInput.value="";
 });
 
-// Messages display
+// Load messages
 const loadMessages=(path)=>{
   messagesDiv.innerHTML="";
   onChildAdded(ref(db,path),snapshot=>{
@@ -99,45 +111,39 @@ const loadMessages=(path)=>{
     if(chatTarget && msg.target!==currentUser.name && msg.target!==chatTarget) return;
     const div=document.createElement("div");
     div.textContent=`[${msg.time}] ${msg.name}: ${msg.text}`;
-    div.classList.add("message",msg.name===currentUser.name?"user":"other");
+    div.style.color=msg.color||'#fff';
+    div.classList.add("message");
     messagesDiv.appendChild(div);
     messagesDiv.scrollTop=messagesDiv.scrollHeight;
   });
 };
 loadMessages("messages");
 
-// Online users
+// Online/Offline users
 onValue(ref(db,"online"),snapshot=>{
-  usersList.innerHTML="";
+  onlineUsers.innerHTML="";
+  offlineUsers.innerHTML="";
   const users=snapshot.val()||{};
   Object.keys(users).forEach(u=>{
     if(u===currentUser?.name) return;
     const li=document.createElement("li");
     li.textContent=u;
+    li.style.color=users[u].color;
     li.addEventListener("click",()=>{
       chatTarget=u;
       profileName.textContent=u;
-      profileEmail.textContent="Private chat";
+      profileEmail.textContent=users[u].email;
       userProfile.classList.remove("hidden");
     });
-    usersList.appendChild(li);
+    onlineUsers.appendChild(li);
   });
 });
 
-// Admin delete all
+// Delete all messages
 deleteAllBtn.addEventListener("click",()=>{
   if(confirm("Delete all messages?")) remove(ref(db,"messages"));
 });
 
 // Emoji
 emojiBtn.addEventListener("click",()=>emojiPicker.classList.toggle("hidden"));
-emojiPicker.querySelectorAll("span").forEach(e=>{
-  e.addEventListener("click",()=>{messageInput.value+=e.textContent;});
-});
-
-// Profile modal
-closeProfile.addEventListener("click",()=>userProfile.classList.add("hidden"));
-privateChatBtn.addEventListener("click",()=>{
-  loadMessages(`private/${currentUser.name}_${chatTarget}`);
-  userProfile.classList.add("hidden");
-});
+emojiPicker.query
