@@ -1,70 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOB CHAT AUTH</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZHOB CHAT</title>
+<link rel="stylesheet" href="style.css">
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js"></script>
+<!-- Firebase CDN -->
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js"></script>
+
 </head>
 <body>
-  <!-- Authentication Section -->
-  <div id="auth-section" class="card">
-    <h2>Welcome to <span>ZHOB CHAT</span></h2>
-    <input type="text" id="name" placeholder="Enter Name" required>
-    <input type="email" id="email" placeholder="Enter Email" required>
-    <input type="password" id="password" placeholder="Enter Password" required>
-    
-    <!-- Signup / Login buttons -->
-    <button id="signupBtn">Sign Up</button>
-    <button id="loginBtn">Login</button>
+
+<!-- Authentication -->
+<div id="auth-section" class="card">
+  <h2>Welcome to <span>ZHOB CHAT</span></h2>
+  <input type="text" id="name" placeholder="Enter Name">
+  <input type="email" id="email" placeholder="Enter Email">
+  <input type="password" id="password" placeholder="Enter Password">
+  <button id="signupBtn">Sign Up</button>
+  <button id="loginBtn">Login</button>
+</div>
+
+<!-- Chat -->
+<div id="chat-section" class="hidden">
+  <div class="chat-header">
+    <h2>ZHOB CHAT</h2>
+    <button id="logoutBtn">Logout</button>
   </div>
-
-  <!-- Chat Section -->
-  <div id="chat-section" class="hidden">
-    <div class="chat-header">
-      <h2>ZHOB CHAT</h2>
-      <button id="logoutBtn">Logout</button>
+  <div class="chat-main">
+    <div id="users-panel">
+      <h4>Online Users</h4>
+      <ul id="usersList"></ul>
     </div>
-
-    <div class="chat-main">
-      <div id="users-panel">
-        <h4>Online Users</h4>
-        <ul id="usersList"></ul>
+    <div id="chat-panel">
+      <div id="messages"></div>
+      <div class="chat-input">
+        <input type="text" id="messageInput" placeholder="Type a message...">
+        <button id="emojiBtn">😊</button>
+        <input type="file" id="fileInput" style="display:none;">
+        <button id="fileBtn">📎</button>
+        <button id="sendBtn">Send</button>
       </div>
-
-      <div id="chat-panel">
-        <div id="messages"></div>
-        <div class="chat-input">
-          <input type="text" id="messageInput" placeholder="Type a message...">
-          <button id="emojiBtn">😊</button>
-          <input type="file" id="fileInput" style="display:none;">
-          <button id="fileBtn">📎</button>
-          <button id="sendBtn">Send</button>
-        </div>
-        <div id="emojiPicker" class="hidden">
-          <span>😀</span> <span>😂</span> <span>😍</span>
-          <span>😎</span> <span>😢</span> <span>👍</span> <span>❤️</span>
-        </div>
+      <div id="emojiPicker" class="hidden">
+        <span>😀</span><span>😂</span><span>😍</span><span>😎</span><span>😢</span><span>👍</span><span>❤️</span>
       </div>
     </div>
-
-    <div id="user-detail" class="hidden">
-      <h4 id="detailName"></h4>
-      <p id="detailEmail"></p>
-      <p id="detailStatus"></p>
-      <button id="privateMsgBtn">Send Private Message</button>
-      <button id="closeDetailBtn">Close</button>
-    </div>
-
-    <button id="deleteAllBtn" class="admin-btn">Delete All Messages (Admin)</button>
   </div>
+  <button id="deleteAllBtn" class="admin-btn">Delete All Messages (Admin)</button>
+</div>
 
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
