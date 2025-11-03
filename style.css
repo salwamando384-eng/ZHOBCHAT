@@ -2,10 +2,6 @@ body {
   font-family: 'Poppins', sans-serif;
   background: #e5ddd5;
   margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
   padding: 20px;
 }
 
@@ -20,24 +16,29 @@ body {
 
 .card h2 span { color: #075E54; }
 
-.card input { width: 100%; margin: 8px 0; padding: 10px; border-radius: 10px; border: 1px solid #ccc; }
+.card input, .card button { width: 100%; margin:5px 0; padding: 10px; border-radius: 10px; }
 
-.card button { width: 100%; margin:5px 0; padding: 10px; border-radius: 10px; border: none; background: #25D366; color: white; font-weight: bold; cursor:pointer; }
+.card button { border: none; background: #25D366; color:white; font-weight:bold; cursor:pointer; }
 
-.hidden { display: none; }
+.hidden { display:none; }
 
 .chat-header { background: #075E54; color:white; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
 
-.users-panel { width: 200px; float:left; margin-right: 10px; }
-.users-panel ul { list-style: none; padding:0; }
+.chat-container { display: flex; height: 80vh; max-width: 1000px; width: 100%; margin-top: 20px; }
 
-#messages { background: #DCF8C6; flex:1; height: 400px; overflow-y:auto; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
+.users-panel { width: 200px; overflow-y: auto; background: #f0f0f0; padding: 10px; border-radius: 10px; }
 
-.chat-input { display: flex; align-items: center; }
+.users-panel ul { list-style:none; padding:0; }
 
-.chat-input input { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #ccc; }
+.chat-area { flex: 1; display:flex; flex-direction: column; }
 
-.chat-input button { margin-left: 5px; padding: 10px; border:none; border-radius: 10px; cursor:pointer; background:#25D366; color:white; font-weight:bold; }
+#messages { flex: 1; background:#DCF8C6; padding:10px; border-radius:10px; overflow-y:auto; }
+
+.chat-input { display:flex; align-items:center; margin-top:5px; }
+
+.chat-input input { flex:1; padding:10px; border-radius:10px; border:1px solid #ccc; }
+
+.chat-input button { margin-left:5px; padding:10px; border:none; border-radius:10px; background:#25D366; color:white; font-weight:bold; cursor:pointer; }
 
 #emojiPicker { display:flex; flex-wrap: wrap; background:white; padding:5px; border-radius:10px; margin-top:5px; }
 
@@ -45,7 +46,7 @@ body {
 
 .message { margin-bottom:5px; padding:5px; border-radius:5px; }
 
-.message.user { background: #dcf8c6; text-align:right; }
-.message.other { background: #fff; text-align:left; }
+.message.user { background:#dcf8c6; text-align:right; }
+.message.other { background:#fff; text-align:left; }
 
 .profile-modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:20px; border-radius:15px; box-shadow:0 4px 10px rgba(0,0,0,0.3); z-index:10; }
