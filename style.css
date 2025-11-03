@@ -19,7 +19,7 @@ body {
 }
 
 .card h2 span { color: #00bfff; }
-.card input, .card button { width: 100%; margin: 8px 0; padding: 10px; border-radius:10px; border:none; }
+.card input, .card button { width: 100%; margin: 8px 0; padding: 10px; border-radius:10px; border:none; cursor:pointer; }
 
 .hidden { display: none; }
 
