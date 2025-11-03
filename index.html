@@ -24,8 +24,8 @@
 <div id="chat-section" class="hidden">
   <div class="chat-header">
     <h2>ZHOB CHAT</h2>
+    <button id="usersToggle">Users</button>
     <button id="logoutBtn">Logout</button>
-    <button id="deleteAllBtn">Delete All (Admin)</button>
   </div>
 
   <div class="chat-container">
@@ -41,9 +41,11 @@
       </div>
     </div>
 
-    <div class="users-panel">
-      <h3 id="usersToggle">Users:</h3>
-      <ul id="userList" class="hidden"></ul>
+    <div class="users-panel hidden">
+      <h3>Online Users</h3>
+      <ul id="onlineList"></ul>
+      <h3>Offline Users</h3>
+      <ul id="offlineList"></ul>
     </div>
   </div>
 </div>
