@@ -1,10 +1,11 @@
-// Replace with your own Firebase project config
+// firebase-config.js
 export const firebaseConfig = {
-  apiKey: "AIzaSyExampleKey123456789",
-  authDomain: "zhobchat-example.firebaseapp.com",
-  databaseURL: "https://zhobchat-example-default-rtdb.firebaseio.com",
-  projectId: "zhobchat-example",
-  storageBucket: "zhobchat-example.appspot.com",
-  messagingSenderId: "1234567890",
-  appId: "1:1234567890:web:abcdef123456"
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+  authDomain: "zhobchat-33d8e.firebaseapp.com",
+  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "zhobchat-33d8e",
+  storageBucket: "zhobchat-33d8e.firebasestorage.app",
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
+  measurementId: "G-LX9P9LRLV8"
 };
