@@ -1,86 +1,57 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-import {
-  getDatabase,
-  ref,
-  push,
-  onChildAdded
-} from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZHOBCHAT — Login / Signup</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page-center">
 
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "your-app.firebaseapp.com",
-  databaseURL: "https://your-app-default-rtdb.firebaseio.com",
-  projectId: "your-app",
-  storageBucket: "your-app.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
+    <div class="card auth-card">
+      <h1>ZHOBCHAT</h1>
+      <p class="muted">Signup — Fill details below (top). Login (bottom)</p>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+      <!-- ====== SIGNUP (top) ====== -->
+      <div class="form-block">
+        <h3>Sign Up</h3>
+        <input id="su_name" placeholder="Name" />
+        <select id="su_gender">
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+        <input id="su_age" placeholder="Age" />
+        <input id="su_city" placeholder="City" />
+        <input id="su_email" type="email" placeholder="Gmail (email)" />
+        <input id="su_password" type="password" placeholder="Password (min 6 chars)" />
+        <label class="file-label">Profile Picture (optional)
+          <input id="su_dp" type="file" accept="image/*" />
+        </label>
+        <div class="color-row">
+          <label> Name color <input id="su_nameColor" type="color" value="#ff4d4d" /></label>
+          <label> Msg color <input id="su_msgColor" type="color" value="#ffffff" /></label>
+        </div>
+        <button id="signupBtn" class="primary">Sign Up</button>
+        <p id="signupMsg" class="muted small"></p>
+      </div>
 
-const authContainer = document.getElementById("auth-container");
-const chatContainer = document.getElementById("chat-container");
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-const loginBtn = document.getElementById("loginBtn");
-const signupBtn = document.getElementById("signupBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const messageInput = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
-const chatBox = document.getElementById("chat-box");
+      <hr/>
 
-loginBtn.onclick = () => {
-  signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-    .catch(e => alert(e.message));
-};
+      <!-- ====== LOGIN (bottom) ====== -->
+      <div class="form-block">
+        <h3>Login</h3>
+        <input id="li_email" type="email" placeholder="Email" />
+        <input id="li_password" type="password" placeholder="Password" />
+        <button id="loginBtn" class="primary">Login</button>
+        <p id="loginMsg" class="muted small"></p>
+      </div>
+    </div>
 
-signupBtn.onclick = () => {
-  createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-    .catch(e => alert(e.message));
-};
+    <p class="small muted center">Powered by Firebase — ZHOBCHAT</p>
+  </div>
 
-logoutBtn.onclick = () => {
-  signOut(auth);
-};
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    authContainer.classList.add("hidden");
-    chatContainer.classList.remove("hidden");
-    loadMessages();
-  } else {
-    authContainer.classList.remove("hidden");
-    chatContainer.classList.add("hidden");
-  }
-});
-
-sendBtn.onclick = () => {
-  const text = messageInput.value.trim();
-  if (text === "") return;
-  push(ref(db, "messages"), {
-    uid: auth.currentUser.uid,
-    text: text
-  });
-  messageInput.value = "";
-};
-
-function loadMessages() {
-  onChildAdded(ref(db, "messages"), (data) => {
-    const msg = data.val();
-    const div = document.createElement("div");
-    div.className = "message";
-    if (msg.uid === auth.currentUser.uid) div.classList.add("self");
-    div.textContent = msg.text;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  });
-}
+  <!-- Firebase (modules used in index.js) -->
+  <script type="module" src="index.js"></script>
+</body>
+</html>
