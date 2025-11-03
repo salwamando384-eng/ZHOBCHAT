@@ -3,67 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOB CHAT</title>
+  <title>ZHOBCHAT - Chat Room</title>
   <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js" defer></script>
 </head>
 <body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <h2>Users</h2>
+      <ul id="userList"></ul>
+    </aside>
 
-<div id="auth-section" class="card">
-  <h2>Welcome to <span>ZHOB CHAT</span></h2>
-
-  <input type="text" id="name" placeholder="Enter Name" required>
-  <input type="email" id="email" placeholder="Enter Email" required>
-  <input type="password" id="password" placeholder="Enter Password" required>
-  <input type="text" id="age" placeholder="Age">
-  <input type="text" id="city" placeholder="City">
-  <select id="gender">
-    <option>Male</option>
-    <option>Female</option>
-  </select>
-  <input type="color" id="nameColor" value="#00bfff" title="Select Name Color">
-  <input type="color" id="msgColor" value="#ffffff" title="Select Message Color">
-  <input type="file" id="dpUpload" accept="image/*">
-
-  <button id="signupBtn">Sign Up</button>
-  <button id="loginBtn">Login</button>
-</div>
-
-<div id="chat-section" class="hidden">
-  <div class="chat-header">
-    <h2>ZHOB CHAT</h2>
-    <button id="usersToggle">Users</button>
-    <button id="logoutBtn">Logout</button>
-  </div>
-
-  <div class="chat-main">
-    <div class="chat-messages" id="messages"></div>
-
-    <div class="users-panel-container">
-      <div class="users-panel hidden">
-        <h4>Online Users</h4>
-        <ul id="onlineList"></ul>
-        <h4>Offline Users</h4>
-        <ul id="offlineList"></ul>
+    <main class="chat-area">
+      <div class="chat-header">
+        <h2 id="chatWith">Welcome to ZHOBCHAT</h2>
       </div>
-    </div>
+      <div id="chatMessages" class="chat-messages"></div>
+      <div class="chat-input">
+        <input id="messageInput" type="text" placeholder="Type your message..." />
+        <button id="sendBtn">Send</button>
+      </div>
+    </main>
   </div>
-
-  <div class="chat-input">
-    <input type="text" id="messageInput" placeholder="Type your message...">
-    <button id="sendBtn">Send</button>
-  </div>
-</div>
-
-<div id="userProfile" class="hidden profile-modal">
-  <button id="closeProfile">Close</button>
-  <img id="profileDP" src="default.png" alt="DP">
-  <p>Name: <span id="profileName"></span></p>
-  <p>Email: <span id="profileEmail"></span></p>
-  <p>Gender: <span id="profileGender"></span></p>
-  <p>Age: <span id="profileAge"></span></p>
-  <p>City: <span id="profileCity"></span></p>
-</div>
-
-<script type="module" src="app.js"></script>
 </body>
 </html>
