@@ -1,29 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZHOBCHAT - Chat Room</title>
   <link rel="stylesheet" href="style.css">
-  <script type="module" src="app.js" defer></script>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-  <div class="app-container">
-    <aside class="sidebar">
-      <h2>Users</h2>
-      <ul id="userList"></ul>
-    </aside>
-
-    <main class="chat-area">
-      <div class="chat-header">
-        <h2 id="chatWith">Welcome to ZHOBCHAT</h2>
-      </div>
-      <div id="chatMessages" class="chat-messages"></div>
-      <div class="chat-input">
-        <input id="messageInput" type="text" placeholder="Type your message..." />
-        <button id="sendBtn">Send</button>
-      </div>
-    </main>
+  <div id="auth-container" class="center-box">
+    <h2>ZHOBCHAT Login / Signup</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button id="login-btn">Login</button>
+    <button id="signup-btn" class="outline">Signup</button>
+    <p id="auth-msg"></p>
   </div>
+
+  <div id="chat-container" class="hidden">
+    <header>
+      <h2>ZHOBCHAT</h2>
+      <button id="logout-btn">Logout</button>
+    </header>
+
+    <div id="main-area">
+      <aside id="user-list"></aside>
+      <section id="chat-room">
+        <div id="messages"></div>
+        <div id="input-area">
+          <input type="text" id="messageInput" placeholder="Type a message...">
+          <button id="sendBtn">Send</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js"></script>
+  <script src="firebase_config.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
