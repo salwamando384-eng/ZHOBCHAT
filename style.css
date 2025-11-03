@@ -26,11 +26,7 @@ body {
 
 .chat-container { display: flex; height: 80vh; max-width: 1000px; width: 100%; margin-top: 20px; }
 
-.users-panel { width: 200px; overflow-y: auto; background: #f0f0f0; padding: 10px; border-radius: 10px; }
-
-.users-panel ul { list-style:none; padding:0; }
-
-.chat-area { flex: 1; display:flex; flex-direction: column; }
+.chat-area { flex: 3; display:flex; flex-direction: column; margin-right: 10px; }
 
 #messages { flex: 1; background:#DCF8C6; padding:10px; border-radius:10px; overflow-y:auto; }
 
@@ -44,9 +40,17 @@ body {
 
 #emojiPicker span { font-size:20px; margin:2px; cursor:pointer; }
 
+.users-panel { width: 200px; background: #f0f0f0; padding: 10px; border-radius: 10px; overflow-y:auto; }
+
+.users-panel ul { list-style:none; padding:0; margin:0; }
+
+.users-panel li { cursor:pointer; padding:5px; border-radius:5px; margin:2px 0; }
+
 .message { margin-bottom:5px; padding:5px; border-radius:5px; }
 
-.message.user { background:#dcf8c6; text-align:right; }
+.message.user { background:#dcf8c6; text-align:left; }
 .message.other { background:#fff; text-align:left; }
+
+.private-message { background:#ffd966; padding:5px; border-radius:5px; margin:5px 0; }
 
 .profile-modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:20px; border-radius:15px; box-shadow:0 4px 10px rgba(0,0,0,0.3); z-index:10; }
