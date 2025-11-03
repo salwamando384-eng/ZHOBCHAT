@@ -1,44 +1,38 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT - Chat Room</title>
+  <title>ZHOBCHAT</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-  <div id="auth-container" class="center-box">
-    <h2>ZHOBCHAT Login / Signup</h2>
+  <div id="auth-container">
+    <h2>ZHOBCHAT LOGIN</h2>
     <input type="email" id="email" placeholder="Email">
     <input type="password" id="password" placeholder="Password">
-    <button id="login-btn">Login</button>
-    <button id="signup-btn" class="outline">Signup</button>
-    <p id="auth-msg"></p>
+    <button id="loginBtn">Login</button>
+    <button id="signupBtn" class="alt">Signup</button>
   </div>
 
   <div id="chat-container" class="hidden">
-    <header>
-      <h2>ZHOBCHAT</h2>
-      <button id="logout-btn">Logout</button>
-    </header>
-
-    <div id="main-area">
-      <aside id="user-list"></aside>
-      <section id="chat-room">
-        <div id="messages"></div>
-        <div id="input-area">
-          <input type="text" id="messageInput" placeholder="Type a message...">
-          <button id="sendBtn">Send</button>
-        </div>
-      </section>
+    <div id="sidebar">
+      <h2>Users</h2>
+      <ul id="userList"></ul>
+      <button id="logoutBtn">Logout</button>
+    </div>
+    <div id="main">
+      <div id="chat-header">
+        <h2 id="chatWith">ZHOBCHAT</h2>
+      </div>
+      <div id="chat-box"></div>
+      <div id="chat-input">
+        <input type="text" id="messageInput" placeholder="Type message...">
+        <button id="sendBtn">Send</button>
+      </div>
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js"></script>
-  <script src="firebase_config.js"></script>
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
