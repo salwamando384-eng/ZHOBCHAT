@@ -1,42 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT Room</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZHOBCHAT — Chat Room</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="chat-container">
-    
-    <!-- Left Side: User List -->
-    <div class="user-list" id="userList">
-      <h3>Online Users</h3>
-      <ul id="users"></ul>
-    </div>
+  <div id="app" class="app-fullscreen hidden">
 
-    <!-- Center: Chat Messages -->
-    <div class="chat-box">
-      <div id="messages"></div>
-      <div class="chat-input">
-        <button id="emojiBtn">😊</button>
-        <input type="text" id="messageInput" placeholder="Type here...">
-        <button id="sendBtn">➤</button>
+    <!-- topbar -->
+    <header class="topbar">
+      <div class="brand">ZHOB<span>CHAT</span></div>
+      <div class="top-actions">
+        <div id="currentName" class="current-name"></div>
+        <img id="currentDP" class="top-dp" src="default_dp.png" alt="dp" />
+        <button id="logoutBtn" class="btn small">Logout</button>
       </div>
-    </div>
+    </header>
 
-    <!-- Right Side: User Profile Popup -->
-    <div class="user-profile" id="userProfile">
-      <img id="profileDp" src="default_dp.png" alt="DP">
-      <h4 id="profileName">User Name</h4>
-      <p id="profileAge">Age: --</p>
-      <p id="profileGender">Gender: --</p>
-      <button id="privateBtn">Private</button>
-      <button id="closeProfile">Close</button>
+    <!-- main area -->
+    <div class="main-area">
+      <!-- users panel (left) -->
+      <aside class="users-panel">
+        <h4>Users <span id="onlineCount" class="muted small"></span></h4>
+        <ul id="onlineList" class="user-list"></ul>
+      </aside>
+
+      <!-- messages area -->
+      <section class="messages-area">
+        <div id="messages" class="messages"></div>
+
+        <div class="composer">
+          <button id="emojiBtn" class="emoji">😊</button>
+          <input id="messageInput" placeholder="Type a message..." />
+          <button id="sendBtn" class="btn primary">Send</button>
+        </div>
+      </section>
+
+      <!-- profile slide (right) -->
+      <aside id="profilePanel" class="profile-panel hidden">
+        <button id="closeProfile" class="close-x">✖</button>
+        <img id="profileDP" src="default_dp.png" class="profile-img" alt="dp" />
+        <h3 id="profileName">Name</h3>
+        <p id="profileInfo" class="muted small">Age · Gender · City</p>
+        <div class="profile-actions">
+          <button id="startPrivateBtn" class="btn">Start Private</button>
+          <button id="viewProfileBtn" class="btn">View Profile</button>
+        </div>
+      </aside>
     </div>
   </div>
 
-  <script src="firebase_config.js"></script>
-  <script src="app.js"></script>
+  <script type="module" src="chat.js"></script>
 </body>
 </html>
