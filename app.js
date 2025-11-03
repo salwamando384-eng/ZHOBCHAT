@@ -45,6 +45,7 @@ const closeProfile = document.getElementById("closeProfile");
 let currentUser = null;
 let chatTarget = null;
 const userColors = {};
+const messageColors = {};
 function getRandomColor(){ return "#"+Math.floor(Math.random()*16777215).toString(16); }
 
 // ===== Signup =====
@@ -55,13 +56,18 @@ signupBtn.addEventListener("click",()=>{
   const gender=document.getElementById("gender").value.trim();
   const age=document.getElementById("age").value.trim();
   const city=document.getElementById("city").value.trim();
-  
+
   if(!name||!email||!password){ alert("Fill Name, Email, Password!"); return; }
+
+  // Assign random colors
+  const nameColor = getRandomColor();
+  const msgColor = getRandomColor();
+  userColors[name] = nameColor;
+  messageColors[name] = msgColor;
 
   createUserWithEmailAndPassword(auth,email,password)
   .then(u=>{
-    currentUser={name,email,gender,age,city,dp:"default.png"};
-    userColors[name]=getRandomColor();
+    currentUser={name,email,gender,age,city,dp:"default.png", nameColor, msgColor};
     set(ref(db,"users/"+name),currentUser);
     authSection.classList.add("hidden");
     chatSection.classList.remove("hidden");
@@ -76,7 +82,8 @@ loginBtn.addEventListener("click",()=>{
   .then(u=>{
     const name=email.split("@")[0];
     currentUser={name,email,dp:"default.png"};
-    userColors[name]=getRandomColor();
+    userColors[name] = getRandomColor();
+    messageColors[name] = getRandomColor();
     set(ref(db,"users/"+name+"/online"),true);
     authSection.classList.add("hidden");
     chatSection.classList.remove("hidden");
@@ -99,7 +106,7 @@ sendBtn.addEventListener("click",()=>{
   push(ref(db,"messages"),{
     name:currentUser.name,
     text:text,
-    color:userColors[currentUser.name],
+    color:messageColors[currentUser.name]||"#25D366",
     time:new Date().toLocaleTimeString(),
     target:chatTarget||""
   });
@@ -119,7 +126,10 @@ onChildAdded(ref(db,"messages"),snapshot=>{
 });
 
 // ===== Toggle Users Panel =====
-usersToggle.addEventListener("click",()=>usersPanel.classList.toggle("hidden"));
+usersToggle.addEventListener("click",()=>{
+  if(usersPanel.classList.contains("hidden")) usersPanel.classList.remove("hidden");
+  else usersPanel.classList.add("hidden");
+});
 
 // ===== Online / Offline Users =====
 onValue(ref(db,"users"),snapshot=>{
@@ -127,9 +137,10 @@ onValue(ref(db,"users"),snapshot=>{
   offlineList.innerHTML="";
   snapshot.forEach(snap=>{
     const user=snap.val();
+    if(!user.name) return;
     const li=document.createElement("li");
     li.textContent=user.name;
-    li.style.color=userColors[user.name]||getRandomColor();
+    li.style.color=user.nameColor||getRandomColor();
     li.addEventListener("click",()=>showProfile(user.name));
     if(user.online) onlineList.appendChild(li);
     else offlineList.appendChild(li);
