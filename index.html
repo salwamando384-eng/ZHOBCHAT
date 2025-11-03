@@ -13,6 +13,10 @@
   <input type="text" id="name" placeholder="Enter Name" required>
   <input type="email" id="email" placeholder="Enter Email" required>
   <input type="password" id="password" placeholder="Enter Password" required>
+  <input type="text" id="gender" placeholder="Gender">
+  <input type="number" id="age" placeholder="Age">
+  <input type="text" id="city" placeholder="City">
+  <input type="file" id="dp" accept="image/*">
   <button id="signupBtn">Sign Up</button>
   <button id="loginBtn">Login</button>
 </div>
@@ -24,30 +28,36 @@
     <button id="deleteAllBtn">Delete All (Admin)</button>
   </div>
 
-  <div class="users-panel">
-    <h3>Online Users</h3>
-    <ul id="onlineUsers"></ul>
-    <h3>Offline Users</h3>
-    <ul id="offlineUsers"></ul>
-  </div>
+  <div class="chat-container">
+    <div class="users-panel">
+      <h3>Online Users</h3>
+      <ul id="onlineUsers"></ul>
+      <h3>Offline Users</h3>
+      <ul id="offlineUsers"></ul>
+    </div>
 
-  <div id="messages"></div>
-
-  <div class="chat-input">
-    <input type="text" id="messageInput" placeholder="Type your message...">
-    <button id="emojiBtn">😀</button>
-    <button id="sendBtn">Send</button>
-    <div id="emojiPicker" class="hidden">
-      <span>😀</span><span>😂</span><span>😍</span><span>😎</span><span>😢</span>
+    <div class="chat-area">
+      <div id="messages"></div>
+      <div class="chat-input">
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <button id="emojiBtn">😀</button>
+        <button id="sendBtn">Send</button>
+        <div id="emojiPicker" class="hidden">
+          <span>😀</span><span>😂</span><span>😍</span><span>😎</span><span>😢</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- User Profile Modal -->
 <div id="userProfile" class="hidden profile-modal">
-  <h3>User Profile</h3>
-  <p>Name: <span id="profileName"></span></p>
+  <img id="profileDP" src="default.png" width="80" height="80" style="border-radius:50%">
+  <h3 id="profileName"></h3>
   <p>Email: <span id="profileEmail"></span></p>
+  <p>Gender: <span id="profileGender"></span></p>
+  <p>Age: <span id="profileAge"></span></p>
+  <p>City: <span id="profileCity"></span></p>
   <button id="privateChatBtn">Start Private Chat</button>
   <button id="closeProfile">Close</button>
 </div>
