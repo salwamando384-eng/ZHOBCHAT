@@ -1,56 +1,29 @@
-body {
-  font-family: 'Poppins', sans-serif;
-  background: #e5ddd5;
-  margin: 0;
-  padding: 20px;
-}
-
-.card {
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  text-align: center;
-  width: 320px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-.card h2 span { color: #075E54; }
-
-.card input, .card button { width: 100%; margin:5px 0; padding: 10px; border-radius: 10px; }
-
-.card button { border: none; background: #25D366; color:white; font-weight:bold; cursor:pointer; }
+body { font-family: 'Poppins', sans-serif; background: #e5ddd5; margin:0; padding:20px; }
+.card { background:white; padding:25px; border-radius:15px; text-align:center; width:320px; box-shadow:0 4px 10px rgba(0,0,0,0.2); }
+.card h2 span { color:#075E54; }
+.card input, .card button { width:100%; margin:5px 0; padding:10px; border-radius:10px; }
+.card button { border:none; background:#25D366; color:white; font-weight:bold; cursor:pointer; }
 
 .hidden { display:none; }
 
-.chat-header { background: #075E54; color:white; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+.chat-header { background:#075E54; color:white; padding:10px; display:flex; justify-content:space-between; align-items:center; }
+.chat-container { display:flex; height:80vh; max-width:1000px; width:100%; margin-top:20px; }
 
-.chat-container { display: flex; height: 80vh; max-width: 1000px; width: 100%; margin-top: 20px; }
-
-.chat-area { flex: 3; display:flex; flex-direction: column; margin-right: 10px; }
-
-#messages { flex: 1; background:#DCF8C6; padding:10px; border-radius:10px; overflow-y:auto; }
-
+.chat-area { flex:3; display:flex; flex-direction:column; margin-right:10px; }
+#messages { flex:1; background:#DCF8C6; padding:10px; border-radius:10px; overflow-y:auto; }
 .chat-input { display:flex; align-items:center; margin-top:5px; }
-
 .chat-input input { flex:1; padding:10px; border-radius:10px; border:1px solid #ccc; }
-
 .chat-input button { margin-left:5px; padding:10px; border:none; border-radius:10px; background:#25D366; color:white; font-weight:bold; cursor:pointer; }
-
 #emojiPicker { display:flex; flex-wrap: wrap; background:white; padding:5px; border-radius:10px; margin-top:5px; }
-
 #emojiPicker span { font-size:20px; margin:2px; cursor:pointer; }
 
-.users-panel { width: 200px; background: #f0f0f0; padding: 10px; border-radius: 10px; overflow-y:auto; }
-
+.users-panel { width:200px; background:#f0f0f0; padding:10px; border-radius:10px; overflow-y:auto; }
 .users-panel ul { list-style:none; padding:0; margin:0; }
-
 .users-panel li { cursor:pointer; padding:5px; border-radius:5px; margin:2px 0; }
 
 .message { margin-bottom:5px; padding:5px; border-radius:5px; }
-
 .message.user { background:#dcf8c6; text-align:left; }
 .message.other { background:#fff; text-align:left; }
-
 .private-message { background:#ffd966; padding:5px; border-radius:5px; margin:5px 0; }
 
 .profile-modal { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:20px; border-radius:15px; box-shadow:0 4px 10px rgba(0,0,0,0.3); z-index:10; }
