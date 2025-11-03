@@ -1,161 +1,185 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, onValue, set, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded, onValue, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 // ===== Firebase Config =====
-const firebaseConfig={
-  apiKey:"AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain:"zhobchat-33d8e.firebaseapp.com",
-  databaseURL:"https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"zhobchat-33d8e",
-  storageBucket:"zhobchat-33d8e.appspot.com",
-  messagingSenderId:"116466089929",
-  appId:"1:116466089929:web:06e914c8ed81ba9391f218"
+const firebaseConfig = {
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+  authDomain: "zhobchat-33d8e.firebaseapp.com",
+  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "zhobchat-33d8e",
+  storageBucket: "zhobchat-33d8e.appspot.com",
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
 };
 
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
-const auth=getAuth(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+const storage = getStorage(app);
 
 // ===== Elements =====
-const signupBtn=document.getElementById("signupBtn");
-const loginBtn=document.getElementById("loginBtn");
-const logoutBtn=document.getElementById("logoutBtn");
-const sendBtn=document.getElementById("sendBtn");
-const messageInput=document.getElementById("messageInput");
-const messagesDiv=document.getElementById("messages");
-const usersToggle=document.getElementById("usersToggle");
-const usersPanel=document.querySelector(".users-panel");
-const onlineList=document.getElementById("onlineList");
-const offlineList=document.getElementById("offlineList");
-const authSection=document.getElementById("auth-section");
-const chatSection=document.getElementById("chat-section");
-const userProfile=document.getElementById("userProfile");
-const profileName=document.getElementById("profileName");
-const profileEmail=document.getElementById("profileEmail");
-const profileGender=document.getElementById("profileGender");
-const profileAge=document.getElementById("profileAge");
-const profileCity=document.getElementById("profileCity");
-const profileDP=document.getElementById("profileDP");
-const privateChatBtn=document.getElementById("privateChatBtn");
-const closeProfile=document.getElementById("closeProfile");
+const signupBtn = document.getElementById("signupBtn");
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const sendBtn = document.getElementById("sendBtn");
+const messageInput = document.getElementById("messageInput");
+const messagesDiv = document.getElementById("messages");
+const usersToggle = document.getElementById("usersToggle");
+const usersPanel = document.querySelector(".users-panel");
+const onlineList = document.getElementById("onlineList");
+const offlineList = document.getElementById("offlineList");
+const authSection = document.getElementById("auth-section");
+const chatSection = document.getElementById("chat-section");
+const dpUpload = document.getElementById("dpUpload");
+const nameColorInput = document.getElementById("nameColor");
+const msgColorInput = document.getElementById("msgColor");
 
-let currentUser=null;
-let chatTarget=null;
-const userColors={};
-const messageColors={};
+const userProfile = document.getElementById("userProfile");
+const profileName = document.getElementById("profileName");
+const profileEmail = document.getElementById("profileEmail");
+const profileGender = document.getElementById("profileGender");
+const profileAge = document.getElementById("profileAge");
+const profileCity = document.getElementById("profileCity");
+const profileDP = document.getElementById("profileDP");
+const privateChatBtn = document.getElementById("privateChatBtn");
+const closeProfile = document.getElementById("closeProfile");
 
-function getRandomColor(){ return "#"+Math.floor(Math.random()*16777215).toString(16); }
+let currentUser = null;
+let chatTarget = null;
+
+// ===== Helper =====
+function createMessageDiv(msg) {
+  const div = document.createElement("div");
+  div.classList.add("message");
+  div.innerHTML = `<span style="color:${msg.nameColor}">${msg.name}:</span> <span style="color:${msg.msgColor}">${msg.text}</span>`;
+  div.addEventListener("click",()=>{
+    showUserProfile(msg);
+  });
+  messagesDiv.appendChild(div);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
 
 // ===== Signup =====
-signupBtn.addEventListener("click",()=>{
-  const name=document.getElementById("name").value.trim();
-  const email=document.getElementById("email").value.trim();
-  const password=document.getElementById("password").value.trim();
-  const gender=document.getElementById("gender").value.trim();
-  const age=document.getElementById("age").value.trim();
-  const city=document.getElementById("city").value.trim();
-  const nameColor=document.getElementById("nameColor").value.trim()||"#00bfff";
-  const msgColor=document.getElementById("msgColor").value.trim()||"#ffffff";
+signupBtn.addEventListener("click", async () => {
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const gender = document.getElementById("gender").value;
+  const age = document.getElementById("age").value.trim();
+  const city = document.getElementById("city").value.trim();
+  const nameColor = nameColorInput.value || "#00bfff";
+  const msgColor = msgColorInput.value || "#ffffff";
+  const dpFile = dpUpload.files[0];
 
-  if(!name||!email||!password){ alert("Fill Name, Email, Password!"); return; }
+  if(!name || !email || !password){
+    alert("Please fill Name, Email, Password"); return;
+  }
 
-  userColors[name]=nameColor;
-  messageColors[name]=msgColor;
+  let dpURL = "default.png";
+  if(dpFile){
+    const storageRef = sRef(storage, "dp/"+email);
+    await uploadBytes(storageRef, dpFile);
+    dpURL = await getDownloadURL(storageRef);
+  }
 
-  createUserWithEmailAndPassword(auth,email,password).then(u=>{
-    currentUser={name,email,gender,age,city,dp:"default.png",nameColor,msgColor,online:true};
-    set(ref(db,"users/"+name),currentUser);
+  createUserWithEmailAndPassword(auth, email, password)
+  .then(() => {
+    currentUser = {name,email,gender,age,city,nameColor,msgColor,dpURL,online:true};
+    localStorage.setItem("zhobUser", JSON.stringify(currentUser));
+    update(ref(db,"users/"+email.replace(".","_")), currentUser);
     authSection.classList.add("hidden");
     chatSection.classList.remove("hidden");
-  }).catch(e=>alert(e.message));
+    listenMessages();
+    listenUsers();
+  })
+  .catch(err => alert(err.message));
 });
 
 // ===== Login =====
-loginBtn.addEventListener("click",()=>{
-  const email=document.getElementById("email").value.trim();
-  const password=document.getElementById("password").value.trim();
-  if(!email||!password){ alert("Fill Email & Password!"); return; }
+loginBtn.addEventListener("click", ()=>{
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  if(!email || !password){ alert("Enter Email and Password"); return; }
 
-  signInWithEmailAndPassword(auth,email,password).then(userCredential=>{
-    const u=userCredential.user;
-    // Fetch user info from DB
-    onValue(ref(db,"users"),snapshot=>{
-      snapshot.forEach(child=>{
-        if(child.val().email===email){
-          currentUser=child.val();
-          authSection.classList.add("hidden");
-          chatSection.classList.remove("hidden");
-          update(ref(db,"users/"+currentUser.name),{online:true});
-        }
-      });
+  signInWithEmailAndPassword(auth,email,password)
+  .then(()=>{
+    const userRef = ref(db,"users/"+email.replace(".","_"));
+    onValue(userRef, snapshot=>{
+      currentUser = snapshot.val();
+      currentUser.online = true;
+      localStorage.setItem("zhobUser", JSON.stringify(currentUser));
+      authSection.classList.add("hidden");
+      chatSection.classList.remove("hidden");
+      update(userRef,currentUser);
+      listenMessages();
+      listenUsers();
     });
-  }).catch(e=>alert(e.message));
+  })
+  .catch(err => alert(err.message));
 });
 
 // ===== Logout =====
-logoutBtn.addEventListener("click",()=>{
+logoutBtn.addEventListener("click", ()=>{
   if(currentUser){
-    update(ref(db,"users/"+currentUser.name),{online:false});
-    currentUser=null;
+    const userRef = ref(db,"users/"+currentUser.email.replace(".","_"));
+    update(userRef,{online:false});
   }
-  authSection.classList.remove("hidden");
+  signOut(auth);
+  localStorage.removeItem("zhobUser");
   chatSection.classList.add("hidden");
+  authSection.classList.remove("hidden");
 });
 
-// ===== Toggle Users Panel =====
+// ===== Send Message =====
+sendBtn.addEventListener("click", ()=>{
+  const text = messageInput.value.trim();
+  if(!text) return;
+  const msg = {
+    name: currentUser.name,
+    email: currentUser.email,
+    text,
+    nameColor: currentUser.nameColor,
+    msgColor: currentUser.msgColor,
+    dpURL: currentUser.dpURL,
+    time: new Date().toLocaleTimeString(),
+    private: chatTarget || null
+  };
+  push(ref(db, chatTarget ? "private/"+chatTarget+"/"+currentUser.email.replace(".","_") : "messages"), msg);
+  messageInput.value="";
+});
+
+// ===== Listen Messages =====
+function listenMessages(){
+  messagesDiv.innerHTML="";
+  onChildAdded(ref(db,"messages"), snapshot=>{
+    const msg = snapshot.val();
+    createMessageDiv(msg);
+  });
+}
+
+// ===== Users Toggle =====
 usersToggle.addEventListener("click",()=>{
   usersPanel.classList.toggle("hidden");
 });
 
-// ===== Send Message =====
-sendBtn.addEventListener("click",()=>{
-  const text=messageInput.value.trim();
-  if(!text||!currentUser)return;
-
-  const msgData={
-    sender:currentUser.name,
-    text,
-    time:new Date().toLocaleTimeString(),
-    nameColor:currentUser.nameColor,
-    msgColor:currentUser.msgColor,
-    privateTo:chatTarget||null
-  };
-
-  push(ref(db,"messages"),msgData);
-  messageInput.value="";
-  chatTarget=null; // reset after sending
-});
-
-// ===== Display Messages =====
-onChildAdded(ref(db,"messages"),snapshot=>{
-  const msg=snapshot.val();
-  if(msg.privateTo && msg.privateTo!==currentUser?.name && msg.sender!==currentUser?.name) return;
-
-  const div=document.createElement("div");
-  div.classList.add("message");
-  div.style.color=msg.msgColor;
-  div.innerHTML=`<span style="color:${msg.nameColor}; font-weight:bold;">${msg.sender}:</span> ${msg.text}`;
-  messagesDiv.appendChild(div);
-  messagesDiv.scrollTop=messagesDiv.scrollHeight;
-});
-
-// ===== Users List =====
-onValue(ref(db,"users"),snapshot=>{
-  onlineList.innerHTML=""; offlineList.innerHTML="";
-  snapshot.forEach(child=>{
-    const u=child.val();
-    const li=document.createElement("li");
-    li.textContent=u.name;
-    li.style.color=u.nameColor||"#00bfff";
-    li.addEventListener("click",()=>showUserProfile(u));
-    if(u.online){
-      onlineList.appendChild(li);
-    }else{
-      offlineList.appendChild(li);
-    }
+// ===== Listen Users =====
+function listenUsers(){
+  onValue(ref(db,"users"), snapshot=>{
+    onlineList.innerHTML="";
+    offlineList.innerHTML="";
+    snapshot.forEach(child=>{
+      const u = child.val();
+      const li = document.createElement("li");
+      li.textContent = u.name;
+      li.style.cursor="pointer";
+      li.addEventListener("click",()=>{ showUserProfile(u); });
+      if(u.online){ onlineList.appendChild(li); }
+      else { offlineList.appendChild(li); }
+    });
   });
-});
+}
 
 // ===== Show User Profile =====
 function showUserProfile(u){
@@ -164,13 +188,26 @@ function showUserProfile(u){
   profileGender.textContent=u.gender;
   profileAge.textContent=u.age;
   profileCity.textContent=u.city;
-  profileDP.src=u.dp||"default.png";
+  profileDP.src=u.dpURL || "default.png";
   userProfile.classList.remove("hidden");
-
-  privateChatBtn.onclick=()=>{
-    chatTarget=u.name;
-    userProfile.classList.add("hidden");
-  };
+  chatTarget = u.email.replace(".","_");
 }
 
-closeProfile.addEventListener("click",()=>userProfile.classList.add("hidden"));
+// ===== Close Profile =====
+closeProfile.addEventListener("click",()=>{
+  userProfile.classList.add("hidden");
+  chatTarget = null;
+});
+
+// ===== Init if already logged in =====
+window.addEventListener("load",()=>{
+  const user = JSON.parse(localStorage.getItem("zhobUser"));
+  if(user){
+    currentUser = user;
+    authSection.classList.add("hidden");
+    chatSection.classList.remove("hidden");
+    listenMessages();
+    listenUsers();
+    update(ref(db,"users/"+currentUser.email.replace(".","_")), {...currentUser, online:true});
+  }
+});
