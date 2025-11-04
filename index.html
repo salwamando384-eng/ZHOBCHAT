@@ -1,57 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZHOBCHAT — Login / Signup</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="auth-container">
-    <h2>ZHOBCHAT</h2>
+  <div class="center-card">
+    <h1>ZHOBCHAT</h1>
 
-    <div id="signup-section">
-      <input type="text" id="name" placeholder="Full Name">
-      <select id="gender">
-        <option value="">Gender</option>
+    <div id="signupBox" class="card">
+      <h2>Create account</h2>
+      <input id="su_name" placeholder="Full name" />
+      <select id="su_gender">
+        <option value="">Select gender</option>
         <option value="Male">Male</option>
         <option value="Female">Female</option>
       </select>
-      <input type="number" id="age" placeholder="Age">
-      <input type="text" id="city" placeholder="City">
-      <input type="email" id="email" placeholder="Email">
-      <input type="password" id="password" placeholder="Password">
-      <label>Profile Picture:</label>
-      <input type="file" id="dpUpload" accept="image/*">
-      <label>Name Color:</label>
-      <input type="color" id="nameColor">
-      <label>Message Color:</label>
-      <input type="color" id="msgColor">
-      <button id="signupBtn">Signup</button>
-      <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
+      <input id="su_age" type="number" placeholder="Age" />
+      <input id="su_city" placeholder="City" />
+      <input id="su_email" type="email" placeholder="Email" />
+      <input id="su_password" type="password" placeholder="Password" />
+      <label>Profile picture</label>
+      <input id="su_dp" type="file" accept="image/*" />
+      <div class="two-col">
+        <div>
+          <label>Name color</label>
+          <input id="su_nameColor" type="color" value="#ff4d4d" />
+        </div>
+        <div>
+          <label>Message color</label>
+          <input id="su_msgColor" type="color" value="#ffffff" />
+        </div>
+      </div>
+      <button id="signupBtn">Sign up</button>
+      <p id="signupMsg" class="muted small"></p>
+      <p class="muted">Already registered? <a href="#" id="showLogin">Login</a></p>
     </div>
 
-    <div id="login-section" class="hidden">
-      <input type="email" id="loginEmail" placeholder="Email">
-      <input type="password" id="loginPassword" placeholder="Password">
+    <div id="loginBox" class="card hidden">
+      <h2>Login</h2>
+      <input id="li_email" type="email" placeholder="Email" />
+      <input id="li_password" type="password" placeholder="Password" />
       <button id="loginBtn">Login</button>
-      <p>Don't have an account? <a href="#" id="showSignup">Signup</a></p>
+      <p id="loginMsg" class="muted small"></p>
+      <p class="muted">New user? <a href="#" id="showSignup">Signup</a></p>
     </div>
   </div>
 
-  <div id="chat-container" class="hidden">
-    <div id="chat-header">
-      <h2 id="chatWith">ZHOBCHAT</h2>
-      <span id="userLabel">User</span>
-      <button id="logoutBtn">Logout</button>
-    </div>
-    <div id="chat-box"></div>
-    <div id="chat-input">
-      <input type="text" id="messageInput" placeholder="Type your message...">
-      <button id="sendBtn">Send</button>
-    </div>
-  </div>
-
-  <script type="module" src="chat.js"></script>
+  <script type="module" src="index.js"></script>
 </body>
 </html>
