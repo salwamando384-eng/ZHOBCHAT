@@ -1,210 +1,68 @@
-/* ====== General Layout ====== */
-body {
-  font-family: Arial, sans-serif;
-  background: #e8f0ff;
-  margin: 0;
-  padding: 0;
+:root{
+  --bg1:#0a2647; --bg2:#144272; --accent:#ff4d4d;
+  --card: rgba(255,255,255,0.04);
+  --muted: rgba(255,255,255,0.7);
+  --glass: rgba(255,255,255,0.03);
+  --white: #ffffff;
 }
 
-header {
-  background-color: #0066cc;
-  color: white;
-  padding: 10px 15px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+/* Base */
+*{box-sizing:border-box}
+body,html{height:100%;margin:0;font-family:Inter, system-ui, Arial;color:var(--white);background:linear-gradient(135deg,var(--bg1),var(--bg2))}
+.muted{color:var(--muted)} .small{font-size:12px}
 
-header h1 {
-  margin: 0;
-  font-size: 20px;
-}
+/* Topbar */
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:rgba(0,0,0,0.12)}
+.brand{font-weight:800;font-size:20px}
+.brand span{color:var(--accent)}
+.top-right{display:flex;align-items:center;gap:10px}
+.top-dp{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.06)}
+.current-name{font-weight:700}
+.top-center{flex:1;text-align:center;color:var(--white);font-weight:700}
 
-#currentName {
-  font-weight: bold;
-  margin: 0 10px;
-  color: white;
-}
+/* Layout */
+.main-area{display:flex;flex:1;height:calc(100vh - 64px);gap:12px;padding:12px;align-items:stretch;overflow:hidden}
+.users-panel{width:260px;background:var(--glass);padding:12px;border-radius:10px;overflow:auto}
+.user-list{list-style:none;padding:0;margin:8px 0}
+.user-item{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer}
+.user-item img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.user-name{font-weight:700}
+.user-status{font-size:12px;color:var(--muted)}
 
-#logoutBtn {
-  background-color: #ff4444;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-#logoutBtn:hover {
-  background-color: #cc0000;
-}
+/* Messages */
+.messages-area{flex:1;display:flex;flex-direction:column;background:rgba(0,0,0,0.03);border-radius:10px;padding:10px;overflow:hidden}
+.messages{flex:1;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:10px}
+.msg-row{display:flex;gap:12px;align-items:flex-start}
+.msg-dp{width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.msg-content{background:rgba(255,255,255,0.03);padding:10px;border-radius:10px;position:relative;max-width:76%}
+.msg-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.msg-name{font-weight:800}
+.msg-time{font-size:12px;color:var(--muted);margin-left:12px}
+.msg-text{white-space:pre-wrap;word-break:break-word}
 
-/* ====== Chat Section ====== */
-#app {
-  display: flex;
-  height: calc(100vh - 60px);
-}
+/* composer */
+.composer{display:flex;gap:8px;padding:10px;align-items:center;border-top:1px solid rgba(255,255,255,0.02)}
+.composer input{flex:1;padding:12px;border-radius:10px;border:none;background:rgba(255,255,255,0.02);color:var(--white)}
+.btn{background:var(--glass);border:none;padding:8px 10px;border-radius:8px;color:var(--white);cursor:pointer}
+.primary{background:var(--accent);color:#111;padding:10px 14px;border-radius:8px}
+.danger{background:#e74c3c;color:white}
+.hidden{display:none}
+.typing{padding:6px 12px;color:var(--muted)}
 
-#sidebar {
-  width: 200px;
-  background: #f1f1f1;
-  border-right: 1px solid #ccc;
-  overflow-y: auto;
-}
+/* profile panel */
+.profile-panel{width:300px;background:var(--glass);padding:12px;border-radius:10px;overflow:auto}
+.profile-img{width:120px;height:120px;border-radius:50%;display:block;margin:8px auto;object-fit:cover}
+.profile-actions{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.close-x{background:transparent;border:none;font-size:18px;color:var(--muted);cursor:pointer}
 
-#onlineList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.user-item {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  cursor: pointer;
-  border-bottom: 1px solid #ddd;
-}
-.user-item:hover {
-  background: #e2ecff;
-}
-.user-item img {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-.user-name {
-  font-size: 14px;
-}
+/* message actions small button */
+.msg-actions{display:flex;gap:6px;margin-top:6px}
+.msg-action{font-size:12px;padding:6px;border-radius:6px;border:none;cursor:pointer;background:transparent;color:var(--muted)}
 
-/* ====== Messages ====== */
-#messages {
-  flex: 1;
-  padding: 10px;
-  overflow-y: auto;
-  background: #fdfdfd;
-}
-
-.msg-row {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 10px;
-}
-
-.msg-dp {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 8px;
-}
-
-.msg-bubble {
-  background: #e6f0ff;
-  border-radius: 12px;
-  padding: 8px 12px;
-  max-width: 75%;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.msg-meta {
-  display: flex;
-  align-items: center;
-  margin-bottom: 3px;
-}
-
-.msg-name {
-  font-weight: bold;
-  color: #003366;
-  margin-right: 5px;
-}
-
-.msg-text {
-  font-size: 14px;
-  color: #222;
-}
-
-.msg-time {
-  font-size: 11px;
-  color: #666;
-  text-align: right;
-  margin-top: 4px;
-}
-
-/* ====== Input Area ====== */
-#inputArea {
-  display: flex;
-  padding: 10px;
-  border-top: 1px solid #ccc;
-  background: white;
-}
-
-#messageInput {
-  flex: 1;
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-#sendBtn {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  margin-left: 8px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-#sendBtn:hover {
-  background-color: #0056b3;
-}
-
-/* ====== Profile Panel ====== */
-#profilePanel {
-  position: fixed;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 300px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.2);
-  padding: 15px;
-  z-index: 999;
-}
-
-#profilePanel.hidden {
-  display: none;
-}
-
-#profileDP {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  display: block;
-  margin: 0 auto 10px auto;
-}
-
-#profileName {
-  text-align: center;
-  font-weight: bold;
-  font-size: 18px;
-}
-
-#profileInfo {
-  text-align: center;
-  font-size: 14px;
-  color: #555;
-  margin-top: 5px;
-}
-
-#closeProfile {
-  display: block;
-  text-align: center;
-  margin-top: 10px;
-  color: #007bff;
-  cursor: pointer;
-}
-#closeProfile:hover {
-  text-decoration: underline;
+/* responsive */
+@media(max-width:900px){
+  .main-area{flex-direction:column;padding:8px}
+  .users-panel{width:100%;order:2}
+  .profile-panel{width:100%;order:3;position:relative}
+  .top-dp{width:36px;height:36px}
 }
