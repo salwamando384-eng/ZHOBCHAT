@@ -3,25 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ZHOBCHAT — V2</title>
+  <title>ZHOBCHAT — Chat</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Topbar -->
   <header class="topbar">
     <div class="brand">ZHOB<span>CHAT</span></div>
-    <div class="top-center" id="centerLabel">User</div>
+    <div id="centerLabel" class="centerLabel">User</div>
     <div class="top-right">
-      <img id="currentDP" src="default_dp.png" class="top-dp" alt="dp" />
+      <img id="currentDP" src="default_dp.png" alt="dp" class="top-dp" />
       <div id="currentName" class="current-name"> — </div>
       <button id="clearAllBtn" class="btn danger hidden">Clear All</button>
       <button id="logoutBtn" class="btn">Logout</button>
     </div>
   </header>
 
-  <!-- Main -->
   <div class="main-area">
-    <!-- Users list -->
     <aside class="users-panel">
       <div class="users-header">
         <h4>Users <span id="onlineCount" class="muted small"></span></h4>
@@ -29,36 +26,28 @@
       <ul id="usersList" class="user-list"></ul>
     </aside>
 
-    <!-- Messages -->
     <section class="messages-area">
       <div id="messages" class="messages"></div>
-
-      <!-- typing indicator -->
       <div id="typingIndicator" class="typing muted hidden"></div>
-
       <div class="composer">
         <input id="messageInput" placeholder="Type a message..." autocomplete="off" />
         <button id="sendBtn" class="btn primary">Send</button>
       </div>
     </section>
 
-    <!-- Profile / actions -->
     <aside id="profilePanel" class="profile-panel hidden">
       <button id="closeProfile" class="close-x">✖</button>
       <img id="profileDP" src="default_dp.png" class="profile-img" alt="dp" />
       <h3 id="profileName">Name</h3>
       <p id="profileInfo" class="muted small">Age · Gender · City</p>
-
       <div class="profile-actions">
-        <button id="friendReqBtn" class="btn">Send Friend Request</button>
+        <button id="friendReqBtn" class="btn">Add Friend</button>
         <button id="blockBtn" class="btn danger">Block</button>
         <button id="muteBtn" class="btn">Mute</button>
-        <button id="viewProfileBtn" class="btn">View Profile</button>
       </div>
     </aside>
   </div>
 
-  <!-- Firebase + chat logic -->
   <script type="module" src="chat.js"></script>
 </body>
 </html>
