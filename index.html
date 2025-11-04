@@ -7,32 +7,44 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="auth-container">
-    <h2>ZHOBCHAT LOGIN</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button id="loginBtn">Login</button>
-    <button id="signupBtn" class="alt">Signup</button>
+  <div class="container">
+    <h1>ZHOBCHAT</h1>
+
+    <!-- Signup Section -->
+    <div id="signup-box">
+      <h2>Create Account</h2>
+      <input type="text" id="su_name" placeholder="Full Name">
+      <select id="su_gender">
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      <input type="number" id="su_age" placeholder="Age">
+      <input type="text" id="su_city" placeholder="City">
+      <input type="email" id="su_email" placeholder="Email">
+      <input type="password" id="su_password" placeholder="Password">
+      <label>Profile Picture:</label>
+      <input type="file" id="su_dp" accept="image/*">
+      <label>Name Color:</label>
+      <input type="color" id="su_nameColor" value="#ff4d4d">
+      <label>Message Color:</label>
+      <input type="color" id="su_msgColor" value="#ffffff">
+      <button id="signupBtn">Signup</button>
+      <p id="signupMsg"></p>
+    </div>
+
+    <hr>
+
+    <!-- Login Section -->
+    <div id="login-box">
+      <h2>Already have an account?</h2>
+      <input type="email" id="li_email" placeholder="Email">
+      <input type="password" id="li_password" placeholder="Password">
+      <button id="loginBtn">Login</button>
+      <p id="loginMsg"></p>
+    </div>
   </div>
 
-  <div id="chat-container" class="hidden">
-    <div id="sidebar">
-      <h2>Users</h2>
-      <ul id="userList"></ul>
-      <button id="logoutBtn">Logout</button>
-    </div>
-    <div id="main">
-      <div id="chat-header">
-        <h2 id="chatWith">ZHOBCHAT</h2>
-      </div>
-      <div id="chat-box"></div>
-      <div id="chat-input">
-        <input type="text" id="messageInput" placeholder="Type message...">
-        <button id="sendBtn">Send</button>
-      </div>
-    </div>
-  </div>
-
-  <script type="module" src="app.js"></script>
+  <script type="module" src="index.js"></script>
 </body>
 </html>
