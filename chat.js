@@ -1,118 +1,154 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getDatabase, ref, push, set, onChildAdded, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+// chat.js (final version)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref, push, onChildAdded, onValue, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getStorage, ref as sRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// 🔥 اپنے Firebase Config سے بدلیں
+// === Firebase Config ===
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_APP.firebaseapp.com",
-  databaseURL: "https://YOUR_APP-default-rtdb.firebaseio.com",
-  projectId: "YOUR_APP",
-  storageBucket: "YOUR_APP.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+  authDomain: "zhobchat-33d8e.firebaseapp.com",
+  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "zhobchat-33d8e",
+  storageBucket: "zhobchat-33d8e.firebasestorage.app",
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
+  measurementId: "G-LX9P9LRLV8"
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getDatabase();
+const auth = getAuth(app);
+const db = getDatabase(app);
+const storage = getStorage(app);
 
-const authContainer = document.getElementById("auth-container");
-const chatContainer = document.getElementById("chat-container");
-const chatBox = document.getElementById("chat-box");
-const messageInput = document.getElementById("messageInput");
+const el = id => document.getElementById(id);
+const emailKey = email => email.split('.').join('_');
+
+const chatBox = el('chat-box');
+const userList = el('userList');
+const sendBtn = el('sendBtn');
+const logoutBtn = el('logoutBtn');
+const messageInput = el('messageInput');
+const chatWith = el('chatWith');
 
 let currentUser = null;
-let userProfile = {};
 
-document.getElementById("showLogin").onclick = () => {
-  document.getElementById("signup-section").classList.add("hidden");
-  document.getElementById("login-section").classList.remove("hidden");
-};
-
-document.getElementById("showSignup").onclick = () => {
-  document.getElementById("signup-section").classList.remove("hidden");
-  document.getElementById("login-section").classList.add("hidden");
-};
-
-// ✅ Signup
-document.getElementById("signupBtn").onclick = async () => {
-  const email = email.value;
-  const password = password.value;
-  const name = document.getElementById("name").value;
-  const city = document.getElementById("city").value;
-  const gender = document.getElementById("gender").value;
-  const age = document.getElementById("age").value;
-  const nameColor = document.getElementById("nameColor").value;
-  const msgColor = document.getElementById("msgColor").value;
-  const dpFile = document.getElementById("dpUpload").files[0];
-
-  if (!email || !password || !name) return alert("Please fill all required fields");
-
-  const userCred = await createUserWithEmailAndPassword(auth, email, password);
-  const uid = userCred.user.uid;
-
-  let dpURL = "default_dp.png";
-  if (dpFile) dpURL = URL.createObjectURL(dpFile);
-
-  userProfile = { name, city, gender, age, nameColor, msgColor, dpURL };
-
-  await set(ref(db, "users/" + uid), userProfile);
-};
-
-// ✅ Login
-document.getElementById("loginBtn").onclick = async () => {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
-  await signInWithEmailAndPassword(auth, email, password);
-};
-
-// ✅ Auth state
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUser = user;
-    authContainer.classList.add("hidden");
-    chatContainer.classList.remove("hidden");
-  } else {
-    authContainer.classList.remove("hidden");
-    chatContainer.classList.add("hidden");
+// Auth check
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
   }
+  currentUser = user;
+
+  const key = emailKey(user.email);
+  await update(ref(db, "users/" + key), { online: true });
+
+  listenMessages();
+  listenUsers();
 });
 
-// ✅ Send message
-document.getElementById("sendBtn").onclick = async () => {
-  const msg = messageInput.value.trim();
-  if (!msg) return;
+// Send message
+sendBtn.addEventListener("click", sendMessage);
+messageInput.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
 
-  const msgRef = push(ref(db, "messages"));
-  await set(msgRef, {
-    uid: currentUser.uid,
-    text: msg,
-    username: userProfile.name,
-    dp: userProfile.dpURL,
-    nameColor: userProfile.nameColor,
-    msgColor: userProfile.msgColor,
-    time: new Date().toLocaleTimeString(),
-    timestamp: serverTimestamp()
+function sendMessage() {
+  const text = messageInput.value.trim();
+  if (!text || !currentUser) return;
+
+  const userKey = emailKey(currentUser.email);
+  onValue(ref(db, "users/" + userKey), (snap) => {
+    const userData = snap.val();
+    if (!userData) return;
+
+    const msg = {
+      name: userData.name,
+      email: userData.email,
+      text,
+      dpURL: userData.dpURL || "default_dp.png",
+      nameColor: userData.nameColor || "#ff4d4d",
+      msgColor: userData.msgColor || "#ffffff",
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    push(ref(db, "messages"), msg);
+    messageInput.value = "";
+  }, { onlyOnce: true });
+}
+
+// Listen messages
+function listenMessages() {
+  chatBox.innerHTML = "";
+  onChildAdded(ref(db, "messages"), snapshot => {
+    const msg = snapshot.val();
+    appendMessage(msg);
   });
-  messageInput.value = "";
-};
+}
 
-// ✅ Display message
-onChildAdded(ref(db, "messages"), (snap) => {
-  const data = snap.val();
-  const div = document.createElement("div");
-  div.className = "message";
-  div.innerHTML = `
-    <img src="${data.dp}" alt="dp">
-    <div class="msg-content" style="color:${data.msgColor}">
-      <div><span class="username" style="color:${data.nameColor}">${data.username}:</span> ${data.text}</div>
-      <div class="msg-time">${data.time}</div>
-    </div>
-  `;
-  chatBox.appendChild(div);
+function appendMessage(msg) {
+  const row = document.createElement("div");
+  row.className = "msg-row";
+
+  const dp = document.createElement("img");
+  dp.className = "msg-dp";
+  dp.src = msg.dpURL || "default_dp.png";
+
+  const content = document.createElement("div");
+  content.className = "msg-content";
+
+  const top = document.createElement("div");
+  top.className = "msg-top";
+  const name = document.createElement("span");
+  name.className = "msg-name";
+  name.textContent = msg.name || "Unknown";
+  name.style.color = msg.nameColor;
+
+  const time = document.createElement("span");
+  time.className = "msg-time";
+  time.textContent = msg.time || "";
+
+  top.appendChild(name);
+  top.appendChild(time);
+
+  const text = document.createElement("div");
+  text.className = "msg-text";
+  text.textContent = msg.text;
+  text.style.color = msg.msgColor;
+
+  content.appendChild(top);
+  content.appendChild(text);
+
+  row.appendChild(dp);
+  row.appendChild(content);
+
+  chatBox.appendChild(row);
   chatBox.scrollTop = chatBox.scrollHeight;
-});
+}
 
-// ✅ Logout
-document.getElementById("logoutBtn").onclick = () => signOut(auth);
+// Listen users
+function listenUsers() {
+  onValue(ref(db, "users"), snapshot => {
+    userList.innerHTML = "";
+    snapshot.forEach(child => {
+      const u = child.val();
+      const li = document.createElement("li");
+      li.className = "user-item";
+      li.innerHTML = `
+        <img src="${u.dpURL || 'default_dp.png'}" class="user-dp">
+        <span class="user-name">${u.name}</span>
+      `;
+      li.addEventListener("click", () => {
+        chatWith.textContent = u.name;
+      });
+      userList.appendChild(li);
+    });
+  });
+}
+
+// Logout
+logoutBtn.addEventListener("click", async () => {
+  if (!currentUser) return;
+  const key = emailKey(currentUser.email);
+  await update(ref(db, "users/" + key), { online: false });
+  await signOut(auth);
+  window.location.href = "index.html";
+});
