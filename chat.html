@@ -1,51 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ZHOBCHAT — Chat</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT ROOM</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">ZHOB<span>CHAT</span></div>
-    <div id="centerLabel" class="centerLabel">User</div>
-    <div class="top-right">
-      <img id="currentDP" src="default_dp.png" alt="dp" class="top-dp" />
-      <div id="currentName" class="current-name"> — </div>
-      <button id="clearAllBtn" class="btn danger hidden">Clear All</button>
-      <button id="logoutBtn" class="btn">Logout</button>
+  <div class="chat-container">
+    <div class="sidebar">
+      <h2>Online Users</h2>
+      <ul id="userList" class="user-list"></ul>
     </div>
-  </header>
 
-  <div class="main-area">
-    <aside class="users-panel">
-      <div class="users-header">
-        <h4>Users <span id="onlineCount" class="muted small"></span></h4>
+    <div class="chat-main">
+      <div class="chat-header">
+        <h2>ZHOBCHAT</h2>
+        <button id="logoutBtn">Logout</button>
       </div>
-      <ul id="usersList" class="user-list"></ul>
-    </aside>
 
-    <section class="messages-area">
-      <div id="messages" class="messages"></div>
-      <div id="typingIndicator" class="typing muted hidden"></div>
-      <div class="composer">
-        <input id="messageInput" placeholder="Type a message..." autocomplete="off" />
-        <button id="sendBtn" class="btn primary">Send</button>
-      </div>
-    </section>
+      <div id="messageBox" class="message-box"></div>
 
-    <aside id="profilePanel" class="profile-panel hidden">
-      <button id="closeProfile" class="close-x">✖</button>
-      <img id="profileDP" src="default_dp.png" class="profile-img" alt="dp" />
-      <h3 id="profileName">Name</h3>
-      <p id="profileInfo" class="muted small">Age · Gender · City</p>
-      <div class="profile-actions">
-        <button id="friendReqBtn" class="btn">Add Friend</button>
-        <button id="blockBtn" class="btn danger">Block</button>
-        <button id="muteBtn" class="btn">Mute</button>
-      </div>
-    </aside>
+      <form id="messageForm" class="message-form">
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <button type="submit">Send</button>
+      </form>
+    </div>
   </div>
 
   <script type="module" src="chat.js"></script>
