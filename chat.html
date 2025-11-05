@@ -3,40 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZHOBCHAT</title>
+  <title>ZHOBCHAT Room</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="chat-container">
-    <div id="chat-sidebar">
+  <div class="chat-container">
+    <header class="chat-header">
       <h2>ZHOBCHAT</h2>
-      <ul id="userList"></ul>
-      <div id="themeSelector">
-        <label>🎨 Theme:</label>
-        <select id="themeSelect">
-          <option value="default">Default</option>
-          <option value="dark">Dark</option>
-          <option value="blue">Blue</option>
-          <option value="green">Green</option>
-        </select>
-      </div>
       <button id="logoutBtn">Logout</button>
-    </div>
+    </header>
 
-    <div id="chat-main">
-      <div id="chat-header">
-        <h3 id="chatWith">Global Chat</h3>
-      </div>
-      <div id="chat-box"></div>
-      <div id="chat-input">
+    <aside class="user-list" id="userList"></aside>
+
+    <main class="chat-main">
+      <div class="messages" id="messageBox"></div>
+
+      <div class="message-input">
         <input type="text" id="messageInput" placeholder="Type your message..." />
         <button id="sendBtn">Send</button>
       </div>
-    </div>
+    </main>
   </div>
 
-  <audio id="notifySound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+  <!-- Admin panel -->
+  <div id="adminPanel" class="admin-panel hidden">
+    <h3>Admin Controls</h3>
+    <button id="deleteAllBtn">🗑 Delete All</button>
+    <button id="blockUserBtn">🚫 Block User</button>
+    <button id="muteUserBtn">🔇 Mute User</button>
+  </div>
 
-  <script type="module" src="chat.js"></script>
+  <script src="firebase_config.js"></script>
+  <script src="chat.js"></script>
 </body>
 </html>
