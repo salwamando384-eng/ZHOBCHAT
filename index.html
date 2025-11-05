@@ -1,54 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ZHOBCHAT — Login / Signup</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZHOB CHAT</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="center-card">
-    <h1>ZHOBCHAT</h1>
-
-    <div id="signupBox" class="card">
-      <h2>Create account</h2>
-      <input id="su_name" placeholder="Full name" />
-      <select id="su_gender">
-        <option value="">Select gender</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-      </select>
-      <input id="su_age" type="number" placeholder="Age" />
-      <input id="su_city" placeholder="City" />
-      <input id="su_email" type="email" placeholder="Email" />
-      <input id="su_password" type="password" placeholder="Password" />
-      <label>Profile picture</label>
-      <input id="su_dp" type="file" accept="image/*" />
-      <div class="two-col">
-        <div>
-          <label>Name color</label>
-          <input id="su_nameColor" type="color" value="#ff4d4d" />
-        </div>
-        <div>
-          <label>Message color</label>
-          <input id="su_msgColor" type="color" value="#ffffff" />
-        </div>
+  <div class="chat-container">
+    <header class="chat-header">
+      <h2>ZHOB CHAT</h2>
+      <div class="header-right">
+        <button id="menuToggle" class="dots-btn">⋮</button>
+        <button id="logoutBtn">Logout</button>
       </div>
-      <button id="signupBtn">Sign up</button>
-      <p id="signupMsg" class="muted small"></p>
-      <p class="muted">Already registered? <a href="#" id="showLogin">Login</a></p>
-    </div>
+    </header>
 
-    <div id="loginBox" class="card hidden">
-      <h2>Login</h2>
-      <input id="li_email" type="email" placeholder="Email" />
-      <input id="li_password" type="password" placeholder="Password" />
-      <button id="loginBtn">Login</button>
-      <p id="loginMsg" class="muted small"></p>
-      <p class="muted">New user? <a href="#" id="showSignup">Signup</a></p>
-    </div>
+    <aside class="user-list hidden" id="userList"></aside>
+
+    <main class="chat-main">
+      <div class="messages" id="messageBox"></div>
+
+      <div class="message-input">
+        <input type="text" id="messageInput" placeholder="Type your message..." />
+        <button id="sendBtn">Send</button>
+      </div>
+    </main>
   </div>
 
-  <script type="module" src="index.js"></script>
+  <!-- Admin panel -->
+  <div id="adminPanel" class="admin-panel hidden">
+    <h3>Admin Controls</h3>
+    <button id="deleteAllBtn">🗑 Delete All</button>
+    <button id="blockUserBtn">🚫 Block User</button>
+    <button id="muteUserBtn">🔇 Mute User</button>
+  </div>
+
+  <script src="firebase_config.js"></script>
+  <script src="chat.js"></script>
 </body>
 </html>
