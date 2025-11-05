@@ -1,101 +1,87 @@
-import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, push, onValue, remove, update } from "firebase/database";
+import { getAuth, signOut } from "firebase/auth";
 import { app } from "./firebase_config.js";
 
 const db = getDatabase(app);
 const auth = getAuth(app);
-const userList = document.getElementById("userList");
+
+const messageBox = document.getElementById("messageBox");
 const messageInput = document.getElementById("messageInput");
-const chatBox = document.getElementById("chat-box");
 const sendBtn = document.getElementById("sendBtn");
 const logoutBtn = document.getElementById("logoutBtn");
-const themeSelect = document.getElementById("themeSelect");
-const notifySound = document.getElementById("notifySound");
 
-let currentUser = null;
-let currentChat = "global";
+const adminPanel = document.getElementById("adminPanel");
+const deleteAllBtn = document.getElementById("deleteAllBtn");
+const blockUserBtn = document.getElementById("blockUserBtn");
+const muteUserBtn = document.getElementById("muteUserBtn");
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) window.location.href = "index.html";
-  else {
-    currentUser = user;
-    loadUsers();
-    loadMessages();
-  }
-});
+let currentUser = auth.currentUser;
+let mutedUsers = {};
+let blockedUsers = {};
+let adminEmail = "admin@gmail.com"; // ← اپنا ایڈمن جی میل یہاں لکھیں
 
-// 🎨 Theme handling
-themeSelect.addEventListener("change", () => {
-  const theme = themeSelect.value;
-  document.body.className = theme;
-  localStorage.setItem("theme", theme);
-});
-
-window.addEventListener("load", () => {
-  const saved = localStorage.getItem("theme");
-  if (saved) {
-    document.body.className = saved;
-    themeSelect.value = saved;
-  }
-});
-
-// 👥 Load dummy users (robots)
-const robots = [
-  { name: "Abid", dp: "https://i.pravatar.cc/100?img=11" },
-  { name: "Hina", dp: "https://i.pravatar.cc/100?img=12" },
-  { name: "Akbar Khan", dp: "https://i.pravatar.cc/100?img=13" },
-  { name: "Junaid", dp: "https://i.pravatar.cc/100?img=14" },
-  { name: "Shaista", dp: "https://i.pravatar.cc/100?img=15" }
-];
-
-function loadUsers() {
-  userList.innerHTML = "";
-  robots.forEach(u => {
-    const li = document.createElement("li");
-    li.innerHTML = `<img src="${u.dp}" class="dp"> ${u.name}`;
-    li.onclick = () => openPrivateChat(u.name);
-    userList.appendChild(li);
-  });
+// --- Hide admin panel for normal users ---
+if (currentUser && currentUser.email === adminEmail) {
+  adminPanel.classList.remove("hidden");
 }
 
-// 💬 Global messages
-function loadMessages() {
-  const msgRef = ref(db, "messages/");
-  onChildAdded(msgRef, (data) => {
-    const msg = data.val();
-    const div = document.createElement("div");
-    div.className = msg.sender === currentUser.email ? "me" : "them";
-    div.innerHTML = `<strong>${msg.senderName}:</strong> ${msg.text}`;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-    if (msg.sender !== currentUser.email) notifySound.play();
-  });
-}
-
-// ✉️ Send message
-sendBtn.addEventListener("click", sendMessage);
-messageInput.addEventListener("keypress", e => e.key === "Enter" && sendMessage());
-
-function sendMessage() {
-  if (!messageInput.value.trim()) return;
-  const msg = {
-    sender: currentUser.email,
-    senderName: currentUser.displayName || "User",
+// --- Send message ---
+sendBtn.addEventListener("click", () => {
+  if (messageInput.value.trim() === "") return;
+  push(ref(db, "messages"), {
+    user: currentUser.email,
     text: messageInput.value,
     time: Date.now(),
-    chat: currentChat
-  };
-  push(ref(db, "messages/"), msg);
+  });
   messageInput.value = "";
-}
-
-// 🔒 Private Chat (dummy visual only)
-function openPrivateChat(name) {
-  document.getElementById("chatWith").textContent = name + " (Private)";
-  chatBox.innerHTML = `<div class="notice">Private chat with ${name}</div>`;
-}
-
-// 🚪 Logout
-logoutBtn.addEventListener("click", () => {
-  signOut(auth).then(() => (window.location.href = "index.html"));
 });
+
+// --- Display messages ---
+onValue(ref(db, "messages"), (snapshot) => {
+  messageBox.innerHTML = "";
+  snapshot.forEach((child) => {
+    const msg = child.val();
+    if (blockedUsers[msg.user]) return; // hide blocked users
+
+    const div = document.createElement("div");
+    div.className = "msg";
+    div.textContent = `${msg.user}: ${msg.text}`;
+    messageBox.appendChild(div);
+
+    // Allow admin to delete individual message
+    if (currentUser && currentUser.email === adminEmail) {
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "❌";
+      delBtn.onclick = () => remove(ref(db, "messages/" + child.key));
+      div.appendChild(delBtn);
+    }
+  });
+});
+
+// --- Delete all messages (admin only) ---
+deleteAllBtn.onclick = () => {
+  if (confirm("Delete all messages?")) {
+    remove(ref(db, "messages"));
+  }
+};
+
+// --- Block user ---
+blockUserBtn.onclick = () => {
+  const email = prompt("Enter user email to block:");
+  if (email) blockedUsers[email] = true;
+  alert(email + " blocked.");
+};
+
+// --- Mute user ---
+muteUserBtn.onclick = () => {
+  const email = prompt("Enter user email to mute:");
+  if (email) mutedUsers[email] = true;
+  alert(email + " muted.");
+};
+
+// --- Logout ---
+logoutBtn.onclick = () => {
+  signOut(auth).then(() => {
+    window.location.href = "index.html";
+  });
+};
