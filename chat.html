@@ -3,17 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZHOBCHAT Room</title>
+  <title>ZHOB CHAT</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="chat-container">
     <header class="chat-header">
-      <h2>ZHOBCHAT</h2>
-      <button id="logoutBtn">Logout</button>
+      <h2>ZHOB CHAT</h2>
+      <div class="header-right">
+        <button id="userToggle" class="user-btn">Users</button>
+        <button id="logoutBtn">Logout</button>
+      </div>
     </header>
 
-    <aside class="user-list" id="userList"></aside>
+    <aside class="user-list hidden" id="userList">
+      <h3>Online 🔵</h3>
+      <div id="onlineUsers"></div>
+      <hr />
+      <h3>Offline ⚪</h3>
+      <div id="offlineUsers"></div>
+    </aside>
 
     <main class="chat-main">
       <div class="messages" id="messageBox"></div>
@@ -23,6 +32,14 @@
         <button id="sendBtn">Send</button>
       </div>
     </main>
+  </div>
+
+  <!-- Profile / Private / Theme Section -->
+  <div class="side-menu" id="sideMenu">
+    <h3>Settings ⚙️</h3>
+    <button class="menu-btn" id="profileBtn">👤 Profile</button>
+    <button class="menu-btn" id="privateBtn">💬 Private Chat</button>
+    <button class="menu-btn" id="themeBtn">🎨 Theme</button>
   </div>
 
   <!-- Admin panel -->
