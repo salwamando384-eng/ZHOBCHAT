@@ -1,114 +1,64 @@
-// --- Firebase initialization ---
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "your-app.firebaseapp.com",
-  databaseURL: "https://your-app-default-rtdb.firebaseio.com",
-  projectId: "your-app",
-  storageBucket: "your-app.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-firebase.initializeApp(firebaseConfig);
+// ========== ZHOBCHAT CHAT.JS ==========
+document.addEventListener("DOMContentLoaded", () => {
+  const userList = document.getElementById("userList");
+  const messageBox = document.getElementById("messageBox");
+  const form = document.getElementById("messageForm");
+  const input = document.getElementById("messageInput");
+  const logoutBtn = document.getElementById("logoutBtn");
 
-const auth = firebase.auth();
-const db = firebase.database();
+  // --- Sample Users (Robots) ---
+  const robots = [
+    { name: "Abid", dp: "https://i.pravatar.cc/150?img=5" },
+    { name: "Hina", dp: "https://i.pravatar.cc/150?img=32" },
+    { name: "Akbar Khan", dp: "https://i.pravatar.cc/150?img=15" },
+    { name: "Junaid", dp: "https://i.pravatar.cc/150?img=24" },
+    { name: "Shaista", dp: "https://i.pravatar.cc/150?img=45" }
+  ];
 
-const messageForm = document.getElementById('messageForm');
-const messageInput = document.getElementById('messageInput');
-const messageBox = document.getElementById('messageBox');
-const userList = document.getElementById('userList');
-
-// --- 5 Robot Users (dummy display only) ---
-const robotUsers = [
-  {
-    name: "Abid",
-    email: "abid@zhobchat.ai",
-    dp: "https://randomuser.me/api/portraits/men/22.jpg"
-  },
-  {
-    name: "Hina",
-    email: "hina@zhobchat.ai",
-    dp: "https://randomuser.me/api/portraits/women/68.jpg"
-  },
-  {
-    name: "Akbar Khan",
-    email: "akbar@zhobchat.ai",
-    dp: "https://randomuser.me/api/portraits/men/55.jpg"
-  },
-  {
-    name: "Junaid",
-    email: "junaid@zhobchat.ai",
-    dp: "https://randomuser.me/api/portraits/men/33.jpg"
-  },
-  {
-    name: "Shaista",
-    email: "shaista@zhobchat.ai",
-    dp: "https://randomuser.me/api/portraits/women/45.jpg"
+  // --- Display User List ---
+  function renderUserList() {
+    userList.innerHTML = "";
+    robots.forEach(user => {
+      const li = document.createElement("li");
+      li.classList.add("user-item");
+      li.innerHTML = `
+        <img class="user-dp" src="${user.dp}" alt="${user.name}">
+        <span>${user.name}</span>
+      `;
+      userList.appendChild(li);
+    });
   }
-];
 
-// --- Function to show robot users in user list ---
-function showRobotUsers() {
-  robotUsers.forEach(bot => {
-    const li = document.createElement("li");
-    li.classList.add("user-item");
-    li.innerHTML = `
-      <img src="${bot.dp}" class="user-dp" alt="DP">
-      <span>${bot.name}</span>
-    `;
-    userList.appendChild(li);
+  renderUserList();
+
+  // --- Display Messages ---
+  function addMessage(sender, text, color = "#000") {
+    const div = document.createElement("div");
+    div.classList.add("message");
+    div.innerHTML = `<strong style="color:${color}">${sender}:</strong> ${text}`;
+    messageBox.appendChild(div);
+    messageBox.scrollTop = messageBox.scrollHeight;
+  }
+
+  // --- Auto Robot Greeting ---
+  robots.forEach((bot, index) => {
+    setTimeout(() => {
+      addMessage(bot.name, "Hi everyone 👋 I'm here!");
+    }, 1500 * (index + 1));
   });
-}
 
-// --- Load logged-in user ---
-auth.onAuthStateChanged(user => {
-  if (user) {
-    // Show robot users after user logged in
-    showRobotUsers();
+  // --- Send Message ---
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (text !== "") {
+      addMessage("You", text, "#0084ff");
+      input.value = "";
+    }
+  });
 
-    // Show other users (from Firebase)
-    db.ref("users").on("value", snapshot => {
-      userList.innerHTML = ""; // clear list first
-      showRobotUsers(); // show robots again
-
-      snapshot.forEach(child => {
-        const data = child.val();
-        if (data.email !== user.email) {
-          const li = document.createElement("li");
-          li.classList.add("user-item");
-          li.innerHTML = `
-            <img src="${data.dp || 'default_dp.png'}" class="user-dp">
-            <span>${data.name}</span>
-          `;
-          userList.appendChild(li);
-        }
-      });
-    });
-
-    // Show chat messages
-    db.ref("messages").on("child_added", snapshot => {
-      const msg = snapshot.val();
-      const div = document.createElement("div");
-      div.classList.add("message");
-      div.innerHTML = `<strong>${msg.name}:</strong> ${msg.text}`;
-      messageBox.appendChild(div);
-      messageBox.scrollTop = messageBox.scrollHeight;
-    });
-
-    // Send message
-    messageForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const text = messageInput.value.trim();
-      if (text !== "") {
-        db.ref("messages").push({
-          name: user.displayName || user.email,
-          text: text,
-          timestamp: Date.now()
-        });
-        messageInput.value = "";
-      }
-    });
-  } else {
+  // --- Logout Button ---
+  logoutBtn.addEventListener("click", () => {
     window.location.href = "index.html";
-  }
+  });
 });
