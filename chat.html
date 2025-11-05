@@ -1,55 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ZHOBCHAT — Admin Features</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZHOBCHAT</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">ZHOB<span>CHAT</span></div>
-    <div class="centerLabel">ZHOBCHAT</div>
-    <div class="top-right">
-      <img id="currentDP" src="default_dp.png" class="top-dp" alt="dp">
-      <div id="currentName" class="current-name">—</div>
-      <button id="logoutBtn" class="btn">Logout</button>
+  <div id="chat-container">
+    <div id="chat-sidebar">
+      <h2>ZHOBCHAT</h2>
+      <ul id="userList"></ul>
+      <div id="themeSelector">
+        <label>🎨 Theme:</label>
+        <select id="themeSelect">
+          <option value="default">Default</option>
+          <option value="dark">Dark</option>
+          <option value="blue">Blue</option>
+          <option value="green">Green</option>
+        </select>
+      </div>
+      <button id="logoutBtn">Logout</button>
     </div>
-  </header>
 
-  <div class="main-area">
-    <aside class="users-panel">
-      <div class="users-header">
-        <h4>Users <span id="onlineCount" class="muted small"></span></h4>
+    <div id="chat-main">
+      <div id="chat-header">
+        <h3 id="chatWith">Global Chat</h3>
       </div>
-      <ul id="usersList" class="user-list"></ul>
-    </aside>
-
-    <section class="messages-area">
-      <div id="messages" class="messages"></div>
-
-      <div class="composer">
-        <input id="messageInput" placeholder="Type a message..." autocomplete="off" />
-        <button id="sendBtn" class="btn primary">Send</button>
+      <div id="chat-box"></div>
+      <div id="chat-input">
+        <input type="text" id="messageInput" placeholder="Type your message..." />
+        <button id="sendBtn">Send</button>
       </div>
-
-      <!-- Admin controls -->
-      <div id="adminControls" class="admin-controls hidden">
-        <button id="deleteAllBtn" class="btn danger">Delete All Messages (Admin)</button>
-      </div>
-    </section>
-
-    <aside id="profilePanel" class="profile-panel hidden">
-      <button id="closeProfile" class="close-x">✖</button>
-      <img id="profileDP" src="default_dp.png" class="profile-img" alt="dp" />
-      <h3 id="profileName">Name</h3>
-      <p id="profileInfo" class="muted small">Age · Gender · City</p>
-      <div class="profile-actions">
-        <button id="blockBtn" class="btn danger">Block</button>
-        <button id="muteBtn" class="btn">Mute</button>
-      </div>
-    </aside>
+    </div>
   </div>
+
+  <audio id="notifySound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 
   <script type="module" src="chat.js"></script>
 </body>
