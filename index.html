@@ -1,56 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZHOBCHAT - Login</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="login-container">
-    <h2>ZHOBCHAT</h2>
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button id="loginBtn">Login</button>
-    <button id="signupBtn" class="secondary">Sign Up</button>
-  </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } 
-      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+<div class="login-container">
+  <h2>ZHOB CHAT</h2>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-      authDomain: "zhobchat-33d8e.firebaseapp.com",
-      databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "zhobchat-33d8e",
-      storageBucket: "zhobchat-33d8e.firebasestorage.app",
-      messagingSenderId: "116466089929",
-      appId: "1:116466089929:web:06e914c8ed81ba9391f218"
-    };
+  <input type="email" id="email" placeholder="Email لکھیں" required>
+  <input type="password" id="password" placeholder="Password لکھیں" required>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  <button id="loginBtn">Login</button>
+  <button id="signupBtn" class="secondary">Signup</button>
 
-    const loginBtn = document.getElementById("loginBtn");
-    const signupBtn = document.getElementById("signupBtn");
+  <p id="msg" style="margin-top:10px;color:red;"></p>
+</div>
 
-    loginBtn.addEventListener("click", () => {
-      const email = emailInput.value;
-      const password = passwordInput.value;
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => window.location.href = "chat.html")
-        .catch(err => alert(err.message));
-    });
-
-    signupBtn.addEventListener("click", () => {
-      const email = emailInput.value;
-      const password = passwordInput.value;
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => window.location.href = "chat.html")
-        .catch(err => alert(err.message));
-    });
-  </script>
+<script type="module" src="app.js"></script>
 </body>
 </html>
