@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZHOBCHAT - Signup</title>
+  <script type="module" src="./firebase_config.js"></script>
+  <script type="module" src="./signup.js" defer></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #a2d2ff, #cdb4db);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .signup-box {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      width: 320px;
+    }
+    h2 { text-align: center; margin-bottom: 15px; color: #333; }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #0077b6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      margin-top: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover { background: #005f8a; }
+    .login-link {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .login-link a {
+      color: #0077b6;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="signup-box">
+    <h2>ZHOBCHAT Signup</h2>
+    <input type="text" id="name" placeholder="پورا نام" required />
+    <input type="email" id="email" placeholder="ای میل" required />
+    <input type="password" id="password" placeholder="پاسورڈ" required />
+    <select id="gender" required>
+      <option value="">جنس منتخب کریں</option>
+      <option value="Male">مرد</option>
+      <option value="Female">عورت</option>
+      <option value="Other">دیگر</option>
+    </select>
+    <input type="text" id="city" placeholder="شہر" required />
+    <input type="text" id="dp" placeholder="DP لنک (اختیاری)" />
+
+    <button id="signupBtn">Signup</button>
+
+    <div class="login-link">
+      پہلے سے اکاؤنٹ ہے؟ <a href="login.html">Login کریں</a>
+    </div>
+  </div>
+</body>
+</html>
