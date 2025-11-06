@@ -4,53 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ZHOB CHAT</title>
+  <link rel="icon" type="image/png" href="favicon.ico" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <div class="chat-container">
     <header class="chat-header">
       <h2>ZHOB CHAT</h2>
-      <div class="header-right">
-        <button id="userToggle" class="user-btn">Users</button>
-        <button id="logoutBtn">Logout</button>
+      <div class="header-buttons">
+        <button id="usersBtn" class="users-btn">Users</button>
+        <button id="logoutBtn" class="logout-btn">Logout</button>
       </div>
     </header>
 
-    <aside class="user-list hidden" id="userList">
-      <h3>Online 🔵</h3>
-      <div id="onlineUsers"></div>
-      <hr />
-      <h3>Offline ⚪</h3>
-      <div id="offlineUsers"></div>
-    </aside>
-
     <main class="chat-main">
-      <div class="messages" id="messageBox"></div>
-
-      <div class="message-input">
-        <input type="text" id="messageInput" placeholder="Type your message..." />
-        <button id="sendBtn">Send</button>
-      </div>
+      <div id="chatBox" class="chat-box"></div>
     </main>
+
+    <footer class="chat-footer">
+      <input type="text" id="messageInput" placeholder="Type your message..." />
+      <button id="sendBtn">Send</button>
+    </footer>
+
+    <aside id="usersPanel" class="users-panel"></aside>
   </div>
 
-  <!-- Profile / Private / Theme Section -->
-  <div class="side-menu" id="sideMenu">
-    <h3>Settings ⚙️</h3>
-    <button class="menu-btn" id="profileBtn">👤 Profile</button>
-    <button class="menu-btn" id="privateBtn">💬 Private Chat</button>
-    <button class="menu-btn" id="themeBtn">🎨 Theme</button>
-  </div>
-
-  <!-- Admin panel -->
-  <div id="adminPanel" class="admin-panel hidden">
-    <h3>Admin Controls</h3>
-    <button id="deleteAllBtn">🗑 Delete All</button>
-    <button id="blockUserBtn">🚫 Block User</button>
-    <button id="muteUserBtn">🔇 Mute User</button>
-  </div>
-
-  <script src="firebase_config.js"></script>
-  <script src="chat.js"></script>
+  <script type="module" src="chat.js"></script>
 </body>
 </html>
