@@ -1,25 +1,60 @@
-<!DOCTYPE html>
+<!-- index.html -->
+<!doctype html>
 <html lang="ur">
 <head>
-  <meta charset="UTF-8">
-  <title>ZHOBCHAT - Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZHOBCHAT — Login / Signup</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <main class="auth-page">
+    <div class="brand">
+      <h1>ZHOB CHAT</h1>
+    </div>
 
-<div class="login-container">
-  <h2>ZHOB CHAT</h2>
+    <div class="card auth-card">
+      <div class="tabs">
+        <button id="tabLogin" class="tab active">Login</button>
+        <button id="tabSignup" class="tab">Signup</button>
+      </div>
 
-  <input type="email" id="email" placeholder="Email لکھیں" required>
-  <input type="password" id="password" placeholder="Password لکھیں" required>
+      <div id="loginForm" class="form">
+        <input id="li_email" type="email" placeholder="Email (Gmail)" />
+        <input id="li_password" type="password" placeholder="Password" />
+        <div class="row">
+          <button id="loginBtn" class="btn primary">Login</button>
+          <span id="loginMsg" class="msg"></span>
+        </div>
+      </div>
 
-  <button id="loginBtn">Login</button>
-  <button id="signupBtn" class="secondary">Signup</button>
+      <div id="signupForm" class="form hidden">
+        <input id="su_name" type="text" placeholder="Full Name" />
+        <select id="su_gender">
+          <option value="">Gender</option>
+          <option>Male</option>
+          <option>Female</option>
+        </select>
+        <input id="su_age" type="number" placeholder="Age" />
+        <input id="su_city" type="text" placeholder="City" />
+        <input id="su_email" type="email" placeholder="Email (Gmail)" />
+        <input id="su_password" type="password" placeholder="Password" />
+        <label class="file-label">Profile picture (optional)</label>
+        <input id="su_dp" type="file" accept="image/*" />
+        <div class="row colors">
+          <label>Name color</label><input id="su_nameColor" type="color" value="#e74c3c" />
+          <label>Msg color</label><input id="su_msgColor" type="color" value="#000000" />
+        </div>
+        <div class="row">
+          <button id="signupBtn" class="btn primary">Signup</button>
+          <span id="signupMsg" class="msg"></span>
+        </div>
+      </div>
 
-  <p id="msg" style="margin-top:10px;color:red;"></p>
-</div>
+      <p class="small muted">ابھی سائن اپ کریں — لاگ ان رہائش تب تک برقرار رہے گی جب تک یوزر خود لاگ آؤٹ نہ کرے۔</p>
+    </div>
+  </main>
 
-<script type="module" src="app.js"></script>
+  <script type="module" src="index.js"></script>
 </body>
 </html>
