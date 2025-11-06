@@ -1,155 +1,128 @@
-// ===============================
-// 🔹 ZHOB CHAT - chat.js (Full Working Version)
-// ===============================
+// Firebase initialization
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-// Firebase imports
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, push, onValue, remove, update } from "firebase/database";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { firebaseConfig } from "./firebase_config.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+  authDomain: "zhobchat-33d8e.firebaseapp.com",
+  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "zhobchat-33d8e",
+  storageBucket: "zhobchat-33d8e.firebasestorage.app",
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
+  measurementId: "G-LX9P9LRLV8"
+};
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// UI elements
-const chatContainer = document.getElementById("chat-container");
-const chatBox = document.getElementById("chat-box");
-const messageInput = document.getElementById("messageInput");
+// Elements
+const msgInput = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
+const chatBox = document.getElementById("chatBox");
 const logoutBtn = document.getElementById("logoutBtn");
-const userLabel = document.getElementById("userLabel");
-const usersToggle = document.getElementById("usersToggle");
-const usersList = document.getElementById("usersList");
+const usersBtn = document.getElementById("usersBtn");
+const usersPanel = document.getElementById("usersPanel");
 
 let currentUser = null;
 
-// ===============================
-// 🔹 AUTH STATE
-// ===============================
+// Auth
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
-    userLabel.textContent = user.email.split("@")[0];
-    chatContainer.classList.remove("hidden");
-    addUserToList(currentUser.email.split("@")[0]);
+    loadMessages();
+    loadUsers();
   } else {
     window.location.href = "index.html";
   }
 });
 
-// ===============================
-// 🔹 LOGOUT FUNCTION
-// ===============================
-logoutBtn.addEventListener("click", () => {
-  signOut(auth)
-    .then(() => {
-      remove(ref(db, "users/" + currentUser.uid));
-      window.location.href = "index.html";
-    })
-    .catch((error) => alert("Logout error: " + error.message));
-});
-
-// ===============================
-// 🔹 SEND MESSAGE
-// ===============================
-sendBtn.addEventListener("click", sendMessage);
-messageInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") sendMessage();
-});
-
-function sendMessage() {
-  const text = messageInput.value.trim();
+// Send Message
+sendBtn.addEventListener("click", () => {
+  const text = msgInput.value.trim();
   if (text === "") return;
 
-  const messageData = {
-    user: currentUser ? currentUser.email.split("@")[0] : "Guest",
+  const messageRef = ref(db, "messages");
+  push(messageRef, {
+    user: currentUser.displayName || currentUser.email,
+    uid: currentUser.uid,
     text: text,
-    time: new Date().toLocaleTimeString(),
-  };
+    time: new Date().toLocaleTimeString()
+  });
+  msgInput.value = "";
+});
 
-  push(ref(db, "messages"), messageData)
-    .then(() => {
-      messageInput.value = "";
-      chatBox.scrollTop = chatBox.scrollHeight;
-    })
-    .catch((err) => alert("Error: " + err.message));
+// Load Messages
+function loadMessages() {
+  const messageRef = ref(db, "messages");
+  onValue(messageRef, (snapshot) => {
+    chatBox.innerHTML = "";
+    snapshot.forEach((child) => {
+      const data = child.val();
+      const msgDiv = document.createElement("div");
+      msgDiv.classList.add("message");
+      msgDiv.innerHTML = `
+        <b>${data.user}:</b> ${data.text}
+        <small>${data.time}</small>
+      `;
+      // Admin delete option
+      if (currentUser.email === "admin@zhobchat.com") {
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "🗑️";
+        delBtn.onclick = () => remove(ref(db, `messages/${child.key}`));
+        msgDiv.appendChild(delBtn);
+      }
+      chatBox.appendChild(msgDiv);
+    });
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
 }
 
-// ===============================
-// 🔹 DISPLAY MESSAGES (REAL-TIME)
-// ===============================
-onValue(ref(db, "messages"), (snapshot) => {
-  chatBox.innerHTML = "";
-  snapshot.forEach((child) => {
-    const msg = child.val();
-    const msgDiv = document.createElement("div");
-    msgDiv.classList.add("message");
+// Load Users
+function loadUsers() {
+  const userRef = ref(db, "users");
+  onValue(userRef, (snapshot) => {
+    usersPanel.innerHTML = "";
+    snapshot.forEach((child) => {
+      const data = child.val();
+      const userDiv = document.createElement("div");
+      userDiv.classList.add("user-item");
+      userDiv.textContent = data.name;
 
-    // Delete option for admin
-    let deleteBtn = "";
-    if (currentUser && currentUser.email === "admin@gmail.com") {
-      deleteBtn = `<button class="deleteBtn" data-id="${child.key}">🗑️</button>`;
-    }
-
-    msgDiv.innerHTML = `
-      <div class="msg-header">
-        <strong style="color:#0078ff">${msg.user}</strong>
-        <span style="font-size:0.8em;color:gray;">${msg.time}</span>
-        ${deleteBtn}
-      </div>
-      <div class="msg-text">${msg.text}</div>
-    `;
-    chatBox.appendChild(msgDiv);
-  });
-
-  // Delete message action
-  document.querySelectorAll(".deleteBtn").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      const id = e.target.getAttribute("data-id");
-      remove(ref(db, "messages/" + id));
+      // click for menu
+      userDiv.addEventListener("click", () => showUserMenu(data.name));
+      usersPanel.appendChild(userDiv);
     });
   });
-
-  chatBox.scrollTop = chatBox.scrollHeight;
-});
-
-// ===============================
-// 🔹 USER LIST (Online)
-// ===============================
-function addUserToList(username) {
-  const userRef = ref(db, "users/" + currentUser.uid);
-  update(userRef, { name: username, online: true });
-
-  // Remove user when disconnects
-  userRef.onDisconnect().remove();
 }
 
-// Show users list
-onValue(ref(db, "users"), (snapshot) => {
-  usersList.innerHTML = "";
-  snapshot.forEach((child) => {
-    const user = child.val();
-    const li = document.createElement("li");
-    li.textContent = user.name;
-    li.className = user.online ? "online" : "offline";
-    usersList.appendChild(li);
-  });
-});
-
-// Toggle users sidebar
-usersToggle.addEventListener("click", () => {
-  usersList.classList.toggle("hidden");
-});
-
-// ===============================
-// 🔹 ADMIN FEATURES (mute/block)
-// ===============================
-function muteUser(username) {
-  alert(username + " has been muted (demo)");
+// Show Menu on user click
+function showUserMenu(username) {
+  const menu = document.createElement("div");
+  menu.classList.add("user-menu");
+  menu.innerHTML = `
+    <button onclick="viewProfile('${username}')">Profile</button>
+    <button onclick="startPrivateChat('${username}')">Private</button>
+    <button onclick="changeTheme('${username}')">Theme</button>
+    <button onclick="adminAction('${username}')">Action</button>
+  `;
+  document.body.appendChild(menu);
+  setTimeout(() => menu.remove(), 4000);
 }
 
-function blockUser(username) {
-  alert(username + " has been blocked (demo)");
-}
+window.viewProfile = (u) => alert(`${u} profile`);
+window.startPrivateChat = (u) => alert(`Private chat with ${u}`);
+window.changeTheme = (u) => alert(`${u} theme change`);
+window.adminAction = (u) => alert(`Admin actions for ${u}`);
+
+// Toggle Users panel
+usersBtn.addEventListener("click", () => {
+  usersPanel.classList.toggle("show");
+});
+
+// Logout
+logoutBtn.addEventListener("click", () => {
+  signOut(auth).then(() => (window.location.href = "index.html"));
+});
