@@ -1,145 +1,171 @@
-body {
+* {
   margin: 0;
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: #e8ebed;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #f5f7fa;
+  font-family: 'Segoe UI', sans-serif;
   height: 100vh;
-  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chat-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 /* Header */
 .chat-header {
-  background: #1976d2;
+  background: #0078d7;
   color: white;
+  padding: 12px 16px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  padding: 0 15px;
-  height: 60px;
 }
 
-.header-right {
+.chat-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.header-buttons {
   display: flex;
-  align-items: center;
-  gap: 20px;
+  gap: 10px;
 }
 
-.user-btn {
+.users-btn, .logout-btn {
   background: white;
-  color: #1976d2;
+  color: #0078d7;
   border: none;
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: 5px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
+  transition: 0.3s;
 }
 
-#logoutBtn {
-  background: #ef5350;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
+.users-btn:hover, .logout-btn:hover {
+  background: #e6e6e6;
 }
 
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
+/* Chat Area */
 .chat-main {
   flex: 1;
+  background: #eef1f4;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.chat-box {
   display: flex;
   flex-direction: column;
-  background: #f7f9fb;
+  gap: 8px;
 }
 
-.messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 15px;
-}
-
-.message-input {
-  display: flex;
-  padding: 10px;
-  background: #fff;
-  border-top: 1px solid #ddd;
-}
-
-.message-input input {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #ccc;
+.message {
+  background: white;
   border-radius: 8px;
+  padding: 8px 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  max-width: 80%;
 }
 
-.message-input button {
-  margin-left: 10px;
-  padding: 8px 15px;
-  background: #1976d2;
+.message small {
+  display: block;
+  font-size: 11px;
+  color: gray;
+  text-align: right;
+}
+
+/* Footer */
+.chat-footer {
+  background: white;
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid #ccc;
+}
+
+.chat-footer input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #bbb;
+}
+
+.chat-footer button {
+  background: #0078d7;
   color: white;
   border: none;
-  border-radius: 8px;
+  padding: 10px 16px;
+  border-radius: 5px;
+  font-weight: 600;
   cursor: pointer;
+  transition: 0.3s;
 }
 
-/* Users panel */
-.user-list {
-  position: fixed;
-  top: 60px;
-  right: 0;
+.chat-footer button:hover {
+  background: #005fa3;
+}
+
+/* Users Panel */
+.users-panel {
+  position: absolute;
+  top: 50px;
+  right: -260px;
   width: 250px;
-  height: calc(100vh - 60px);
+  height: calc(100% - 60px);
   background: white;
   border-left: 1px solid #ccc;
-  box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1);
-  transform: translateX(100%);
-  transition: transform 0.3s ease-in-out;
-  padding: 10px;
+  box-shadow: -2px 0 6px rgba(0,0,0,0.1);
   overflow-y: auto;
-  z-index: 10;
-}
-
-.user-list.show {
-  transform: translateX(0);
-}
-
-/* Profile / Private / Theme side menu */
-.side-menu {
-  position: fixed;
-  left: 10px;
-  bottom: 20px;
-  background: white;
-  border-radius: 12px;
+  transition: right 0.3s ease;
   padding: 10px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
 }
 
-.menu-btn {
-  display: block;
-  background: #1976d2;
-  color: white;
-  border: none;
-  margin: 5px 0;
+.users-panel.show {
+  right: 0;
+}
+
+.user-item {
   padding: 8px;
-  border-radius: 8px;
+  border-bottom: 1px solid #eee;
   cursor: pointer;
-  width: 140px;
-  text-align: left;
+  font-weight: 500;
 }
 
-.admin-panel {
+.user-item:hover {
+  background: #f0f4ff;
+}
+
+.user-menu {
   position: fixed;
-  bottom: 15px;
-  right: 15px;
-  background: #fff;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  gap: 8px;
+  z-index: 999;
 }
 
-.admin-panel.hidden {
-  display: none;
+.user-menu button {
+  border: none;
+  background: #0078d7;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
 }
