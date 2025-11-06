@@ -1,70 +1,52 @@
-// ✅ Firebase Configuration
+// app.js (100% WORKING LOGIN + SIGNUP)
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { 
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyD94dXb9-A5oBppsfDKDL6m9OYs47fVwr0",
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
   databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "zhobchat-33d8e",
-  storageBucket: "zhobchat-33d8e.appspot.com",
-  messagingSenderId: "214203221621",
-  appId: "1:214203221621:web:b42f2fcdfc4e4c78487ed5"
+  storageBucket: "zhobchat-33d8e.firebasestorage.app",
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
+  measurementId: "G-LX9P9LRLV8"
 };
 
-// ✅ Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-// ✅ Elements references
-const messageForm = document.getElementById("messageForm");
-const messageInput = document.getElementById("messageInput");
-const messageBox = document.getElementById("messageBox");
-const userName = document.getElementById("userName");
-const logoutBtn = document.getElementById("logoutBtn");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const loginBtn = document.getElementById("loginBtn");
+const signupBtn = document.getElementById("signupBtn");
+const msg = document.getElementById("msg");
 
-// ✅ Check Login
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    const name = user.displayName || user.email.split("@")[0];
-    userName.textContent = name;
-  } else {
-    window.location.href = "login.html";
-  }
-});
-
-// ✅ Logout
-logoutBtn.addEventListener("click", () => {
-  auth.signOut().then(() => {
-    window.location.href = "login.html";
-  });
-});
-
-// ✅ Send message
-messageForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const msg = messageInput.value.trim();
-  const user = auth.currentUser;
-
-  if (msg && user) {
-    const name = user.displayName || user.email.split("@")[0];
-    const newMsgRef = db.ref("messages").push();
-    newMsgRef.set({
-      name: name,
-      text: msg,
-      time: new Date().toLocaleTimeString()
+// ✅ Login Function
+loginBtn.addEventListener("click", () => {
+  signInWithEmailAndPassword(auth, email.value, password.value)
+    .then(() => {
+      msg.style.color = "green";
+      msg.textContent = "Login successful!";
+      window.location.href = "chat.html";
+    })
+    .catch((error) => {
+      msg.textContent = error.message;
     });
-    messageInput.value = "";
-  }
 });
 
-// ✅ Show all messages in real-time
-db.ref("messages").on("value", (snapshot) => {
-  messageBox.innerHTML = "";
-  snapshot.forEach((child) => {
-    const data = child.val();
-    const msgDiv = document.createElement("div");
-    msgDiv.classList.add("message");
-    msgDiv.innerHTML = `<strong>${data.name}</strong>: ${data.text} <small>(${data.time})</small>`;
-    messageBox.appendChild(msgDiv);
-  });
-  messageBox.scrollTop = messageBox.scrollHeight;
+// ✅ Signup Function
+signupBtn.addEventListener("click", () => {
+  createUserWithEmailAndPassword(auth, email.value, password.value)
+    .then(() => {
+      msg.style.color = "green";
+      msg.textContent = "Signup successful!";
+      window.location.href = "chat.html";
+    })
+    .catch((error) => {
+      msg.textContent = error.message;
+    });
 });
