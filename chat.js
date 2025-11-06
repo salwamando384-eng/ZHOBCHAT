@@ -1,4 +1,3 @@
-// chat.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { 
   getAuth, onAuthStateChanged, signOut 
@@ -7,7 +6,7 @@ import {
   getDatabase, ref, push, onValue, set 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// 🔹 Firebase Config
+// ✅ Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -15,15 +14,13 @@ const firebaseConfig = {
   projectId: "zhobchat-33d8e",
   storageBucket: "zhobchat-33d8e.firebasestorage.app",
   messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-  measurementId: "G-LX9P9LRLV8"
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// 🔹 HTML Elements
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
@@ -33,7 +30,7 @@ const usersPanel = document.getElementById("usersPanel");
 
 let currentUser = null;
 
-// ✅ User Login Check
+// 🔹 Login Check
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
@@ -45,30 +42,37 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// 🔹 Save user info in DB
+// 🔹 Save User Info
 function saveUser(user) {
   const userRef = ref(db, "users/" + user.uid);
   set(userRef, {
-    name: user.displayName || user.email,
+    name: user.email.split("@")[0],
     email: user.email,
-    lastSeen: new Date().toLocaleString(),
-    online: true
+    online: true,
+    lastSeen: new Date().toLocaleString()
   });
 }
 
-// 🔹 Send message
+// 🔹 Send Message
 function sendMessage() {
   const text = msgInput.value.trim();
-  if (text === "") return;
+  if (!text) return;
 
   const msgRef = ref(db, "messages");
   push(msgRef, {
     uid: currentUser.uid,
-    user: currentUser.displayName || currentUser.email,
-    text: text,
+    user: currentUser.email.split("@")[0],
+    text,
     time: new Date().toLocaleTimeString()
   });
   msgInput.value = "";
+  playSound();
+}
+
+// 🔹 Sound on Send
+function playSound() {
+  const sound = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_dca1dcf00e.mp3");
+  sound.play();
 }
 
 sendBtn.addEventListener("click", sendMessage);
@@ -76,48 +80,51 @@ msgInput.addEventListener("keypress", e => {
   if (e.key === "Enter") sendMessage();
 });
 
-// 🔹 Load messages
+// 🔹 Load Messages
 function loadMessages() {
   const msgRef = ref(db, "messages");
   onValue(msgRef, (snapshot) => {
     chatBox.innerHTML = "";
     snapshot.forEach((child) => {
-      const data = child.val();
-      const msgDiv = document.createElement("div");
-      msgDiv.classList.add("message");
-      msgDiv.innerHTML = `
-        <b>${data.user}:</b> ${data.text}
-        <br><small>${data.time}</small>
-      `;
-      chatBox.appendChild(msgDiv);
+      const m = child.val();
+      const div = document.createElement("div");
+      div.classList.add("message");
+      div.innerHTML = `<b>${m.user}:</b> ${m.text}<br><small>${m.time}</small>`;
+      chatBox.appendChild(div);
     });
     chatBox.scrollTop = chatBox.scrollHeight;
   });
 }
 
-// 🔹 Load users list
+// 🔹 Load Users
 function loadUsers() {
   const userRef = ref(db, "users");
   onValue(userRef, (snapshot) => {
     usersPanel.innerHTML = "";
     snapshot.forEach((child) => {
       const u = child.val();
-      const userDiv = document.createElement("div");
-      userDiv.classList.add("user-item");
-      userDiv.textContent = u.name || u.email;
-      usersPanel.appendChild(userDiv);
+      const div = document.createElement("div");
+      div.classList.add("user-item");
+      div.textContent = `${u.name} (${u.online ? "🟢" : "⚫"})`;
+      usersPanel.appendChild(div);
     });
   });
 }
 
-// 🔹 Toggle user list
+// 🔹 Toggle Users Panel
 usersBtn.addEventListener("click", () => {
   usersPanel.classList.toggle("show");
 });
 
 // 🔹 Logout
 logoutBtn.addEventListener("click", () => {
-  signOut(auth).then(() => {
-    window.location.href = "index.html";
+  signOut(auth).then(() => window.location.href = "index.html");
+});
+
+// 🎨 Theme Color Change
+const themeButtons = document.querySelectorAll(".theme-btn");
+themeButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.body.style.background = btn.dataset.color;
   });
 });
