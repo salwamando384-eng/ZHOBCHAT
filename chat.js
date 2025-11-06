@@ -1,22 +1,14 @@
-// Firebase initialization
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, set, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain: "zhobchat-33d8e.firebaseapp.com",
-  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "zhobchat-33d8e",
-  storageBucket: "zhobchat-33d8e.firebasestorage.app",
-  messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-  measurementId: "G-LX9P9LRLV8"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
+// chat.js (updated for firebase_config.js v11)
+import { auth, db } from "./firebase_config.js";
+import {
+  ref,
+  push,
+  onValue,
+  remove,
+  set,
+  update
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 // Elements
 const msgInput = document.getElementById("messageInput");
@@ -32,7 +24,7 @@ let currentUser = null;
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
-    // Save user to DB
+    // Save user info
     const userRef = ref(db, "users/" + user.uid);
     set(userRef, {
       name: user.displayName || user.email,
@@ -40,6 +32,7 @@ onAuthStateChanged(auth, (user) => {
       online: true,
       lastSeen: new Date().toLocaleString()
     });
+
     loadMessages();
     loadUsers();
   } else {
@@ -47,7 +40,7 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// Send Message
+// Send message
 function sendMessage() {
   const text = msgInput.value.trim();
   if (text === "") return;
@@ -67,7 +60,7 @@ msgInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
 });
 
-// Load Messages
+// Load messages
 function loadMessages() {
   const messageRef = ref(db, "messages");
   onValue(messageRef, (snapshot) => {
@@ -80,7 +73,6 @@ function loadMessages() {
         <b>${data.user}:</b> ${data.text}
         <small>${data.time}</small>
       `;
-      // Admin delete option
       if (currentUser.email === "admin@zhobchat.com") {
         const delBtn = document.createElement("button");
         delBtn.textContent = "🗑️";
@@ -93,7 +85,7 @@ function loadMessages() {
   });
 }
 
-// Load Users
+// Load users
 function loadUsers() {
   const userRef = ref(db, "users");
   onValue(userRef, (snapshot) => {
@@ -109,7 +101,7 @@ function loadUsers() {
   });
 }
 
-// Show User Menu
+// User menu
 function showUserMenu(username) {
   const menu = document.createElement("div");
   menu.classList.add("user-menu");
@@ -123,7 +115,6 @@ function showUserMenu(username) {
   setTimeout(() => menu.remove(), 4000);
 }
 
-// Expose for inline HTML calls
 window.viewProfile = (u) => alert(`${u}'s profile`);
 window.startPrivateChat = (u) => alert(`Private chat with ${u}`);
 window.changeTheme = (u) => alert(`${u}'s theme`);
