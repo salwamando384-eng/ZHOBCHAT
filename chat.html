@@ -1,34 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>ZHOB CHAT</title>
-  <link rel="icon" type="image/png" href="favicon.ico" />
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      background: #007bff;
+      color: white;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #chatBox {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      background: #fff;
+    }
+    .message {
+      background: #e9e9e9;
+      border-radius: 5px;
+      padding: 6px;
+      margin-bottom: 5px;
+    }
+    #msgArea {
+      display: flex;
+      padding: 10px;
+      background: #f5f5f5;
+    }
+    #messageInput {
+      flex: 1;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    #sendBtn {
+      padding: 8px 12px;
+      margin-left: 6px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    #usersPanel {
+      position: fixed;
+      top: 60px;
+      right: 0;
+      background: #fff;
+      border-left: 1px solid #ccc;
+      width: 200px;
+      height: calc(100% - 60px);
+      display: none;
+      overflow-y: auto;
+      z-index: 10;
+    }
+    #usersPanel.show {
+      display: block;
+    }
+    .user-item {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    .user-item:hover {
+      background: #f0f0f0;
+    }
+    .user-menu {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 6px;
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <h3>ZHOB CHAT</h3>
+    <div>
+      <button id="usersBtn">Users</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </header>
 
-  <div class="chat-container">
-    <header class="chat-header">
-      <h2>ZHOB CHAT</h2>
-      <div class="header-buttons">
-        <button id="usersBtn" class="users-btn">Users</button>
-        <button id="logoutBtn" class="logout-btn">Logout</button>
-      </div>
-    </header>
+  <div id="chatBox"></div>
 
-    <main class="chat-main">
-      <div id="chatBox" class="chat-box"></div>
-    </main>
-
-    <footer class="chat-footer">
-      <input type="text" id="messageInput" placeholder="Type your message..." />
-      <button id="sendBtn">Send</button>
-    </footer>
-
-    <aside id="usersPanel" class="users-panel"></aside>
+  <div id="msgArea">
+    <input type="text" id="messageInput" placeholder="اپنا پیغام لکھیں..." />
+    <button id="sendBtn">Send</button>
   </div>
+
+  <div id="usersPanel"></div>
 
   <script type="module" src="chat.js"></script>
 </body>
