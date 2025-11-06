@@ -1,6 +1,6 @@
 // Firebase initialization
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove, set, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -32,6 +32,14 @@ let currentUser = null;
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
+    // Save user to DB
+    const userRef = ref(db, "users/" + user.uid);
+    set(userRef, {
+      name: user.displayName || user.email,
+      email: user.email,
+      online: true,
+      lastSeen: new Date().toLocaleString()
+    });
     loadMessages();
     loadUsers();
   } else {
@@ -40,7 +48,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // Send Message
-sendBtn.addEventListener("click", () => {
+function sendMessage() {
   const text = msgInput.value.trim();
   if (text === "") return;
 
@@ -52,6 +60,11 @@ sendBtn.addEventListener("click", () => {
     time: new Date().toLocaleTimeString()
   });
   msgInput.value = "";
+}
+
+sendBtn.addEventListener("click", sendMessage);
+msgInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
 });
 
 // Load Messages
@@ -89,16 +102,14 @@ function loadUsers() {
       const data = child.val();
       const userDiv = document.createElement("div");
       userDiv.classList.add("user-item");
-      userDiv.textContent = data.name;
-
-      // click for menu
+      userDiv.textContent = data.name || data.email;
       userDiv.addEventListener("click", () => showUserMenu(data.name));
       usersPanel.appendChild(userDiv);
     });
   });
 }
 
-// Show Menu on user click
+// Show User Menu
 function showUserMenu(username) {
   const menu = document.createElement("div");
   menu.classList.add("user-menu");
@@ -112,12 +123,13 @@ function showUserMenu(username) {
   setTimeout(() => menu.remove(), 4000);
 }
 
-window.viewProfile = (u) => alert(`${u} profile`);
+// Expose for inline HTML calls
+window.viewProfile = (u) => alert(`${u}'s profile`);
 window.startPrivateChat = (u) => alert(`Private chat with ${u}`);
-window.changeTheme = (u) => alert(`${u} theme change`);
+window.changeTheme = (u) => alert(`${u}'s theme`);
 window.adminAction = (u) => alert(`Admin actions for ${u}`);
 
-// Toggle Users panel
+// Toggle users panel
 usersBtn.addEventListener("click", () => {
   usersPanel.classList.toggle("show");
 });
