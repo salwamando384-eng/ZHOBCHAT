@@ -1,50 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZHOB CHAT</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT - Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h2>ZHOB CHAT</h2>
-    <div>
-      <select id="theme-select">
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-        <option value="blue">Blue</option>
-        <option value="green">Green</option>
-      </select>
-      <button id="users-btn">Users</button>
-      <button id="logout-btn">Logout</button>
-    </div>
-  </header>
-
-  <div id="main">
-    <div id="message-box"></div>
-
-    <form id="message-form">
-      <input id="message-input" type="text" placeholder="Type message..." autocomplete="off" />
-      <button type="submit">Send</button>
-    </form>
+  <div class="login-container">
+    <h2>ZHOBCHAT</h2>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button id="loginBtn">Login</button>
+    <button id="signupBtn" class="secondary">Sign Up</button>
   </div>
 
-  <aside id="users-panel"></aside>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-  <div id="private-chat" class="hidden">
-    <div class="popup">
-      <h3 id="private-title"></h3>
-      <div id="private-box"></div>
-      <input id="private-input" placeholder="Type private message..." />
-      <button id="private-send">Send</button>
-      <button id="close-private">Close</button>
-    </div>
-  </div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+      authDomain: "zhobchat-33d8e.firebaseapp.com",
+      databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "zhobchat-33d8e",
+      storageBucket: "zhobchat-33d8e.firebasestorage.app",
+      messagingSenderId: "116466089929",
+      appId: "1:116466089929:web:06e914c8ed81ba9391f218"
+    };
 
-  <audio id="notify-sound" src="notify.mp3" preload="auto"></audio>
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-  <script type="module" src="firebase_config.js"></script>
-  <script type="module" src="Chat.js"></script>
+    const loginBtn = document.getElementById("loginBtn");
+    const signupBtn = document.getElementById("signupBtn");
+
+    loginBtn.addEventListener("click", () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      signInWithEmailAndPassword(auth, email, password)
+        .then(() => window.location.href = "chat.html")
+        .catch(err => alert(err.message));
+    });
+
+    signupBtn.addEventListener("click", () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(() => window.location.href = "chat.html")
+        .catch(err => alert(err.message));
+    });
+  </script>
 </body>
 </html>
