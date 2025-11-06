@@ -7,36 +7,44 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="chat-container">
-    <header class="chat-header">
-      <h2>ZHOB CHAT</h2>
-      <div class="header-right">
-        <button id="menuToggle" class="dots-btn">⋮</button>
-        <button id="logoutBtn">Logout</button>
-      </div>
-    </header>
+  <header>
+    <h2>ZHOB CHAT</h2>
+    <div>
+      <select id="theme-select">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="blue">Blue</option>
+        <option value="green">Green</option>
+      </select>
+      <button id="users-btn">Users</button>
+      <button id="logout-btn">Logout</button>
+    </div>
+  </header>
 
-    <aside class="user-list hidden" id="userList"></aside>
+  <div id="main">
+    <div id="message-box"></div>
 
-    <main class="chat-main">
-      <div class="messages" id="messageBox"></div>
-
-      <div class="message-input">
-        <input type="text" id="messageInput" placeholder="Type your message..." />
-        <button id="sendBtn">Send</button>
-      </div>
-    </main>
+    <form id="message-form">
+      <input id="message-input" type="text" placeholder="Type message..." autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
   </div>
 
-  <!-- Admin panel -->
-  <div id="adminPanel" class="admin-panel hidden">
-    <h3>Admin Controls</h3>
-    <button id="deleteAllBtn">🗑 Delete All</button>
-    <button id="blockUserBtn">🚫 Block User</button>
-    <button id="muteUserBtn">🔇 Mute User</button>
+  <aside id="users-panel"></aside>
+
+  <div id="private-chat" class="hidden">
+    <div class="popup">
+      <h3 id="private-title"></h3>
+      <div id="private-box"></div>
+      <input id="private-input" placeholder="Type private message..." />
+      <button id="private-send">Send</button>
+      <button id="close-private">Close</button>
+    </div>
   </div>
 
-  <script src="firebase_config.js"></script>
-  <script src="chat.js"></script>
+  <audio id="notify-sound" src="notify.mp3" preload="auto"></audio>
+
+  <script type="module" src="firebase_config.js"></script>
+  <script type="module" src="Chat.js"></script>
 </body>
 </html>
