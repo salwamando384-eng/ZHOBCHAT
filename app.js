@@ -1,4 +1,4 @@
-// Firebase Configuration
+// ✅ Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyD94dXb9-A5oBppsfDKDL6m9OYs47fVwr0",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -9,37 +9,62 @@ const firebaseConfig = {
   appId: "1:214203221621:web:b42f2fcdfc4e4c78487ed5"
 };
 
-// Initialize Firebase
+// ✅ Initialize Firebase
 firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 const db = firebase.database();
 
-// References
+// ✅ Elements references
 const messageForm = document.getElementById("messageForm");
 const messageInput = document.getElementById("messageInput");
 const messageBox = document.getElementById("messageBox");
+const userName = document.getElementById("userName");
+const logoutBtn = document.getElementById("logoutBtn");
 
-// When message is sent
+// ✅ Check Login
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    const name = user.displayName || user.email.split("@")[0];
+    userName.textContent = name;
+  } else {
+    window.location.href = "login.html";
+  }
+});
+
+// ✅ Logout
+logoutBtn.addEventListener("click", () => {
+  auth.signOut().then(() => {
+    window.location.href = "login.html";
+  });
+});
+
+// ✅ Send message
 messageForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  const message = messageInput.value.trim();
-  if (message) {
-    const newMessageRef = db.ref("messages").push();
-    newMessageRef.set({
-      text: message,
+  const msg = messageInput.value.trim();
+  const user = auth.currentUser;
+
+  if (msg && user) {
+    const name = user.displayName || user.email.split("@")[0];
+    const newMsgRef = db.ref("messages").push();
+    newMsgRef.set({
+      name: name,
+      text: msg,
       time: new Date().toLocaleTimeString()
     });
     messageInput.value = "";
   }
 });
 
-// Show messages in real-time
+// ✅ Show all messages in real-time
 db.ref("messages").on("value", (snapshot) => {
   messageBox.innerHTML = "";
-  snapshot.forEach((childSnapshot) => {
-    const data = childSnapshot.val();
-    const p = document.createElement("p");
-    p.textContent = `${data.time} - ${data.text}`;
-    messageBox.appendChild(p);
+  snapshot.forEach((child) => {
+    const data = child.val();
+    const msgDiv = document.createElement("div");
+    msgDiv.classList.add("message");
+    msgDiv.innerHTML = `<strong>${data.name}</strong>: ${data.text} <small>(${data.time})</small>`;
+    messageBox.appendChild(msgDiv);
   });
   messageBox.scrollTop = messageBox.scrollHeight;
 });
