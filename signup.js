@@ -1,4 +1,10 @@
-// Firebase config (آپ کا اپنا config یہاں لگائیں)
+// Import Firebase modular SDK
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
+
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -6,18 +12,19 @@ const firebaseConfig = {
   projectId: "zhobchat-33d8e",
   storageBucket: "zhobchat-33d8e.appspot.com",
   messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
+  measurementId: "G-LX9P9LRLV8"
 };
 
-firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
-const database = firebase.database();
-const storage = firebase.storage();
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+const storage = getStorage(app);
 
 const signupForm = document.getElementById("signupForm");
 
-signupForm.addEventListener("submit", function(e) {
+signupForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const name = document.getElementById("name").value;
@@ -28,39 +35,30 @@ signupForm.addEventListener("submit", function(e) {
   const password = document.getElementById("password").value;
   const dpFile = document.getElementById("dp").files[0];
 
-  // Firebase Auth
-  auth.createUserWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      const userId = userCredential.user.uid;
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userId = userCredential.user.uid;
 
-      // DP upload
-      if (dpFile) {
-        const storageRef = storage.ref("users/" + userId + "/dp.jpg");
-        storageRef.put(dpFile).then(() => {
-          storageRef.getDownloadURL().then((url) => {
-            saveUserProfile(userId, name, age, gender, city, url);
-          });
-        });
-      } else {
-        saveUserProfile(userId, name, age, gender, city, "");
-      }
-    })
-    .catch((error) => {
-      alert(error.message);
+    let dpUrl = "";
+    if (dpFile) {
+      const storageRef = sRef(storage, `users/${userId}/dp.jpg`);
+      await uploadBytes(storageRef, dpFile);
+      dpUrl = await getDownloadURL(storageRef);
+    }
+
+    await set(ref(database, `users/${userId}`), {
+      name: name,
+      age: age,
+      gender: gender,
+      city: city,
+      dp: dpUrl,
+      blockedUsers: []
     });
-});
 
-// Function to save profile in database
-function saveUserProfile(userId, name, age, gender, city, dpUrl) {
-  database.ref("users/" + userId).set({
-    name: name,
-    age: age,
-    gender: gender,
-    city: city,
-    dp: dpUrl,
-    blockedUsers: []
-  }).then(() => {
     alert("Signup successful!");
     window.location = "chat.html"; // Redirect to chat page
-  });
-}
+
+  } catch (error) {
+    alert(error.message);
+  }
+});
