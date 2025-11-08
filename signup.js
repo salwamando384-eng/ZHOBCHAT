@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebas
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -19,7 +20,7 @@ const db = getDatabase(app);
 
 const signupForm = document.getElementById("signupForm");
 
-signupForm.addEventListener("submit", (e) => {
+signupForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const name = document.getElementById("name").value.trim();
@@ -28,33 +29,43 @@ signupForm.addEventListener("submit", (e) => {
   const city = document.getElementById("city").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
+  const dpFile = document.getElementById("dp").files[0];
 
-  if (!email || !password || !name) {
-    alert("براہ کرم تمام ضروری فیلڈز بھریں");
+  if (!name || !email || !password) {
+    alert("براہ کرم نام، ای میل اور پاس ورڈ ضرور بھریں");
     return;
   }
 
-  createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-      // ✅ DP کو optional رکھ دیا
-      const dp = "default_dp.png";
+    // DP optional
+    let dpURL = "default_dp.png";
+    if (dpFile) {
+      dpURL = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(dpFile);
+      });
+    }
 
-      set(ref(db, "users/" + user.uid), {
-        name,
-        age,
-        gender,
-        city,
-        email,
-        dp,
-        blockedUsers: []
-      })
-      .then(() => {
-        alert("Signup کامیاب 🎉");
-        window.location = "chat.html";
-      })
-      .catch((err) => alert("Database error: " + err.message));
-    })
-    .catch((error) => alert("Authentication error: " + error.message));
+    // Save user info to Realtime Database
+    await set(ref(db, "users/" + user.uid), {
+      name,
+      age,
+      gender,
+      city,
+      email,
+      dp: dpURL,
+      blockedUsers: []
+    });
+
+    alert("Signup کامیاب 🎉");
+    window.location = "chat.html";
+
+  } catch (error) {
+    alert("Signup Error: " + error.message);
+  }
 });
