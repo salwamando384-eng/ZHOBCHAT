@@ -1,26 +1,26 @@
-<!doctype html>
-<html lang="ur">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ZHOB CHAT — Room</title>
-  <link rel="stylesheet" href="style.css">
+  <title>ZHOBCHAT</title>
+  <style>
+    body { font-family: Arial; margin: 0; padding: 0; }
+    #chatBox { height: 80vh; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
+    #messageInput { width: 80%; padding: 10px; }
+    #sendBtn { padding: 10px; }
+    .message { margin: 5px 0; }
+    .sender { font-weight: bold; }
+    .dp { width: 30px; height: 30px; border-radius: 50%; vertical-align: middle; margin-right: 5px; }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>ZHOB CHAT</h1>
-    <button id="logoutBtn" class="btn danger">Logout</button>
-  </header>
+  <h2>ZHOBCHAT</h2>
+  <div id="chatBox"></div>
+  <input type="text" id="messageInput" placeholder="Message..." />
+  <button id="sendBtn">Send</button>
 
-  <main class="chat-page">
-    <div id="messages" class="messages"></div>
-
-    <div class="msg-box">
-      <input id="msgInput" type="text" placeholder="Write a message..." />
-      <button id="sendBtn" class="btn primary">Send</button>
-    </div>
-  </main>
-
-  <script type="module" src="chat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="chat.js"></script>
 </body>
 </html>
