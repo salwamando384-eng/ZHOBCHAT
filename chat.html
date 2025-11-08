@@ -3,13 +3,13 @@
 <head>
   <title>ZHOBCHAT</title>
   <style>
-    body { font-family: Arial; margin: 0; padding: 0; }
-    #chatBox { height: 80vh; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
-    #messageInput { width: 80%; padding: 10px; }
-    #sendBtn { padding: 10px; }
-    .message { margin: 5px 0; }
-    .sender { font-weight: bold; }
-    .dp { width: 30px; height: 30px; border-radius: 50%; vertical-align: middle; margin-right: 5px; }
+    body { font-family: Arial; margin:0; padding:0; }
+    #chatBox { height: 80vh; overflow-y: scroll; border:1px solid #ccc; padding:10px; }
+    #messageInput { width: 80%; padding:10px; }
+    #sendBtn { padding:10px; }
+    .message { margin:5px 0; }
+    .sender { font-weight:bold; }
+    .dp { width:30px; height:30px; border-radius:50%; vertical-align:middle; margin-right:5px; }
   </style>
 </head>
 <body>
@@ -18,9 +18,6 @@
   <input type="text" id="messageInput" placeholder="Message..." />
   <button id="sendBtn">Send</button>
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="chat.js"></script>
+  <script type="module" src="chat.js"></script>
 </body>
 </html>
