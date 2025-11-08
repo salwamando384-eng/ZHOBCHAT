@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Private Chat</title>
+  <style>
+    #chatBox { height: 70vh; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
+    .message { margin: 5px; }
+    .sender { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h3 id="chatWithName"></h3>
+  <div id="chatBox"></div>
+  <input type="text" id="msgInput" placeholder="Write message..." />
+  <button id="sendBtn">Send</button>
+
+  <script type="module" src="private_chat.js"></script>
+</body>
+</html>
