@@ -1,7 +1,3 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-
 // Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
@@ -14,13 +10,14 @@ const firebaseConfig = {
   measurementId: "G-LX9P9LRLV8"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
 const signupForm = document.getElementById("signupForm");
 
-signupForm.addEventListener("submit", async (e) => {
+signupForm.addEventListener("submit", function(e) {
   e.preventDefault();
 
   const name = document.getElementById("name").value.trim();
@@ -36,36 +33,39 @@ signupForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+  auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
 
-    // DP optional
-    let dpURL = "default_dp.png";
-    if (dpFile) {
-      dpURL = await new Promise((resolve, reject) => {
+      // DP optional
+      if (dpFile) {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (err) => reject(err);
+        reader.onload = function() {
+          saveUser(user.uid, reader.result);
+        }
         reader.readAsDataURL(dpFile);
-      });
-    }
+      } else {
+        saveUser(user.uid, "default_dp.png");
+      }
 
-    // Save user info to Realtime Database
-    await set(ref(db, "users/" + user.uid), {
-      name,
-      age,
-      gender,
-      city,
-      email,
-      dp: dpURL,
-      blockedUsers: []
+      function saveUser(uid, dpURL) {
+        db.ref("users/" + uid).set({
+          name,
+          age,
+          gender,
+          city,
+          email,
+          dp: dpURL,
+          blockedUsers: []
+        })
+        .then(() => {
+          alert("Signup کامیاب 🎉");
+          window.location = "chat.html";
+        })
+        .catch((err) => alert("Database error: " + err.message));
+      }
+    })
+    .catch((error) => {
+      alert("Signup Error: " + error.message);
     });
-
-    alert("Signup کامیاب 🎉");
-    window.location = "chat.html";
-
-  } catch (error) {
-    alert("Signup Error: " + error.message);
-  }
 });
