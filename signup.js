@@ -1,10 +1,9 @@
-// Import Firebase modular SDK
+// ✅ Signup.js - ZhobChat
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -19,46 +18,54 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const database = getDatabase(app);
-const storage = getStorage(app);
+const db = getDatabase(app);
 
+// ✅ DOM Elements
 const signupForm = document.getElementById("signupForm");
 
-signupForm.addEventListener("submit", async (e) => {
+signupForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const name = document.getElementById("name").value;
-  const age = document.getElementById("age").value;
-  const gender = document.getElementById("gender").value;
-  const city = document.getElementById("city").value;
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const name = document.getElementById("name").value.trim();
+  const age = document.getElementById("age").value.trim();
+  const gender = document.getElementById("gender").value.trim();
+  const city = document.getElementById("city").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
   const dpFile = document.getElementById("dp").files[0];
 
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const userId = userCredential.user.uid;
-
-    let dpUrl = "";
-    if (dpFile) {
-      const storageRef = sRef(storage, `users/${userId}/dp.jpg`);
-      await uploadBytes(storageRef, dpFile);
-      dpUrl = await getDownloadURL(storageRef);
-    }
-
-    await set(ref(database, `users/${userId}`), {
-      name: name,
-      age: age,
-      gender: gender,
-      city: city,
-      dp: dpUrl,
-      blockedUsers: []
-    });
-
-    alert("Signup successful!");
-    window.location = "chat.html"; // Redirect to chat page
-
-  } catch (error) {
-    alert(error.message);
+  if (!email || !password || !name) {
+    alert("براہ کرم تمام فیلڈز بھریں");
+    return;
   }
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+
+      // 🔹 Default DP
+      const reader = new FileReader();
+      reader.onload = function () {
+        const dpURL = dpFile ? reader.result : "default_dp.png";
+
+        set(ref(db, "users/" + user.uid), {
+          name,
+          age,
+          gender,
+          city,
+          email,
+          dp: dpURL,
+          blockedUsers: []
+        }).then(() => {
+          alert("Signup کامیاب 🎉");
+          window.location = "chat.html";
+        });
+      };
+
+      if (dpFile) reader.readAsDataURL(dpFile);
+      else reader.onload();
+    })
+    .catch((error) => {
+      alert("Error: " + error.message);
+    });
 });
