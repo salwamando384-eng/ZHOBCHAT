@@ -1,18 +1,33 @@
 // index.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import {
+  getDatabase,
+  ref,
+  set
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import {
+  getStorage,
+  ref as sRef,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// 🔥 اپنی Firebase Config یہاں لگاؤ
+// ✅ تمہارا Firebase Config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "zhobchatweb.firebaseapp.com",
-  databaseURL: "https://zhobchatweb-default-rtdb.firebaseio.com",
-  projectId: "zhobchatweb",
-  storageBucket: "zhobchatweb.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+  authDomain: "zhobchat-33d8e.firebaseapp.com",
+  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "zhobchat-33d8e",
+  storageBucket: "zhobchat-33d8e.firebasestorage.app",
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
+  measurementId: "G-LX9P9LRLV8"
 };
 
 // Initialize Firebase
@@ -21,13 +36,12 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-// UI Elements
+// 🟦 Tabs switching
 const tabLogin = document.getElementById("tabLogin");
 const tabSignup = document.getElementById("tabSignup");
 const loginForm = document.getElementById("loginForm");
 const signupForm = document.getElementById("signupForm");
 
-// Tabs switch
 tabLogin.onclick = () => {
   tabLogin.classList.add("active");
   tabSignup.classList.remove("active");
@@ -42,22 +56,24 @@ tabSignup.onclick = () => {
   loginForm.classList.add("hidden");
 };
 
-// Login
+// 🟢 LOGIN
 document.getElementById("loginBtn").onclick = async () => {
   const email = document.getElementById("li_email").value.trim();
   const password = document.getElementById("li_password").value.trim();
   const msg = document.getElementById("loginMsg");
 
+  msg.textContent = "Logging in...";
+
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    msg.textContent = "Login successful ✅";
-    setTimeout(() => window.location.href = "chat.html", 1000);
-  } catch (e) {
-    msg.textContent = "❌ " + e.message;
+    msg.textContent = "✅ Login successful";
+    setTimeout(() => (window.location.href = "chat.html"), 1000);
+  } catch (err) {
+    msg.textContent = "❌ " + err.message;
   }
 };
 
-// Signup
+// 🟣 SIGNUP
 document.getElementById("signupBtn").onclick = async () => {
   const name = document.getElementById("su_name").value.trim();
   const gender = document.getElementById("su_gender").value;
@@ -71,14 +87,17 @@ document.getElementById("signupBtn").onclick = async () => {
   const msg = document.getElementById("signupMsg");
 
   if (!name || !email || !password) {
-    msg.textContent = "Please fill all required fields";
+    msg.textContent = "❌ Fill all required fields";
     return;
   }
+
+  msg.textContent = "Creating account...";
 
   try {
     const userCred = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCred.user;
 
+    // 🖼 Upload profile picture if provided
     let dpUrl = "";
     if (dpFile) {
       const dpRef = sRef(storage, "profiles/" + user.uid + ".jpg");
@@ -86,8 +105,13 @@ document.getElementById("signupBtn").onclick = async () => {
       dpUrl = await getDownloadURL(dpRef);
     }
 
-    await updateProfile(user, { displayName: name, photoURL: dpUrl });
+    // Update Firebase Auth profile
+    await updateProfile(user, {
+      displayName: name,
+      photoURL: dpUrl
+    });
 
+    // Save user info in Realtime Database
     await set(ref(db, "users/" + user.uid), {
       uid: user.uid,
       name,
@@ -101,9 +125,9 @@ document.getElementById("signupBtn").onclick = async () => {
       createdAt: new Date().toISOString()
     });
 
-    msg.textContent = "Signup successful 🎉";
-    setTimeout(() => window.location.href = "chat.html", 1500);
-  } catch (e) {
-    msg.textContent = "❌ " + e.message;
+    msg.textContent = "🎉 Signup successful!";
+    setTimeout(() => (window.location.href = "chat.html"), 1500);
+  } catch (err) {
+    msg.textContent = "❌ " + err.message;
   }
 };
