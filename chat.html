@@ -1,65 +1,25 @@
-<!-- chat.html -->
 <!doctype html>
 <html lang="ur">
 <head>
   <meta charset="utf-8" />
-  <title>ZHOB CHAT — Room</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZHOB CHAT — Room</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="chat-page">
-  <div class="chat-container">
-    <header class="chat-header">
-      <div class="header-left">
-        <h2 id="brandTitle">ZHOB CHAT</h2>
-        <div id="userLabel" class="user-label">User</div>
-      </div>
-      <div class="header-right">
-        <button id="usersBtn" class="btn small">Users</button>
-        <select id="themeSelect" title="Change chat theme" class="theme-select">
-          <option value="default">Theme</option>
-          <option value="blue">Blue</option>
-          <option value="dark">Dark</option>
-          <option value="green">Green</option>
-          <option value="purple">Purple</option>
-        </select>
-        <button id="logoutBtn" class="btn small">Logout</button>
-      </div>
-    </header>
+<body>
+  <header>
+    <h1>ZHOB CHAT</h1>
+    <button id="logoutBtn" class="btn danger">Logout</button>
+  </header>
 
-    <main class="chat-main">
-      <div id="chatBox" class="chat-box" aria-live="polite"></div>
-    </main>
+  <main class="chat-page">
+    <div id="messages" class="messages"></div>
 
-    <footer class="chat-footer">
-      <input id="messageInput" placeholder="اپنا پیغام لکھیں..." autocomplete="off" />
-      <button id="sendBtn" class="btn">Send</button>
-    </footer>
-
-    <aside id="usersPanel" class="users-panel" aria-hidden="true">
-      <h3>Users <span id="onlineCount">(0)</span></h3>
-      <div id="usersList"></div>
-      <hr />
-      <h4>Robots</h4>
-      <div id="botsList"></div>
-    </aside>
-
-    <!-- profile modal -->
-    <div id="profileModal" class="modal hidden">
-      <div class="modal-card">
-        <img id="profileDp" src="default_dp.png" class="profile-dp" />
-        <h3 id="profileName"></h3>
-        <p id="profileInfo"></p>
-        <div class="modal-actions">
-          <button id="pmBtn" class="btn">Private Message</button>
-          <button id="friendBtn" class="btn">Friend Request</button>
-          <button id="actionBtn" class="btn">Action</button>
-          <button id="closeProfile" class="btn alt">Close</button>
-        </div>
-      </div>
+    <div class="msg-box">
+      <input id="msgInput" type="text" placeholder="Write a message..." />
+      <button id="sendBtn" class="btn primary">Send</button>
     </div>
-
-  </div>
+  </main>
 
   <script type="module" src="chat.js"></script>
 </body>
