@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="utf-8" />
+  <title>Profile</title>
+  <style>body{font-family:sans-serif;text-align:center;padding:20px}img{width:120px;border-radius:50%}</style>
+</head>
+<body>
+  <h2>User Profile</h2>
+  <img id="dp" src="default_dp.png" alt="dp"/>
+  <h3 id="name"></h3>
+  <p id="age"></p>
+  <p id="gender"></p>
+  <p id="city"></p>
+  <button id="blockBtn">Loading...</button>
+  <p><a href="users.html">Back</a></p>
+
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
+  <script src="profile.js"></script>
+</body>
+</html>
