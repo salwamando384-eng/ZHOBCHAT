@@ -1,19 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="ur">
 <head>
+  <meta charset="utf-8" />
   <title>Private Chat</title>
   <style>
-    #chatBox { height: 70vh; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
-    .message { margin: 5px; }
-    .sender { font-weight: bold; }
+    body{font-family:sans-serif;padding:10px}
+    #chatBox{height:60vh;overflow:auto;border:1px solid #ddd;padding:8px}
+    input{width:70%;padding:8px}
+    button{padding:8px}
   </style>
 </head>
 <body>
-  <h3 id="chatWithName"></h3>
+  <h3 id="chatWithName">Private Chat</h3>
   <div id="chatBox"></div>
-  <input type="text" id="msgInput" placeholder="Write message..." />
+  <input id="msgInput" placeholder="Write message..." />
   <button id="sendBtn">Send</button>
+  <p><a href="users.html">Back</a></p>
 
-  <script type="module" src="private_chat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
+  <script src="private_chat.js"></script>
 </body>
 </html>
