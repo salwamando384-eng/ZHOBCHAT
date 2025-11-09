@@ -1,7 +1,3 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-import { getDatabase, ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -9,56 +5,49 @@ const firebaseConfig = {
   projectId: "zhobchat-33d8e",
   storageBucket: "zhobchat-33d8e.appspot.com",
   messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-  measurementId: "G-LX9P9LRLV8"
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
 };
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-const chatWith = localStorage.getItem("chatWith");
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 const chatWithName = document.getElementById("chatWithName");
 
-let currentUser;
+auth.onAuthStateChanged(async user => {
+  if (!user) return location.href = "login.html";
+  const other = localStorage.getItem("chatWith");
+  if (!other) { alert("No chat target"); return location.href="users.html"; }
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) return window.location = "signup.html";
-  currentUser = user;
+  // canonical chat id so both users use same node
+  const chatId = (user.uid < other) ? user.uid + "_" + other : other + "_" + user.uid;
+  const chatRef = db.ref("privateChats/" + chatId);
 
-  const userSnap = await get(ref(db, `users/${chatWith}`));
-  const u = userSnap.val();
-  chatWithName.textContent = u ? u.name : "User";
+  // show other user name
+  const otherSnap = await db.ref("users/" + other).once("value");
+  const otherData = otherSnap.val() || {};
+  chatWithName.textContent = otherData.name || "User";
 
-  const chatId = currentUser.uid < chatWith
-    ? currentUser.uid + "_" + chatWith
-    : chatWith + "_" + currentUser.uid;
-
-  const chatRef = ref(db, `privateChats/${chatId}`);
-
-  sendBtn.addEventListener("click", async () => {
+  sendBtn.onclick = () => {
     const text = msgInput.value.trim();
     if (!text) return;
-
-    await push(chatRef, {
-      sender: currentUser.uid,
-      text,
-      timestamp: Date.now()
-    });
+    chatRef.push({ sender: user.uid, text, time: Date.now() });
     msgInput.value = "";
-  });
+  };
 
-  onChildAdded(chatRef, async (snap) => {
-    const msg = snap.val();
-    const senderSnap = await get(ref(db, `users/${msg.sender}`));
-    const sender = senderSnap.val();
+  chatRef.on("child_added", async snap => {
+    const m = snap.val();
+    // if current user has blocked sender -> skip
+    const meSnap = await db.ref("users/" + user.uid).once("value");
+    const me = meSnap.val() || {};
+    if (me.blockedUsers && me.blockedUsers.includes(m.sender)) return;
 
+    const senderSnap = await db.ref("users/" + m.sender).once("value");
+    const s = senderSnap.val() || {};
     const div = document.createElement("div");
-    div.classList.add("message");
-    div.innerHTML = `<b class="sender">${sender.name}:</b> ${msg.text}`;
+    div.innerHTML = `<b>${s.name||'User'}:</b> ${m.text}`;
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
   });
