@@ -33,9 +33,6 @@
       border-radius: 10px;
       cursor: pointer;
     }
-    #usersList span:hover {
-      background: #d1e8ff;
-    }
     .status-dot {
       display: inline-block;
       width: 10px;
@@ -60,6 +57,7 @@
       border-radius: 50%;
       margin-left: 10px;
       object-fit: cover;
+      cursor: pointer;
     }
     .msg-content {
       background: #f2f2f2;
@@ -97,6 +95,45 @@
     button:hover {
       background: #0b7dda;
     }
+
+    /* 🌟 Profile Card */
+    #profilePopup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .profileCard {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      width: 280px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .profileCard img {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 10px;
+    }
+    .profileCard h3 {
+      margin: 5px 0;
+    }
+    .closeBtn {
+      background: crimson;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: none;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -112,12 +149,23 @@
     <button id="sendBtn">Send</button>
   </div>
 
+  <!-- 🌟 Profile Popup -->
+  <div id="profilePopup">
+    <div class="profileCard">
+      <img id="pPhoto" src="">
+      <h3 id="pName"></h3>
+      <p id="pGender"></p>
+      <p id="pCity"></p>
+      <p id="pAge"></p>
+      <button class="closeBtn" onclick="closeProfile()">بند کریں</button>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import {
       getAuth,
-      onAuthStateChanged,
-      signOut
+      onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import {
       getDatabase,
@@ -128,7 +176,7 @@
       set,
       serverTimestamp,
       onDisconnect,
-      update
+      get
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     const firebaseConfig = {
@@ -150,8 +198,15 @@
     const sendBtn = document.getElementById("sendBtn");
     const usersList = document.getElementById("usersList");
 
+    const popup = document.getElementById("profilePopup");
+    const pPhoto = document.getElementById("pPhoto");
+    const pName = document.getElementById("pName");
+    const pGender = document.getElementById("pGender");
+    const pCity = document.getElementById("pCity");
+    const pAge = document.getElementById("pAge");
+
     let currentUser = null;
-    let activeChatId = "public"; // default chat room
+    let activeChatId = "public";
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
@@ -160,7 +215,6 @@
       }
       currentUser = user;
 
-      // ✅ Online status set
       const userStatusRef = ref(db, "status/" + user.uid);
       await set(userStatusRef, { online: true, lastSeen: new Date().toISOString() });
       onDisconnect(userStatusRef).set({ online: false, lastSeen: new Date().toISOString() });
@@ -169,7 +223,6 @@
       loadMessages();
     });
 
-    // 🔹 Load All Users with Status
     function loadUsers() {
       const usersRef = ref(db, "users");
       const statusRef = ref(db, "status");
@@ -183,7 +236,6 @@
 
           for (let uid in users) {
             if (uid === currentUser.uid) continue;
-
             const span = document.createElement("span");
             const dot = document.createElement("span");
             dot.classList.add("status-dot");
@@ -193,25 +245,33 @@
 
             span.textContent = users[uid].name || "User";
             span.prepend(dot);
-            span.onclick = () => openPrivateChat(uid, users[uid].name);
+            span.onclick = () => showProfile(uid);
             usersList.appendChild(span);
           }
         });
       });
     }
 
-    // 🔹 Open Private Chat
-    function openPrivateChat(otherUID, otherName) {
-      activeChatId =
-        currentUser.uid < otherUID
-          ? `${currentUser.uid}_${otherUID}`
-          : `${otherUID}_${currentUser.uid}`;
-      chatBox.innerHTML = "";
-      document.querySelector("header").textContent = `🔒 پرائیویٹ چیٹ: ${otherName}`;
-      loadMessages();
+    // 🌟 Show Profile Popup
+    async function showProfile(uid) {
+      const userRef = ref(db, "users/" + uid);
+      const snap = await get(userRef);
+      const data = snap.val();
+      if (!data) return;
+
+      pPhoto.src = data.photoURL || "default.png";
+      pName.textContent = "👤 " + data.name;
+      pGender.textContent = "🚻 جنس: " + (data.gender || "نامعلوم");
+      pCity.textContent = "🏙️ شہر: " + (data.city || "نامعلوم");
+      pAge.textContent = "🎂 عمر: " + (data.age || "نامعلوم");
+
+      popup.style.display = "flex";
     }
 
-    // 🔹 Load Messages (public or private)
+    window.closeProfile = function() {
+      popup.style.display = "none";
+    };
+
     function loadMessages() {
       const chatRef = ref(db, "chats/" + activeChatId);
       chatBox.innerHTML = "";
@@ -221,12 +281,10 @@
       });
     }
 
-    // 🔹 Send Message
     sendBtn.onclick = async () => {
       const text = messageInput.value.trim();
       if (!text) return;
       const chatRef = ref(db, "chats/" + activeChatId);
-
       await push(chatRef, {
         uid: currentUser.uid,
         name: currentUser.displayName || "User",
@@ -234,17 +292,16 @@
         text,
         timestamp: serverTimestamp()
       });
-
       messageInput.value = "";
     };
 
-    // 🔹 Display Message
     function displayMessage(data) {
       const msgDiv = document.createElement("div");
       msgDiv.className = "msg";
 
       const img = document.createElement("img");
       img.src = data.photoURL || "default.png";
+      img.onclick = () => showProfile(data.uid);
 
       const content = document.createElement("div");
       content.className = "msg-content";
@@ -252,6 +309,7 @@
       const name = document.createElement("div");
       name.className = "msg-name";
       name.textContent = data.name || "User";
+      name.onclick = () => showProfile(data.uid);
 
       const text = document.createElement("div");
       text.textContent = data.text;
