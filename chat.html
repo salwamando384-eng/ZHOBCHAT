@@ -36,6 +36,13 @@
     #usersList span:hover {
       background: #d1e8ff;
     }
+    .status-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-left: 5px;
+    }
     #chatBox {
       height: 65vh;
       overflow-y: auto;
@@ -109,7 +116,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import {
       getAuth,
-      onAuthStateChanged
+      onAuthStateChanged,
+      signOut
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import {
       getDatabase,
@@ -118,7 +126,9 @@
       onChildAdded,
       onValue,
       set,
-      serverTimestamp
+      serverTimestamp,
+      onDisconnect,
+      update
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     const firebaseConfig = {
@@ -143,29 +153,50 @@
     let currentUser = null;
     let activeChatId = "public"; // default chat room
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "index.html";
         return;
       }
       currentUser = user;
+
+      // ✅ Online status set
+      const userStatusRef = ref(db, "status/" + user.uid);
+      await set(userStatusRef, { online: true, lastSeen: new Date().toISOString() });
+      onDisconnect(userStatusRef).set({ online: false, lastSeen: new Date().toISOString() });
+
       loadUsers();
       loadMessages();
     });
 
-    // 🔹 Load All Users List
+    // 🔹 Load All Users with Status
     function loadUsers() {
       const usersRef = ref(db, "users");
+      const statusRef = ref(db, "status");
+
       onValue(usersRef, (snapshot) => {
+        const users = snapshot.val() || {};
         usersList.innerHTML = "";
-        const users = snapshot.val();
-        for (let uid in users) {
-          if (uid === currentUser.uid) continue;
-          const span = document.createElement("span");
-          span.textContent = users[uid].name || "User";
-          span.onclick = () => openPrivateChat(uid, users[uid].name);
-          usersList.appendChild(span);
-        }
+
+        onValue(statusRef, (statusSnap) => {
+          const statuses = statusSnap.val() || {};
+
+          for (let uid in users) {
+            if (uid === currentUser.uid) continue;
+
+            const span = document.createElement("span");
+            const dot = document.createElement("span");
+            dot.classList.add("status-dot");
+
+            const userStatus = statuses[uid]?.online;
+            dot.style.background = userStatus ? "limegreen" : "gray";
+
+            span.textContent = users[uid].name || "User";
+            span.prepend(dot);
+            span.onclick = () => openPrivateChat(uid, users[uid].name);
+            usersList.appendChild(span);
+          }
+        });
       });
     }
 
@@ -202,12 +233,6 @@
         photoURL: currentUser.photoURL || "default.png",
         text,
         timestamp: serverTimestamp()
-      });
-
-      // save user info (for list)
-      await set(ref(db, "users/" + currentUser.uid), {
-        name: currentUser.displayName || "User",
-        photoURL: currentUser.photoURL || "default.png"
       });
 
       messageInput.value = "";
