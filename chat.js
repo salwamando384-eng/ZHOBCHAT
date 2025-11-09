@@ -1,8 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-import { getDatabase, ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-
-// Firebase config (اپنا config یہاں لگائیں)
+// Firebase init (same config)
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -10,51 +6,61 @@ const firebaseConfig = {
   projectId: "zhobchat-33d8e",
   storageBucket: "zhobchat-33d8e.appspot.com",
   messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-  measurementId: "G-LX9P9LRLV8"
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
 };
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
 const chatBox = document.getElementById("chatBox");
-const messageInput = document.getElementById("messageInput");
+const input = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
+const usersBtn = document.getElementById("usersBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const myInfo = document.getElementById("myInfo");
+const status = document.getElementById("status");
 
-// Ensure user is logged in
-onAuthStateChanged(auth, (user) => {
-  if (!user) window.location = "signup.html";
-});
+usersBtn.addEventListener("click", () => location.href = "users.html");
+logoutBtn.addEventListener("click", () => auth.signOut().then(()=> location.href="login.html"));
 
-// Send message
-sendBtn.addEventListener("click", async () => {
-  const text = messageInput.value;
-  if (!text) return;
-
-  const userId = auth.currentUser.uid;
-  await push(ref(database, "messages"), {
-    senderId: userId,
-    text: text,
-    timestamp: Date.now()
+auth.onAuthStateChanged(user => {
+  if (!user) return location.href = "login.html";
+  status.textContent = "Logged in";
+  // show my info
+  db.ref("users/" + user.uid).once("value").then(snap => {
+    const d = snap.val() || {};
+    myInfo.innerHTML = `<img src="${d.dp || 'default_dp.png'}" class="dp"/> <div><b>${d.name||'You'}</b></div>`;
   });
 
-  messageInput.value = "";
-});
+  // send message
+  sendBtn.onclick = () => {
+    const text = input.value.trim();
+    if (!text) return;
+    // write to global messages
+    db.ref("messages").push({
+      sender: user.uid,
+      text,
+      time: Date.now()
+    });
+    input.value = "";
+  };
 
-// Listen for messages
-onChildAdded(ref(database, "messages"), async (snapshot) => {
-  const msg = snapshot.val();
-  const msgDiv = document.createElement("div");
-  msgDiv.classList.add("message");
+  // listen messages
+  db.ref("messages").limitToLast(200).on("child_added", async snap => {
+    const m = snap.val();
+    // check block: if current user has blocked sender -> skip
+    const meSnap = await db.ref("users/" + user.uid).once("value");
+    const me = meSnap.val() || {};
+    if (me.blockedUsers && me.blockedUsers.includes(m.sender)) return;
 
-  // Get sender info
-  const userSnap = await get(ref(database, `users/${msg.senderId}`));
-  const user = userSnap.val();
-  const dpUrl = user.dp || "default_dp.png";
-
-  msgDiv.innerHTML = `<img src="${dpUrl}" class="dp"/> <span class="sender">${user.name}:</span> ${msg.text}`;
-  chatBox.appendChild(msgDiv);
-  chatBox.scrollTop = chatBox.scrollHeight;
+    // get sender data
+    const s = (await db.ref("users/" + m.sender).once("value")).val() || {};
+    const dp = s.dp || 'default_dp.png';
+    const name = s.name || 'User';
+    const div = document.createElement('div');
+    div.className = 'msg';
+    div.innerHTML = `<img src="${dp}" class="dp"/> <b>${name}:</b> ${m.text}`;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
 });
