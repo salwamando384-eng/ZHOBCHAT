@@ -1,7 +1,4 @@
-// =====================
-// 🔹 ZHOB CHAT - DEBUG MODE
-// =====================
-
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -12,118 +9,78 @@ const firebaseConfig = {
   appId: "YOUR_APP_ID"
 };
 
-// 🟢 Initialize Firebase
-let debugDiv = document.createElement("div");
-debugDiv.style.position = "fixed";
-debugDiv.style.bottom = "0";
-debugDiv.style.left = "0";
-debugDiv.style.right = "0";
-debugDiv.style.maxHeight = "200px";
-debugDiv.style.overflowY = "auto";
-debugDiv.style.background = "#000";
-debugDiv.style.color = "#0f0";
-debugDiv.style.fontFamily = "monospace";
-debugDiv.style.fontSize = "12px";
-debugDiv.style.padding = "10px";
-debugDiv.style.zIndex = "99999";
-debugDiv.innerText = "🟡 Connecting to Firebase...";
-document.body.appendChild(debugDiv);
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+const storage = firebase.storage();
 
-function logDebug(msg) {
-  console.log(msg);
-  debugDiv.innerText += "\n" + msg;
-}
+// Signup
+document.getElementById("signup-form")?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = document.getElementById("signup-email").value;
+  const password = document.getElementById("signup-password").value;
+  const username = document.getElementById("signup-username").value;
+  const gender = document.querySelector('input[name="gender"]:checked')?.value || "Unknown";
+  const profilePic = document.getElementById("profile-pic").files[0];
+  const nameColor = document.getElementById("name-color").value || "#000000";
+  const msgColor = document.getElementById("msg-color").value || "#000000";
 
-// Firebase Initialization
-let app, database, auth;
+  const createBtn = document.getElementById("create-account-btn");
+  createBtn.disabled = true;
+  createBtn.textContent = "Creating account...";
 
-try {
-  app = firebase.initializeApp(firebaseConfig);
-  database = firebase.database();
-  auth = firebase.auth();
-  logDebug("✅ Firebase SDK initialized");
-} catch (e) {
-  logDebug("❌ Firebase init failed: " + e.message);
-}
+  auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      const uid = user.uid;
+      const uploadPromise = profilePic 
+        ? storage.ref(`profilePics/${uid}`).put(profilePic).then(() => storage.ref(`profilePics/${uid}`).getDownloadURL())
+        : Promise.resolve("https://i.postimg.cc/3Rwgjfyk/default.png");
 
-// Test Firebase connection
-try {
-  firebase.database().ref(".info/connected").on("value", (snap) => {
-    if (snap.val() === true) {
-      logDebug("✅ Firebase Realtime DB connected");
-    } else {
-      logDebug("⚠️ Firebase not connected");
-    }
+      uploadPromise.then((photoURL) => {
+        return db.ref("users/" + uid).set({
+          username,
+          email,
+          gender,
+          photoURL,
+          nameColor,
+          msgColor,
+          createdAt: new Date().toISOString()
+        });
+      }).then(() => {
+        alert("Signup successful!");
+        window.location.href = "https://salwamando384-eng.github.io/ZHOBCHAT/";
+      });
+    })
+    .catch((error) => {
+      alert("Error: " + error.message);
+    })
+    .finally(() => {
+      createBtn.disabled = false;
+      createBtn.textContent = "Signup";
+    });
+});
+
+// Login
+document.getElementById("login-form")?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      alert("Login successful!");
+      window.location.href = "chat.html";
+    })
+    .catch((error) => {
+      alert("Login failed: " + error.message);
+    });
+});
+
+// Logout
+document.getElementById("logout-btn")?.addEventListener("click", () => {
+  auth.signOut().then(() => {
+    window.location.href = "https://salwamando384-eng.github.io/ZHOBCHAT/";
   });
-} catch (e) {
-  logDebug("❌ DB check error: " + e.message);
-}
-
-// =====================
-// 🔹 SIGNUP / LOGIN
-// =====================
-const signupBtn = document.getElementById("signupBtn");
-const loginBtn = document.getElementById("loginBtn");
-const emailInput = document.getElementById("email");
-const passInput = document.getElementById("password");
-
-if (signupBtn && loginBtn) {
-  signupBtn.onclick = () => {
-    const email = emailInput.value;
-    const pass = passInput.value;
-    auth.createUserWithEmailAndPassword(email, pass)
-      .then(user => {
-        logDebug("✅ Signup success: " + user.user.email);
-        alert("Signup success!");
-      })
-      .catch(err => logDebug("❌ Signup error: " + err.message));
-  };
-
-  loginBtn.onclick = () => {
-    const email = emailInput.value;
-    const pass = passInput.value;
-    auth.signInWithEmailAndPassword(email, pass)
-      .then(user => {
-        logDebug("✅ Login success: " + user.user.email);
-        alert("Login success!");
-      })
-      .catch(err => logDebug("❌ Login error: " + err.message));
-  };
-} else {
-  logDebug("⚠️ Login/Signup buttons not found in DOM");
-}
-
-// =====================
-// 🔹 CHAT MESSAGE SYSTEM
-// =====================
-const msgForm = document.getElementById("msgForm");
-const msgInput = document.getElementById("msgInput");
-const msgBox = document.getElementById("msgBox");
-
-if (msgForm && msgInput && msgBox) {
-  msgForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const msg = msgInput.value.trim();
-    if (msg !== "") {
-      firebase.database().ref("messages").push({
-        text: msg,
-        time: new Date().toISOString()
-      })
-      .then(() => {
-        logDebug("✅ Message sent: " + msg);
-        msgInput.value = "";
-      })
-      .catch(err => logDebug("❌ Message send failed: " + err.message));
-    }
-  });
-
-  // Listen for new messages
-  firebase.database().ref("messages").on("child_added", (snap) => {
-    const msg = snap.val();
-    const p = document.createElement("p");
-    p.textContent = msg.text;
-    msgBox.appendChild(p);
-  });
-} else {
-  logDebug("⚠️ Chat elements missing");
-}
+});
