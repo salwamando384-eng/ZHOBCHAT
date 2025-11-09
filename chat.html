@@ -1,23 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="ur">
 <head>
-  <title>ZHOBCHAT</title>
+  <meta charset="utf-8" />
+  <title>ZHOBCHAT - Chat</title>
   <style>
-    body { font-family: Arial; margin:0; padding:0; }
-    #chatBox { height: 80vh; overflow-y: scroll; border:1px solid #ccc; padding:10px; }
-    #messageInput { width: 80%; padding:10px; }
-    #sendBtn { padding:10px; }
-    .message { margin:5px 0; }
-    .sender { font-weight:bold; }
-    .dp { width:30px; height:30px; border-radius:50%; vertical-align:middle; margin-right:5px; }
+    body{font-family: sans-serif; margin:0; display:flex; height:100vh}
+    #sidebar{width:260px;border-right:1px solid #ddd;padding:10px;background:#fafafa}
+    #main{flex:1;display:flex;flex-direction:column}
+    #chatBox{flex:1;overflow:auto;padding:10px}
+    #inputRow{padding:10px;border-top:1px solid #ddd}
+    input{width:80%;padding:8px}
+    button{padding:8px 12px;margin-left:8px}
+    .msg{margin:8px 0}
+    .dp{width:32px;height:32px;border-radius:50%;vertical-align:middle;margin-right:8px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #eee}
   </style>
 </head>
 <body>
-  <h2>ZHOBCHAT</h2>
-  <div id="chatBox"></div>
-  <input type="text" id="messageInput" placeholder="Message..." />
-  <button id="sendBtn">Send</button>
 
-  <script type="module" src="chat.js"></script>
+  <div id="sidebar">
+    <h3>ZhobChat</h3>
+    <div>
+      <button id="usersBtn">Users</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
+    <hr/>
+    <div id="myInfo"></div>
+  </div>
+
+  <div id="main">
+    <div class="topbar">
+      <div>Global Chat</div>
+      <div id="status"></div>
+    </div>
+    <div id="chatBox"></div>
+    <div id="inputRow">
+      <input id="messageInput" placeholder="Message..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <!-- Firebase compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
+
+  <script src="chat.js"></script>
 </body>
 </html>
