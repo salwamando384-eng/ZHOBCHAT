@@ -1,12 +1,12 @@
 // Firebase Configuration
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
-  databaseURL: "https://zhobchat-33d8e-default-rtdb.firebaseio.com",
+  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "zhobchat-33d8e",
   storageBucket: "zhobchat-33d8e.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
 };
 
 // Initialize Firebase
@@ -22,9 +22,8 @@ document.getElementById("signup-form")?.addEventListener("submit", (e) => {
   const password = document.getElementById("signup-password").value;
   const username = document.getElementById("signup-username").value;
   const gender = document.querySelector('input[name="gender"]:checked')?.value || "Unknown";
-  const profilePic = document.getElementById("profile-pic").files[0];
-  const nameColor = document.getElementById("name-color").value || "#000000";
-  const msgColor = document.getElementById("msg-color").value || "#000000";
+  const nameColor = document.getElementById("name-color").value;
+  const msgColor = document.getElementById("msg-color").value;
 
   const createBtn = document.getElementById("create-account-btn");
   createBtn.disabled = true;
@@ -34,24 +33,20 @@ document.getElementById("signup-form")?.addEventListener("submit", (e) => {
     .then((userCredential) => {
       const user = userCredential.user;
       const uid = user.uid;
-      const uploadPromise = profilePic 
-        ? storage.ref(`profilePics/${uid}`).put(profilePic).then(() => storage.ref(`profilePics/${uid}`).getDownloadURL())
-        : Promise.resolve("https://i.postimg.cc/3Rwgjfyk/default.png");
 
-      uploadPromise.then((photoURL) => {
-        return db.ref("users/" + uid).set({
-          username,
-          email,
-          gender,
-          photoURL,
-          nameColor,
-          msgColor,
-          createdAt: new Date().toISOString()
-        });
-      }).then(() => {
-        alert("Signup successful!");
-        window.location.href = "https://salwamando384-eng.github.io/ZHOBCHAT/";
+      return db.ref("users/" + uid).set({
+        username,
+        email,
+        gender,
+        nameColor,
+        msgColor,
+        photoURL: "https://i.postimg.cc/3Rwgjfyk/default.png", // default DP
+        createdAt: new Date().toISOString()
       });
+    })
+    .then(() => {
+      alert("Signup successful!");
+      window.location.href = "chat.html";
     })
     .catch((error) => {
       alert("Error: " + error.message);
@@ -76,11 +71,4 @@ document.getElementById("login-form")?.addEventListener("submit", (e) => {
     .catch((error) => {
       alert("Login failed: " + error.message);
     });
-});
-
-// Logout
-document.getElementById("logout-btn")?.addEventListener("click", () => {
-  auth.signOut().then(() => {
-    window.location.href = "https://salwamando384-eng.github.io/ZHOBCHAT/";
-  });
 });
