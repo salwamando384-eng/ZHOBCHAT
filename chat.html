@@ -31,8 +31,8 @@
     }
 
     #profile-img {
-      width: 40px;
-      height: 40px;
+      width: 45px;
+      height: 45px;
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid white;
@@ -42,13 +42,18 @@
       font-weight: bold;
     }
 
-    #logout-btn {
-      background: crimson;
+    #logout-btn, #edit-btn {
+      background: #3498db;
       color: white;
       border: none;
       padding: 5px 10px;
       border-radius: 6px;
       cursor: pointer;
+      margin-left: 5px;
+    }
+
+    #logout-btn {
+      background: crimson;
     }
 
     #chat-box {
@@ -95,6 +100,48 @@
       cursor: pointer;
       margin-left: 5px;
     }
+
+    /* Profile Edit Modal */
+    #editModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    #editBox {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    #editBox input[type="file"] {
+      margin: 10px 0;
+    }
+
+    #saveEdit {
+      background: green;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #closeEdit {
+      background: gray;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
   </style>
 </head>
 <body>
@@ -104,7 +151,10 @@
       <img id="profile-img" src="https://i.postimg.cc/3Rwgjfyk/default.png" alt="Profile">
       <span id="profile-name">Loading...</span>
     </div>
-    <button id="logout-btn">Logout</button>
+    <div>
+      <button id="edit-btn">Edit Profile</button>
+      <button id="logout-btn">Logout</button>
+    </div>
   </header>
 
   <div id="chat-box"></div>
@@ -113,6 +163,18 @@
     <input type="text" id="message-input" placeholder="Type a message..." required />
     <button type="submit" id="send-btn">Send</button>
   </form>
+
+  <!-- Edit Profile Modal -->
+  <div id="editModal">
+    <div id="editBox">
+      <h3>Edit Profile</h3>
+      <input type="file" id="newDp" accept="image/*"><br>
+      <label>Name Color: <input type="color" id="newNameColor"></label><br><br>
+      <label>Message Color: <input type="color" id="newMsgColor"></label><br><br>
+      <button id="saveEdit">Save</button>
+      <button id="closeEdit">Cancel</button>
+    </div>
+  </div>
 
   <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -135,74 +197,102 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+    const storage = firebase.storage();
 
-    // 🧍‍♂️ User Auth Check + Profile Load
+    const chatBox = document.getElementById("chat-box");
+    const modal = document.getElementById("editModal");
+    const newDp = document.getElementById("newDp");
+    const newNameColor = document.getElementById("newNameColor");
+    const newMsgColor = document.getElementById("newMsgColor");
+
+    // 🧍‍♂️ Load User Info
+    let currentUser = null;
     auth.onAuthStateChanged((user) => {
       if (!user) {
         window.location.href = "index.html";
         return;
       }
 
-      const uid = user.uid;
-      db.ref("users/" + uid).once("value").then((snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          document.getElementById("profile-name").textContent = data.username;
-          document.getElementById("profile-name").style.color = data.nameColor;
-          document.getElementById("profile-img").src = data.photoURL || "https://i.postimg.cc/3Rwgjfyk/default.png";
-        }
+      currentUser = user;
+      db.ref("users/" + user.uid).once("value").then((snap) => {
+        const data = snap.val();
+        document.getElementById("profile-name").textContent = data.username;
+        document.getElementById("profile-name").style.color = data.nameColor;
+        document.getElementById("profile-img").src = data.photoURL || "https://i.postimg.cc/3Rwgjfyk/default.png";
+        newNameColor.value = data.nameColor || "#000000";
+        newMsgColor.value = data.msgColor || "#000000";
       });
     });
 
     // 🚪 Logout
     document.getElementById("logout-btn").addEventListener("click", () => {
-      auth.signOut().then(() => {
-        window.location.href = "index.html";
-      });
+      auth.signOut().then(() => window.location.href = "index.html");
     });
 
-    // 💬 Message Send
-    const form = document.getElementById("message-form");
-    const input = document.getElementById("message-input");
-    const chatBox = document.getElementById("chat-box");
-
-    form.addEventListener("submit", (e) => {
+    // 💬 Send Message
+    document.getElementById("message-form").addEventListener("submit", (e) => {
       e.preventDefault();
-      const message = input.value.trim();
-      const user = auth.currentUser;
-
-      if (message && user) {
+      const msg = document.getElementById("message-input").value.trim();
+      if (msg && currentUser) {
         db.ref("messages").push({
-          uid: user.uid,
-          text: message,
+          uid: currentUser.uid,
+          text: msg,
           time: new Date().toISOString()
         });
-        input.value = "";
+        document.getElementById("message-input").value = "";
       }
     });
 
-    // 📡 Real-Time Messages
-    db.ref("messages").on("child_added", async (snapshot) => {
-      const msgData = snapshot.val();
+    // 📡 Load Messages
+    db.ref("messages").on("child_added", async (snap) => {
+      const msg = snap.val();
       const msgDiv = document.createElement("div");
-
-      // Get user info for color and name
-      const userSnap = await db.ref("users/" + msgData.uid).once("value");
+      const userSnap = await db.ref("users/" + msg.uid).once("value");
       const userInfo = userSnap.val();
 
       msgDiv.classList.add("message");
-      if (msgData.uid === (auth.currentUser?.uid)) {
-        msgDiv.classList.add("my-message");
-      }
+      if (msg.uid === currentUser?.uid) msgDiv.classList.add("my-message");
 
       msgDiv.innerHTML = `
-        <strong style="color:${userInfo?.nameColor || '#000'}">${userInfo?.username || 'Unknown'}:</strong>
-        <span style="color:${userInfo?.msgColor || '#000'}">${msgData.text}</span>
+        <strong style="color:${userInfo?.nameColor || '#000'}">${userInfo?.username || "User"}:</strong>
+        <span style="color:${userInfo?.msgColor || '#000'}">${msg.text}</span>
       `;
 
       chatBox.appendChild(msgDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
     });
+
+    // ✏️ Edit Profile
+    document.getElementById("edit-btn").addEventListener("click", () => {
+      modal.style.display = "flex";
+    });
+    document.getElementById("closeEdit").addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    // 💾 Save Profile Changes
+    document.getElementById("saveEdit").addEventListener("click", async () => {
+      if (!currentUser) return;
+      const uid = currentUser.uid;
+      let photoURL = document.getElementById("profile-img").src;
+
+      if (newDp.files[0]) {
+        const dpRef = storage.ref("profilePics/" + uid);
+        await dpRef.put(newDp.files[0]);
+        photoURL = await dpRef.getDownloadURL();
+      }
+
+      await db.ref("users/" + uid).update({
+        photoURL,
+        nameColor: newNameColor.value,
+        msgColor: newMsgColor.value
+      });
+
+      document.getElementById("profile-img").src = photoURL;
+      document.getElementById("profile-name").style.color = newNameColor.value;
+      modal.style.display = "none";
+      alert("✅ Profile updated!");
+    });
   </script>
 </body>
-</html>
+  </html>
