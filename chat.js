@@ -1,100 +1,171 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref, onChildAdded, push, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+// === ZHOBCHAT Chat JS ===
+// Firebase import
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  onChildAdded,
+  set,
+  onValue,
+  update,
+  remove
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+// === Firebase Config ===
 const firebaseConfig = {
-  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain: "zhobchat-33d8e.firebaseapp.com",
-  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "zhobchat-33d8e",
-  storageBucket: "zhobchat-33d8e.appspot.com",
-  messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
+  apiKey: "AIzaSyB-WYRWq3pQ1r_hLzMZ_4FItTd0jRclB1Q",
+  authDomain: "zhobchat-2a01e.firebaseapp.com",
+  databaseURL: "https://zhobchat-2a01e-default-rtdb.firebaseio.com",
+  projectId: "zhobchat-2a01e",
+  storageBucket: "zhobchat-2a01e.appspot.com",
+  messagingSenderId: "1003454915453",
+  appId: "1:1003454915453:web:73a7e4d5c2b3b6bfb2b30e"
 };
 
+// === Initialize Firebase ===
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getDatabase(app);
-const storage = getStorage(app);
+const auth = getAuth(app);
 
+// === Elements ===
 const chatBox = document.getElementById("chatBox");
-const messageInput = document.getElementById("messageInput");
-const userList = document.getElementById("userList");
-const profileModal = document.getElementById("profileModal");
-const userListBtn = document.getElementById("userListBtn");
-const profileBtn = document.getElementById("profileBtn");
+const msgInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const usersBtn = document.getElementById("usersBtn");
+const usersListBox = document.getElementById("userList");
+const usersUl = document.getElementById("users");
+const typingStatus = document.getElementById("typingStatus");
 
-onAuthStateChanged(auth, user => {
-  if (user) {
-    loadMessages();
-    loadUsers();
-  } else {
+let currentUser = null;
+let typingTimer;
+
+// === Check User Auth ===
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
     window.location.href = "index.html";
+  } else {
+    currentUser = user;
+    addUserStatus(user);
+    loadMessages();
+    loadActiveUsers();
   }
 });
 
-window.sendMessage = function () {
-  const msg = messageInput.value.trim();
-  if (msg === "") return;
-
-  const user = auth.currentUser;
-  const time = new Date().toLocaleTimeString();
-
-  push(ref(db, "messages"), {
-    name: user.displayName || "Anonymous",
-    text: msg,
-    time: time
+// === Add User Online ===
+function addUserStatus(user) {
+  const userRef = ref(db, "activeUsers/" + user.uid);
+  set(userRef, {
+    email: user.email,
+    online: true
   });
-  messageInput.value = "";
-};
 
-function loadMessages() {
-  const messagesRef = ref(db, "messages");
-  onChildAdded(messagesRef, data => {
-    const msg = data.val();
-    const div = document.createElement("div");
-    div.innerHTML = `<b>${msg.name}</b>: ${msg.text} <small>(${msg.time})</small>`;
-    chatBox.appendChild(div);
+  window.addEventListener("beforeunload", () => {
+    remove(userRef);
   });
 }
 
-function loadUsers() {
-  const usersRef = ref(db, "users");
-  get(usersRef).then(snapshot => {
-    userList.innerHTML = "";
-    snapshot.forEach(child => {
-      const user = child.val();
-      const div = document.createElement("div");
-      div.textContent = user.name;
-      userList.appendChild(div);
+// === Load Active Users ===
+function loadActiveUsers() {
+  const activeRef = ref(db, "activeUsers/");
+  onValue(activeRef, (snapshot) => {
+    usersUl.innerHTML = "";
+    snapshot.forEach((child) => {
+      const li = document.createElement("li");
+      li.textContent = child.val().email;
+      usersUl.appendChild(li);
     });
   });
 }
 
-window.logout = function () {
+// === Load Messages ===
+function loadMessages() {
+  const chatRef = ref(db, "messages/");
+  onChildAdded(chatRef, (data) => {
+    const msg = data.val();
+    displayMessage(msg);
+  });
+}
+
+// === Display Message ===
+function displayMessage(msg) {
+  const div = document.createElement("div");
+  div.classList.add("msg");
+  if (msg.email === currentUser.email) div.classList.add("self");
+  div.innerHTML = `
+    <strong>${msg.email.split("@")[0]}</strong><br>
+    ${msg.text}
+    <span class="timestamp">${msg.time}</span>
+  `;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// === Send Message ===
+sendBtn.addEventListener("click", sendMessage);
+msgInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+  setTypingStatus(true);
+});
+
+function sendMessage() {
+  const text = msgInput.value.trim();
+  if (!text) return;
+
+  const chatRef = ref(db, "messages/");
+  const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  push(chatRef, {
+    text,
+    email: currentUser.email,
+    time
+  });
+
+  msgInput.value = "";
+  setTypingStatus(false);
+}
+
+// === Typing Indicator ===
+function setTypingStatus(isTyping) {
+  const typingRef = ref(db, "typing/" + currentUser.uid);
+  if (isTyping) {
+    set(typingRef, { email: currentUser.email, typing: true });
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => {
+      remove(typingRef);
+    }, 2000);
+  } else {
+    remove(typingRef);
+  }
+}
+
+const typingRef = ref(db, "typing/");
+onValue(typingRef, (snapshot) => {
+  let someoneTyping = false;
+  snapshot.forEach((child) => {
+    if (child.val().email !== currentUser.email) {
+      someoneTyping = true;
+    }
+  });
+  typingStatus.textContent = someoneTyping ? "کوئی لکھ رہا ہے..." : "";
+});
+
+// === Toggle User List ===
+usersBtn.addEventListener("click", () => {
+  usersListBox.style.display =
+    usersListBox.style.display === "block" ? "none" : "block";
+});
+
+// === Logout ===
+logoutBtn.addEventListener("click", () => {
   signOut(auth).then(() => {
     window.location.href = "index.html";
   });
-};
-
-// Profile Modal
-profileBtn.onclick = () => profileModal.classList.remove("hidden");
-window.closeModal = () => profileModal.classList.add("hidden");
-userListBtn.onclick = () => userList.classList.toggle("hidden");
-
-window.changeProfilePic = function () {
-  const file = document.getElementById("newProfilePic").files[0];
-  if (!file) return alert("Please choose a picture!");
-
-  const user = auth.currentUser;
-  const storageRef = sRef(storage, `profiles/${user.uid}.jpg`);
-
-  uploadBytes(storageRef, file).then(() => {
-    getDownloadURL(storageRef).then(url => {
-      updateProfile(user, { photoURL: url });
-      set(ref(db, "users/" + user.uid + "/profilePic"), url);
-      alert("Profile picture updated!");
-    });
-  });
-};
+});
