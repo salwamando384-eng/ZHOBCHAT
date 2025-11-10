@@ -19,7 +19,7 @@ import {
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// ✅ Firebase Configuration
+// 🔹 Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -37,7 +37,7 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-// 🔹 Tabs switching
+// 🔹 Tabs
 const tabLogin = document.getElementById("tabLogin");
 const tabSignup = document.getElementById("tabSignup");
 const loginForm = document.getElementById("loginForm");
@@ -57,23 +57,23 @@ tabSignup.onclick = () => {
   loginForm.classList.add("hidden");
 };
 
-// 🔹 Login
+// 🔹 Login Function
 document.getElementById("loginBtn").addEventListener("click", async () => {
-  const email = document.getElementById("li_email").value.trim();
-  const password = document.getElementById("li_password").value.trim();
+  const email = document.getElementById("li_email").value;
+  const password = document.getElementById("li_password").value;
   const msg = document.getElementById("loginMsg");
 
   msg.textContent = "Signing in...";
   try {
     await signInWithEmailAndPassword(auth, email, password);
     msg.textContent = "✅ Login successful!";
-    setTimeout(() => (window.location.href = "chat.html"), 1200);
+    window.location.href = "chat.html";
   } catch (err) {
     msg.textContent = "❌ " + err.message;
   }
 });
 
-// 🔹 Signup
+// 🔹 Signup Function
 document.getElementById("signupBtn").addEventListener("click", async () => {
   const name = document.getElementById("su_name").value.trim();
   const gender = document.getElementById("su_gender").value;
@@ -87,25 +87,35 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
   const msg = document.getElementById("signupMsg");
 
   if (!name || !email || !password || !gender || !city) {
-    msg.textContent = "❌ تمام فیلڈز لازمی ہیں۔";
+    msg.textContent = "❌ Please fill all required fields.";
     return;
   }
 
-  msg.textContent = "⏳ Creating account...";
+  msg.textContent = "Creating account...";
 
   try {
+    // Create user
     const userCred = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCred.user;
-    let photoURL = "https://i.postimg.cc/3Rwgjfyk/default.png"; // default DP
 
+    // Default profile picture
+    let photoURL = "https://i.postimg.cc/3Rwgjfyk/default.png";
+
+    // اگر DP فائل ہے تو اپلوڈ کرو، ورنہ default use کرو
     if (dpFile) {
-      const dpRef = sRef(storage, `profiles/${user.uid}.jpg`);
-      await uploadBytes(dpRef, dpFile);
-      photoURL = await getDownloadURL(dpRef);
+      try {
+        const dpRef = sRef(storage, `profiles/${user.uid}.jpg`);
+        await uploadBytes(dpRef, dpFile);
+        photoURL = await getDownloadURL(dpRef);
+      } catch (uploadErr) {
+        console.warn("⚠️ DP upload failed, using default photo:", uploadErr);
+      }
     }
 
+    // Update user profile
     await updateProfile(user, { displayName: name, photoURL });
 
+    // Save user info in database
     await set(ref(db, "users/" + user.uid), {
       uid: user.uid,
       name,
@@ -119,14 +129,16 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
       joinedAt: new Date().toLocaleString()
     });
 
-    msg.textContent = "✅ Account created!";
+    msg.textContent = "✅ Account created successfully!";
     setTimeout(() => (window.location.href = "chat.html"), 1500);
   } catch (err) {
     msg.textContent = "❌ " + err.message;
   }
 });
 
-// Auto redirect if logged in
+// 🔹 Auto Redirect if Logged In
 onAuthStateChanged(auth, (user) => {
-  if (user) console.log("✅ Logged in as:", user.email);
+  if (user) {
+    console.log("✅ Logged in as", user.email);
+  }
 });
