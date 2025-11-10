@@ -1,4 +1,8 @@
-// Firebase init (same config)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref, onChildAdded, push, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -8,59 +12,89 @@ const firebaseConfig = {
   messagingSenderId: "116466089929",
   appId: "1:116466089929:web:06e914c8ed81ba9391f218"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const storage = getStorage(app);
 
 const chatBox = document.getElementById("chatBox");
-const input = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
-const usersBtn = document.getElementById("usersBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const myInfo = document.getElementById("myInfo");
-const status = document.getElementById("status");
+const messageInput = document.getElementById("messageInput");
+const userList = document.getElementById("userList");
+const profileModal = document.getElementById("profileModal");
+const userListBtn = document.getElementById("userListBtn");
+const profileBtn = document.getElementById("profileBtn");
 
-usersBtn.addEventListener("click", () => location.href = "users.html");
-logoutBtn.addEventListener("click", () => auth.signOut().then(()=> location.href="login.html"));
-
-auth.onAuthStateChanged(user => {
-  if (!user) return location.href = "login.html";
-  status.textContent = "Logged in";
-  // show my info
-  db.ref("users/" + user.uid).once("value").then(snap => {
-    const d = snap.val() || {};
-    myInfo.innerHTML = `<img src="${d.dp || 'default_dp.png'}" class="dp"/> <div><b>${d.name||'You'}</b></div>`;
-  });
-
-  // send message
-  sendBtn.onclick = () => {
-    const text = input.value.trim();
-    if (!text) return;
-    // write to global messages
-    db.ref("messages").push({
-      sender: user.uid,
-      text,
-      time: Date.now()
-    });
-    input.value = "";
-  };
-
-  // listen messages
-  db.ref("messages").limitToLast(200).on("child_added", async snap => {
-    const m = snap.val();
-    // check block: if current user has blocked sender -> skip
-    const meSnap = await db.ref("users/" + user.uid).once("value");
-    const me = meSnap.val() || {};
-    if (me.blockedUsers && me.blockedUsers.includes(m.sender)) return;
-
-    // get sender data
-    const s = (await db.ref("users/" + m.sender).once("value")).val() || {};
-    const dp = s.dp || 'default_dp.png';
-    const name = s.name || 'User';
-    const div = document.createElement('div');
-    div.className = 'msg';
-    div.innerHTML = `<img src="${dp}" class="dp"/> <b>${name}:</b> ${m.text}`;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  });
+onAuthStateChanged(auth, user => {
+  if (user) {
+    loadMessages();
+    loadUsers();
+  } else {
+    window.location.href = "index.html";
+  }
 });
+
+window.sendMessage = function () {
+  const msg = messageInput.value.trim();
+  if (msg === "") return;
+
+  const user = auth.currentUser;
+  const time = new Date().toLocaleTimeString();
+
+  push(ref(db, "messages"), {
+    name: user.displayName || "Anonymous",
+    text: msg,
+    time: time
+  });
+  messageInput.value = "";
+};
+
+function loadMessages() {
+  const messagesRef = ref(db, "messages");
+  onChildAdded(messagesRef, data => {
+    const msg = data.val();
+    const div = document.createElement("div");
+    div.innerHTML = `<b>${msg.name}</b>: ${msg.text} <small>(${msg.time})</small>`;
+    chatBox.appendChild(div);
+  });
+}
+
+function loadUsers() {
+  const usersRef = ref(db, "users");
+  get(usersRef).then(snapshot => {
+    userList.innerHTML = "";
+    snapshot.forEach(child => {
+      const user = child.val();
+      const div = document.createElement("div");
+      div.textContent = user.name;
+      userList.appendChild(div);
+    });
+  });
+}
+
+window.logout = function () {
+  signOut(auth).then(() => {
+    window.location.href = "index.html";
+  });
+};
+
+// Profile Modal
+profileBtn.onclick = () => profileModal.classList.remove("hidden");
+window.closeModal = () => profileModal.classList.add("hidden");
+userListBtn.onclick = () => userList.classList.toggle("hidden");
+
+window.changeProfilePic = function () {
+  const file = document.getElementById("newProfilePic").files[0];
+  if (!file) return alert("Please choose a picture!");
+
+  const user = auth.currentUser;
+  const storageRef = sRef(storage, `profiles/${user.uid}.jpg`);
+
+  uploadBytes(storageRef, file).then(() => {
+    getDownloadURL(storageRef).then(url => {
+      updateProfile(user, { photoURL: url });
+      set(ref(db, "users/" + user.uid + "/profilePic"), url);
+      alert("Profile picture updated!");
+    });
+  });
+};
