@@ -1,132 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZHOBCHAT</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT - Chat Room</title>
+  <link rel="stylesheet" href="style.css">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
       margin: 0;
-      padding: 0;
-    }
-    .chat-container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      background: #f0f2f5;
+      font-family: 'Segoe UI', sans-serif;
     }
     header {
-      background: #4a148c;
-      color: white;
-      padding: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 10px 15px;
+      background: #2196F3;
+      color: white;
     }
     header h2 {
       margin: 0;
+      font-size: 20px;
     }
-    #usersBtn {
+    .top-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .top-buttons button {
       background: white;
-      color: #4a148c;
+      color: #2196F3;
       border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
+      padding: 6px 12px;
+      border-radius: 5px;
       cursor: pointer;
       font-weight: bold;
     }
+    .top-buttons button:hover {
+      background: #e3f2fd;
+    }
     #userList {
       position: absolute;
+      top: 50px;
       right: 10px;
-      top: 60px;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      width: 200px;
+      width: 180px;
       max-height: 300px;
       overflow-y: auto;
-      display: none;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       padding: 10px;
+      display: none;
     }
-    #userList h3 {
-      text-align: center;
-      margin-top: 0;
-      color: #4a148c;
-    }
-    #userList p {
-      padding: 5px 0;
+    #userList ul {
+      list-style: none;
+      padding: 0;
       margin: 0;
+    }
+    #userList li {
+      padding: 5px 8px;
       border-bottom: 1px solid #eee;
     }
-    #messages {
-      flex: 1;
-      overflow-y: auto;
+    #chatBox {
       padding: 10px;
+      height: calc(100vh - 150px);
+      overflow-y: auto;
     }
     #messageInput {
-      display: flex;
+      width: 75%;
       padding: 10px;
-      background: #fff;
-    }
-    #messageInput input {
-      flex: 1;
-      padding: 8px;
+      border-radius: 5px;
       border: 1px solid #ccc;
-      border-radius: 6px;
     }
-    #messageInput button {
-      margin-left: 10px;
-      background: #4a148c;
+    #sendBtn {
+      padding: 10px 20px;
+      background: #2196F3;
       color: white;
       border: none;
-      border-radius: 6px;
-      padding: 8px 12px;
+      border-radius: 5px;
       cursor: pointer;
+    }
+    #sendBtn:hover {
+      background: #1976d2;
     }
   </style>
 </head>
 <body>
 
-  <div class="chat-container">
-    <header>
-      <h2>ZHOBCHAT</h2>
+  <header>
+    <h2>ZHOBCHAT</h2>
+    <div class="top-buttons">
       <button id="usersBtn">USERS</button>
-    </header>
-
-    <div id="userList">
-      <h3>Online Users</h3>
-      <div id="usersContainer"></div>
+      <button id="profileBtn">Profile</button>
+      <button id="logoutBtn">Logout</button>
     </div>
+  </header>
 
-    <div id="messages"></div>
-
-    <div id="messageInput">
-      <input type="text" id="msgText" placeholder="Type your message..." />
-      <button id="sendBtn">Send</button>
-    </div>
+  <div id="userList">
+    <h4>Active Users</h4>
+    <ul id="usersUl"></ul>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      push,
-      onValue,
-      set,
-      serverTimestamp,
-      onDisconnect
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  <div id="chatBox"></div>
 
-    // 🔹 Firebase Config
+  <div style="padding:10px;text-align:center;">
+    <input type="text" id="messageInput" placeholder="Write a message...">
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <script>
+    // 🔹 Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
       authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -136,83 +124,84 @@
       messagingSenderId: "116466089929",
       appId: "1:116466089929:web:06e914c8ed81ba9391f218",
     };
+    firebase.initializeApp(firebaseConfig);
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-    const messagesRef = ref(db, "messages");
-    const usersRef = ref(db, "users");
-
-    const msgBox = document.getElementById("messages");
-    const msgText = document.getElementById("msgText");
-    const sendBtn = document.getElementById("sendBtn");
-
-    // 🔹 Toggle user list
     const usersBtn = document.getElementById("usersBtn");
-    const userList = document.getElementById("userList");
-    usersBtn.addEventListener("click", () => {
-      userList.style.display = userList.style.display === "block" ? "none" : "block";
-    });
+    const profileBtn = document.getElementById("profileBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const userListDiv = document.getElementById("userList");
+    const usersUl = document.getElementById("usersUl");
+    const chatBox = document.getElementById("chatBox");
+    const sendBtn = document.getElementById("sendBtn");
+    const messageInput = document.getElementById("messageInput");
 
-    // 🔹 Current user
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const userStatusRef = ref(db, `status/${user.uid}`);
-        set(userStatusRef, { state: "online" });
-        onDisconnect(userStatusRef).set({ state: "offline" });
+    // ✅ Check Login
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "index.html";
+      } else {
         loadMessages();
         loadUsers();
-      } else {
-        window.location.href = "index.html";
       }
     });
 
-    // 🔹 Load messages
-    function loadMessages() {
-      onValue(messagesRef, (snapshot) => {
-        msgBox.innerHTML = "";
-        snapshot.forEach((child) => {
-          const msg = child.val();
-          const div = document.createElement("div");
-          div.textContent = msg.name + ": " + msg.text;
-          msgBox.appendChild(div);
-        });
-        msgBox.scrollTop = msgBox.scrollHeight;
-      });
-    }
+    // ✅ Send Message
+    sendBtn.onclick = () => {
+      const msg = messageInput.value.trim();
+      if (!msg) return;
 
-    // 🔹 Send message
-    sendBtn.addEventListener("click", () => {
-      const text = msgText.value.trim();
       const user = auth.currentUser;
-      if (text && user) {
-        push(messagesRef, {
-          name: user.displayName || "Anonymous",
-          text,
-          time: serverTimestamp(),
-        });
-        msgText.value = "";
-      }
-    });
+      db.ref("messages").push({
+        uid: user.uid,
+        text: msg,
+        name: user.displayName || "User",
+        time: new Date().toLocaleTimeString()
+      });
+      messageInput.value = "";
+    };
 
-    // 🔹 Load online users
+    // ✅ Load Messages
+    function loadMessages() {
+      db.ref("messages").on("child_added", (snap) => {
+        const data = snap.val();
+        const div = document.createElement("div");
+        div.innerHTML = `<b>${data.name}</b>: ${data.text} <small>(${data.time})</small>`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+    }
+
+    // ✅ Load Users
     function loadUsers() {
-      onValue(usersRef, (snapshot) => {
-        const usersContainer = document.getElementById("usersContainer");
-        usersContainer.innerHTML = "";
-        snapshot.forEach((child) => {
-          const u = child.val();
-          const stateRef = ref(db, `status/${u.uid}`);
-          onValue(stateRef, (snap) => {
-            const state = snap.val()?.state === "online" ? "🟢" : "🔴";
-            const p = document.createElement("p");
-            p.textContent = `${state} ${u.name}`;
-            usersContainer.appendChild(p);
-          });
+      db.ref("users").on("value", (snap) => {
+        usersUl.innerHTML = "";
+        snap.forEach((child) => {
+          const li = document.createElement("li");
+          li.textContent = child.val().username || child.val().name || "User";
+          usersUl.appendChild(li);
         });
       });
     }
+
+    // ✅ Toggle user list
+    usersBtn.onclick = () => {
+      userListDiv.style.display = userListDiv.style.display === "none" ? "block" : "none";
+    };
+
+    // ✅ Profile Page
+    profileBtn.onclick = () => {
+      window.location.href = "profile.html";
+    };
+
+    // ✅ Logout
+    logoutBtn.onclick = () => {
+      auth.signOut().then(() => {
+        window.location.href = "index.html";
+      });
+    };
   </script>
 </body>
 </html>
