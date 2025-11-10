@@ -1,116 +1,16 @@
 <!DOCTYPE html>
-<html lang="ur" dir="rtl">
+<html lang="ur">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT - Chat Room</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f1f1f1;
-      margin: 0;
-      padding: 0;
-    }
+  <title>ZHOBCHAT 💬</title>
+  <script type="module">
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getDatabase, ref, push, set, onChildAdded, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-    header {
-      background: #2196F3;
-      color: white;
-      padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    #users-btn {
-      cursor: pointer;
-      background: white;
-      color: #2196F3;
-      border: none;
-      font-weight: bold;
-      padding: 6px 12px;
-      border-radius: 6px;
-    }
-
-    #users-list {
-      position: fixed;
-      right: 0;
-      top: 50px;
-      width: 200px;
-      height: 100%;
-      background: #fff;
-      border-left: 1px solid #ccc;
-      display: none;
-      flex-direction: column;
-      overflow-y: auto;
-      box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-    }
-
-    #users-list p {
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-      margin: 0;
-      cursor: pointer;
-    }
-
-    #chat-box {
-      padding: 10px;
-      height: 70vh;
-      overflow-y: auto;
-      background: #fff;
-      margin: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-
-    #message-form {
-      display: flex;
-      padding: 10px;
-      background: white;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-    }
-
-    #message-input {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    #send-btn {
-      margin-left: 10px;
-      padding: 10px 16px;
-      background: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h3>ZHOBCHAT</h3>
-    <button id="users-btn">USERS</button>
-  </header>
-
-  <div id="users-list"></div>
-  <div id="chat-box"></div>
-
-  <form id="message-form">
-    <input type="text" id="message-input" placeholder="پیغام لکھیں..." required />
-    <button id="send-btn" type="submit">Send</button>
-  </form>
-
-  <script>
-    // Firebase Configuration
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
       authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -121,60 +21,242 @@
       appId: "1:116466089929:web:06e914c8ed81ba9391f218"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-    const chatBox = document.getElementById("chat-box");
-    const messageForm = document.getElementById("message-form");
-    const messageInput = document.getElementById("message-input");
-    const usersList = document.getElementById("users-list");
-    const usersBtn = document.getElementById("users-btn");
+    // Elements
+    const msgBox = document.getElementById("msgBox");
+    const msgInput = document.getElementById("msgInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const usersMenu = document.getElementById("usersMenu");
+    const usersList = document.getElementById("usersList");
+    const chatTitle = document.getElementById("chatTitle");
+    const backBtn = document.getElementById("backBtn");
 
-    // Toggle user list
-    usersBtn.addEventListener("click", () => {
-      usersList.style.display = usersList.style.display === "none" ? "flex" : "none";
+    let currentUser = null;
+    let privateChatWith = null;
+
+    // Listen user auth
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        loadPublicChat();
+        loadUsersList();
+      } else {
+        window.location.href = "index.html";
+      }
     });
+
+    // Load public chat messages
+    function loadPublicChat() {
+      chatTitle.textContent = "Public Chat 🌍";
+      msgBox.innerHTML = "";
+      privateChatWith = null;
+      const chatRef = ref(db, "messages/");
+      onChildAdded(chatRef, (snapshot) => {
+        const msg = snapshot.val();
+        displayMessage(msg, msg.uid === currentUser.uid);
+      });
+    }
 
     // Load users
-    db.ref("users").on("value", (snapshot) => {
-      usersList.innerHTML = "";
-      snapshot.forEach((child) => {
-        const user = child.val();
-        const p = document.createElement("p");
-        p.textContent = user.username;
-        usersList.appendChild(p);
+    function loadUsersList() {
+      const usersRef = ref(db, "users/");
+      onValue(usersRef, (snapshot) => {
+        usersList.innerHTML = "";
+        snapshot.forEach((child) => {
+          const u = child.val();
+          if (u.uid !== currentUser.uid) {
+            const li = document.createElement("li");
+            li.textContent = u.name;
+            li.onclick = () => openPrivateChat(u);
+            usersList.appendChild(li);
+          }
+        });
       });
-    });
-
-    // Load messages
-    db.ref("messages").on("child_added", (snapshot) => {
-      const msg = snapshot.val();
-      const p = document.createElement("p");
-      p.innerHTML = `<strong style="color:${msg.nameColor}">${msg.username}:</strong> 
-                     <span style="color:${msg.msgColor}">${msg.text}</span>`;
-      chatBox.appendChild(p);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    });
+    }
 
     // Send message
-    messageForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const user = auth.currentUser;
-      if (!user) return alert("پہلے لاگ ان کریں!");
+    sendBtn.onclick = () => {
+      const text = msgInput.value.trim();
+      if (!text) return;
 
-      db.ref("users/" + user.uid).once("value").then((snapshot) => {
-        const userData = snapshot.val();
-        db.ref("messages").push({
-          username: userData.username,
-          nameColor: userData.nameColor,
-          msgColor: userData.msgColor,
-          text: messageInput.value,
-          time: new Date().toLocaleString()
+      if (privateChatWith) {
+        const chatID = makeChatId(currentUser.uid, privateChatWith.uid);
+        const msgRef = push(ref(db, `privateChats/${chatID}/messages`));
+        set(msgRef, {
+          uid: currentUser.uid,
+          text,
+          name: currentUser.displayName || "Anonymous",
+          time: new Date().toLocaleTimeString()
         });
-        messageInput.value = "";
+      } else {
+        const msgRef = push(ref(db, "messages"));
+        set(msgRef, {
+          uid: currentUser.uid,
+          text,
+          name: currentUser.displayName || "Anonymous",
+          time: new Date().toLocaleTimeString()
+        });
+      }
+      msgInput.value = "";
+    };
+
+    // Open private chat
+    function openPrivateChat(user2) {
+      privateChatWith = user2;
+      chatTitle.textContent = "Private Chat with " + user2.name + " 🔒";
+      msgBox.innerHTML = "";
+      const chatID = makeChatId(currentUser.uid, user2.uid);
+      const chatRef = ref(db, `privateChats/${chatID}/messages`);
+      onChildAdded(chatRef, (snapshot) => {
+        const msg = snapshot.val();
+        displayMessage(msg, msg.uid === currentUser.uid);
       });
-    });
+    }
+
+    // Back to Public Chat
+    backBtn.onclick = loadPublicChat;
+
+    // Display message
+    function displayMessage(msg, isOwn) {
+      const div = document.createElement("div");
+      div.className = "message " + (isOwn ? "own" : "other");
+      div.innerHTML = `<b>${msg.name}:</b> ${msg.text} <span class="time">${msg.time}</span>`;
+      msgBox.appendChild(div);
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    // Chat ID generator (for private chat)
+    function makeChatId(uid1, uid2) {
+      return uid1 < uid2 ? uid1 + "_" + uid2 : uid2 + "_" + uid1;
+    }
+
+    // Toggle users menu
+    document.getElementById("menuBtn").onclick = () => {
+      usersMenu.classList.toggle("show");
+    };
+
+    // Logout
+    document.getElementById("logoutBtn").onclick = () => {
+      signOut(auth);
+    };
   </script>
+
+  <style>
+    body {
+      font-family: "Noto Nastaliq Urdu", "Segoe UI", sans-serif;
+      margin: 0;
+      background: #f1f5f9;
+    }
+    header {
+      background: #1e293b;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 15px;
+      position: relative;
+    }
+    #menuBtn {
+      font-size: 22px;
+      cursor: pointer;
+    }
+    #usersMenu {
+      position: absolute;
+      top: 50px;
+      right: 10px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      display: none;
+      width: 180px;
+    }
+    #usersMenu.show { display: block; }
+    #usersList li {
+      list-style: none;
+      padding: 8px 10px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    #usersList li:hover {
+      background: #f1f5f9;
+    }
+    main {
+      padding: 10px;
+      height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+    .message {
+      margin: 6px 0;
+      padding: 8px 10px;
+      border-radius: 10px;
+      max-width: 70%;
+    }
+    .message.own {
+      background: #3b82f6;
+      color: white;
+      margin-left: auto;
+    }
+    .message.other {
+      background: #e2e8f0;
+    }
+    .time {
+      font-size: 10px;
+      color: gray;
+      display: block;
+      text-align: right;
+    }
+    footer {
+      display: flex;
+      padding: 10px;
+      background: white;
+      border-top: 1px solid #ddd;
+    }
+    footer input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+    footer button {
+      margin-left: 8px;
+      padding: 8px 14px;
+      border: none;
+      background: #1e3a8a;
+      color: white;
+      border-radius: 10px;
+    }
+    #backBtn {
+      background: #ef4444;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h3 id="chatTitle">Public Chat 🌍</h3>
+    <div>
+      <button id="backBtn">Back</button>
+      <span id="menuBtn">⋮</span>
+      <button id="logoutBtn">Logout</button>
+    </div>
+    <div id="usersMenu">
+      <ul id="usersList"></ul>
+    </div>
+  </header>
+
+  <main id="msgBox"></main>
+
+  <footer>
+    <input type="text" id="msgInput" placeholder="اپنا پیغام لکھیں..." />
+    <button id="sendBtn">Send</button>
+  </footer>
 </body>
 </html>
