@@ -22,6 +22,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      position: relative;
     }
 
     #profile {
@@ -40,6 +41,56 @@
 
     #profile-name {
       font-weight: bold;
+    }
+
+    #menu-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    #menu-box {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 10px;
+      background: white;
+      color: black;
+      border-radius: 8px;
+      width: 200px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      z-index: 100;
+    }
+
+    #menu-box h4 {
+      margin: 0;
+      padding: 10px;
+      background: #3498db;
+      color: white;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    #user-list {
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    #user-list div {
+      padding: 5px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #user-list img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
     }
 
     #logout-btn, #edit-btn {
@@ -124,24 +175,16 @@
       margin: 10px 0;
     }
 
-    #saveEdit {
-      background: green;
-      color: white;
+    #saveEdit, #closeEdit {
       padding: 8px 15px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      color: white;
     }
 
-    #closeEdit {
-      background: gray;
-      color: white;
-      padding: 8px 15px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-left: 5px;
-    }
+    #saveEdit { background: green; }
+    #closeEdit { background: gray; margin-left: 5px; }
   </style>
 </head>
 <body>
@@ -151,9 +194,16 @@
       <img id="profile-img" src="https://i.postimg.cc/3Rwgjfyk/default.png" alt="Profile">
       <span id="profile-name">Loading...</span>
     </div>
+
     <div>
       <button id="edit-btn">Edit Profile</button>
       <button id="logout-btn">Logout</button>
+      <button id="menu-btn">⋮</button>
+    </div>
+
+    <div id="menu-box">
+      <h4>🟢 Online Users</h4>
+      <div id="user-list">Loading...</div>
     </div>
   </header>
 
@@ -176,14 +226,14 @@
     </div>
   </div>
 
-  <!-- Firebase Scripts -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
   <script>
-    // 🔥 Firebase Configuration
+    // 🔥 Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
       authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -200,99 +250,107 @@
     const storage = firebase.storage();
 
     const chatBox = document.getElementById("chat-box");
+    const userList = document.getElementById("user-list");
     const modal = document.getElementById("editModal");
-    const newDp = document.getElementById("newDp");
-    const newNameColor = document.getElementById("newNameColor");
-    const newMsgColor = document.getElementById("newMsgColor");
 
-    // 🧍‍♂️ Load User Info
     let currentUser = null;
-    auth.onAuthStateChanged((user) => {
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
 
+    // 👤 Auth Check
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) return (window.location.href = "index.html");
       currentUser = user;
-      db.ref("users/" + user.uid).once("value").then((snap) => {
-        const data = snap.val();
-        document.getElementById("profile-name").textContent = data.username;
-        document.getElementById("profile-name").style.color = data.nameColor;
-        document.getElementById("profile-img").src = data.photoURL || "https://i.postimg.cc/3Rwgjfyk/default.png";
-        newNameColor.value = data.nameColor || "#000000";
-        newMsgColor.value = data.msgColor || "#000000";
-      });
-    });
 
-    // 🚪 Logout
-    document.getElementById("logout-btn").addEventListener("click", () => {
-      auth.signOut().then(() => window.location.href = "index.html");
+      // User info
+      const snap = await db.ref("users/" + user.uid).once("value");
+      const info = snap.val();
+      document.getElementById("profile-img").src = info.photoURL || "https://i.postimg.cc/3Rwgjfyk/default.png";
+      document.getElementById("profile-name").textContent = info.username;
+      document.getElementById("profile-name").style.color = info.nameColor;
+
+      // Mark user online
+      db.ref("users/" + user.uid).update({ online: true });
+      window.addEventListener("beforeunload", () => {
+        db.ref("users/" + user.uid).update({ online: false });
+      });
     });
 
     // 💬 Send Message
     document.getElementById("message-form").addEventListener("submit", (e) => {
       e.preventDefault();
-      const msg = document.getElementById("message-input").value.trim();
-      if (msg && currentUser) {
+      const text = document.getElementById("message-input").value.trim();
+      if (text && currentUser) {
         db.ref("messages").push({
           uid: currentUser.uid,
-          text: msg,
+          text,
           time: new Date().toISOString()
         });
         document.getElementById("message-input").value = "";
       }
     });
 
-    // 📡 Load Messages
+    // 📡 Receive Messages
     db.ref("messages").on("child_added", async (snap) => {
       const msg = snap.val();
       const msgDiv = document.createElement("div");
-      const userSnap = await db.ref("users/" + msg.uid).once("value");
-      const userInfo = userSnap.val();
-
       msgDiv.classList.add("message");
       if (msg.uid === currentUser?.uid) msgDiv.classList.add("my-message");
 
+      const userSnap = await db.ref("users/" + msg.uid).once("value");
+      const userInfo = userSnap.val();
+
       msgDiv.innerHTML = `
-        <strong style="color:${userInfo?.nameColor || '#000'}">${userInfo?.username || "User"}:</strong>
+        <strong style="color:${userInfo?.nameColor || '#000'}">${userInfo?.username || 'User'}:</strong>
         <span style="color:${userInfo?.msgColor || '#000'}">${msg.text}</span>
       `;
-
       chatBox.appendChild(msgDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
     });
 
-    // ✏️ Edit Profile
-    document.getElementById("edit-btn").addEventListener("click", () => {
-      modal.style.display = "flex";
-    });
-    document.getElementById("closeEdit").addEventListener("click", () => {
-      modal.style.display = "none";
+    // ⋮ Menu Toggle
+    const menuBtn = document.getElementById("menu-btn");
+    const menuBox = document.getElementById("menu-box");
+    menuBtn.addEventListener("click", () => {
+      menuBox.style.display = menuBox.style.display === "block" ? "none" : "block";
     });
 
-    // 💾 Save Profile Changes
+    // 👥 Online Users
+    db.ref("users").on("value", (snap) => {
+      userList.innerHTML = "";
+      snap.forEach((u) => {
+        const data = u.val();
+        if (data.online) {
+          const div = document.createElement("div");
+          div.innerHTML = `<img src="${data.photoURL || 'https://i.postimg.cc/3Rwgjfyk/default.png'}"> <b style="color:${data.nameColor || '#000'}">${data.username}</b>`;
+          userList.appendChild(div);
+        }
+      });
+      if (userList.innerHTML === "") userList.innerHTML = "<p>No users online</p>";
+    });
+
+    // 🧾 Edit Profile
+    document.getElementById("edit-btn").onclick = () => modal.style.display = "flex";
+    document.getElementById("closeEdit").onclick = () => modal.style.display = "none";
+    document.getElementById("logout-btn").onclick = () => auth.signOut().then(() => window.location.href = "index.html");
+
     document.getElementById("saveEdit").addEventListener("click", async () => {
-      if (!currentUser) return;
       const uid = currentUser.uid;
-      let photoURL = document.getElementById("profile-img").src;
+      const newDp = document.getElementById("newDp").files[0];
+      const newNameColor = document.getElementById("newNameColor").value;
+      const newMsgColor = document.getElementById("newMsgColor").value;
 
-      if (newDp.files[0]) {
+      let photoURL = document.getElementById("profile-img").src;
+      if (newDp) {
         const dpRef = storage.ref("profilePics/" + uid);
-        await dpRef.put(newDp.files[0]);
+        await dpRef.put(newDp);
         photoURL = await dpRef.getDownloadURL();
       }
 
-      await db.ref("users/" + uid).update({
-        photoURL,
-        nameColor: newNameColor.value,
-        msgColor: newMsgColor.value
-      });
-
+      await db.ref("users/" + uid).update({ photoURL, nameColor: newNameColor, msgColor: newMsgColor });
       document.getElementById("profile-img").src = photoURL;
-      document.getElementById("profile-name").style.color = newNameColor.value;
+      document.getElementById("profile-name").style.color = newNameColor;
       modal.style.display = "none";
       alert("✅ Profile updated!");
     });
   </script>
 </body>
-  </html>
+</html>
