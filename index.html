@@ -1,61 +1,47 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ur">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ZHOBCHAT — Login / Signup</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT - Login & Signup</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="auth-page">
-    <div class="brand">
-      <h1>ZHOBCHAT</h1>
+  <h2>ZHOBCHAT میں خوش آمدید</h2>
+
+  <!-- Signup Form -->
+  <form id="signup-form">
+    <h3>Signup</h3>
+    <input type="text" id="signup-username" placeholder="Username" required>
+    <input type="email" id="signup-email" placeholder="Email" required>
+    <input type="password" id="signup-password" placeholder="Password" required>
+    
+    <div>
+      Gender:
+      <label><input type="radio" name="gender" value="Male"> Male</label>
+      <label><input type="radio" name="gender" value="Female"> Female</label>
     </div>
 
-    <div class="card auth-card">
-      <div class="tabs">
-        <button id="tabLogin" class="tab active">Login</button>
-        <button id="tabSignup" class="tab">Signup</button>
-      </div>
+    <label>Name color:</label>
+    <input type="color" id="name-color" value="#000000">
+    <label>Message color:</label>
+    <input type="color" id="msg-color" value="#000000">
 
-      <!-- Login -->
-      <div id="loginForm" class="form">
-        <input id="li_email" type="email" placeholder="Email (Gmail)" />
-        <input id="li_password" type="password" placeholder="Password" />
-        <div class="row">
-          <button id="loginBtn" class="btn primary">Login</button>
-          <span id="loginMsg" class="msg"></span>
-        </div>
-      </div>
+    <button type="submit" id="create-account-btn">Signup</button>
+  </form>
 
-      <!-- Signup -->
-      <div id="signupForm" class="form hidden">
-        <input id="su_name" type="text" placeholder="Full Name" />
-        <select id="su_gender">
-          <option value="">Gender</option>
-          <option>Male</option>
-          <option>Female</option>
-        </select>
-        <input id="su_age" type="number" placeholder="Age" />
-        <input id="su_city" type="text" placeholder="City" />
-        <input id="su_email" type="email" placeholder="Email (Gmail)" />
-        <input id="su_password" type="password" placeholder="Password" />
-        <label class="file-label">Profile picture (optional)</label>
-        <input id="su_dp" type="file" accept="image/*" />
-        <div class="row colors">
-          <label>Name color</label><input id="su_nameColor" type="color" value="#e74c3c" />
-          <label>Msg color</label><input id="su_msgColor" type="color" value="#000000" />
-        </div>
-        <div class="row">
-          <button id="signupBtn" class="btn primary">Signup</button>
-          <span id="signupMsg" class="msg"></span>
-        </div>
-      </div>
+  <!-- Login Form -->
+  <form id="login-form">
+    <h3>Login</h3>
+    <input type="email" id="login-email" placeholder="Email" required>
+    <input type="password" id="login-password" placeholder="Password" required>
+    <button type="submit">Login</button>
+  </form>
 
-      <p class="small muted">ZHOBCHAT میں خوش آمدید۔ سائن اپ کریں یا لاگ ان کریں۔</p>
-    </div>
-  </main>
-
-  <script type="module" src="index.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
