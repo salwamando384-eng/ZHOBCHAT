@@ -1,159 +1,31 @@
 <!DOCTYPE html>
-<html lang="ur" dir="rtl">
+<html lang="ur">
 <head>
   <meta charset="UTF-8">
-  <title>میری پروفائل - ZHOBCHAT</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - ZHOBCHAT</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    body {
-      font-family: sans-serif;
-      background: #eef2f3;
-      text-align: center;
-      padding: 20px;
-    }
-    .profile-box {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      max-width: 400px;
-      margin: auto;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    img {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    input, button, select {
-      margin: 6px;
-      padding: 8px;
-      width: 90%;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #2196f3;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0b7dda;
-    }
+    body { text-align: center; font-family: sans-serif; }
+    img { width: 120px; height: 120px; border-radius: 50%; margin: 10px auto; display: block; border: 3px solid #ccc; }
+    input[type="file"] { margin: 10px; }
+    button { margin: 10px; padding: 8px 15px; border: none; background: #2196F3; color: #fff; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #0b7dda; }
   </style>
 </head>
 <body>
+  <h2>میرا پروفائل</h2>
+  <img id="profile-pic" src="https://i.postimg.cc/3Rwgjfyk/default.png" alt="Profile Picture">
+  <h3 id="username">Loading...</h3>
 
-  <div class="profile-box">
-    <h2>👤 میری پروفائل</h2>
-    <img id="profilePic" src="default.png" alt="Profile Picture"><br>
-    <input type="file" id="newPic" accept="image/*"><br>
+  <input type="file" id="new-pic" accept="image/*">
+  <button id="upload-btn">Change Profile Picture</button>
+  <button id="logout-btn">Logout</button>
 
-    <input type="text" id="name" placeholder="نام">
-    <input type="text" id="city" placeholder="شہر">
-    <input type="color" id="nameColor">
-    <input type="color" id="msgColor">
-
-    <button id="saveBtn">💾 محفوظ کریں</button>
-    <p id="status"></p>
-    <button id="logoutBtn" style="background:#f44336;">🚪 لاگ آؤٹ</button>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut,
-      updateProfile
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import {
-      getDatabase,
-      ref,
-      get,
-      update
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-    import {
-      getStorage,
-      ref as sRef,
-      uploadBytes,
-      getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-
-    // 🔹 Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-      authDomain: "zhobchat-33d8e.firebaseapp.com",
-      databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "zhobchat-33d8e",
-      storageBucket: "zhobchat-33d8e.appspot.com",
-      messagingSenderId: "116466089929",
-      appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-      measurementId: "G-LX9P9LRLV8"
-    };
-
-    // 🔹 Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const storage = getStorage(app);
-
-    const statusEl = document.getElementById("status");
-
-    // ✅ Load Profile Data
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
-
-      const uid = user.uid;
-      const snap = await get(ref(db, "users/" + uid));
-      const data = snap.val();
-
-      document.getElementById("name").value = data.name || "";
-      document.getElementById("city").value = data.city || "";
-      document.getElementById("nameColor").value = data.nameColor || "#000000";
-      document.getElementById("msgColor").value = data.msgColor || "#000000";
-      document.getElementById("profilePic").src = data.photoURL || "default.png";
-
-      // 🔹 Save Changes
-      document.getElementById("saveBtn").onclick = async () => {
-        const name = document.getElementById("name").value;
-        const city = document.getElementById("city").value;
-        const nameColor = document.getElementById("nameColor").value;
-        const msgColor = document.getElementById("msgColor").value;
-        const newPic = document.getElementById("newPic").files[0];
-
-        statusEl.textContent = "⏳ محفوظ کیا جا رہا ہے...";
-        let photoURL = data.photoURL;
-
-        if (newPic) {
-          const picRef = sRef(storage, `profiles/${uid}.jpg`);
-          await uploadBytes(picRef, newPic);
-          photoURL = await getDownloadURL(picRef);
-        }
-
-        await update(ref(db, "users/" + uid), {
-          name,
-          city,
-          nameColor,
-          msgColor,
-          photoURL
-        });
-
-        await updateProfile(user, { displayName: name, photoURL });
-
-        statusEl.textContent = "✅ پروفائل کامیابی سے محفوظ ہوگئی!";
-        document.getElementById("profilePic").src = photoURL;
-      };
-    });
-
-    // 🔹 Logout
-    document.getElementById("logoutBtn").onclick = () => {
-      signOut(auth).then(() => window.location.href = "index.html");
-    };
-  </script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <script src="profile.js"></script>
 </body>
 </html>
