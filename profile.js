@@ -1,3 +1,4 @@
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -5,47 +6,65 @@ const firebaseConfig = {
   projectId: "zhobchat-33d8e",
   storageBucket: "zhobchat-33d8e.appspot.com",
   messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
 };
+
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
+const storage = firebase.storage();
 
-const dp = document.getElementById("dp");
-const nameEl = document.getElementById("name");
-const ageEl = document.getElementById("age");
-const genderEl = document.getElementById("gender");
-const cityEl = document.getElementById("city");
-const blockBtn = document.getElementById("blockBtn");
+const usernameElem = document.getElementById("username");
+const profilePicElem = document.getElementById("profile-pic");
 
-const profileId = localStorage.getItem("profileView");
+// Check user login
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    const uid = user.uid;
+    db.ref("users/" + uid).once("value").then((snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        usernameElem.textContent = data.username || "User";
+        profilePicElem.src = data.photoURL || "https://i.postimg.cc/3Rwgjfyk/default.png";
+      }
+    });
+  } else {
+    alert("Please login first!");
+    window.location.href = "index.html";
+  }
+});
 
-auth.onAuthStateChanged(async user => {
-  if (!user) return location.href="login.html";
-  if (!profileId) { alert("No profile selected"); return location.href="users.html"; }
+// Upload new profile picture
+document.getElementById("upload-btn").addEventListener("click", () => {
+  const file = document.getElementById("new-pic").files[0];
+  const user = auth.currentUser;
 
-  const snap = await db.ref("users/" + profileId).once("value");
-  const target = snap.val();
-  if (!target) { alert("User not found"); return; }
+  if (!file) {
+    alert("Please select an image first!");
+    return;
+  }
 
-  dp.src = target.dp || 'default_dp.png';
-  nameEl.textContent = target.name || '';
-  ageEl.textContent = "Age: " + (target.age || '');
-  genderEl.textContent = "Gender: " + (target.gender || '');
-  cityEl.textContent = "City: " + (target.city || '');
+  if (user) {
+    const uid = user.uid;
+    const ref = storage.ref("profilePics/" + uid);
 
-  const meSnap = await db.ref("users/" + user.uid).once("value");
-  const me = meSnap.val() || {};
-  const blocked = me.blockedUsers || [];
-  let isBlocked = blocked.includes(profileId);
-  blockBtn.textContent = isBlocked ? "Unblock User" : "Block User";
+    ref.put(file).then(() => {
+      return ref.getDownloadURL();
+    }).then((url) => {
+      profilePicElem.src = url;
+      return db.ref("users/" + uid + "/photoURL").set(url);
+    }).then(() => {
+      alert("Profile picture updated successfully!");
+    }).catch((error) => {
+      alert("Error: " + error.message);
+    });
+  }
+});
 
-  blockBtn.onclick = async () => {
-    let newBlocked;
-    if (isBlocked) newBlocked = blocked.filter(id => id !== profileId);
-    else newBlocked = [...blocked, profileId];
-    await db.ref("users/" + user.uid).update({ blockedUsers: newBlocked });
-    alert(isBlocked ? "User Unblocked" : "User Blocked");
-    location.reload();
-  };
+// Logout
+document.getElementById("logout-btn").addEventListener("click", () => {
+  auth.signOut().then(() => {
+    window.location.href = "index.html";
+  });
 });
