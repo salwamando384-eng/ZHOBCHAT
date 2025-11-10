@@ -1,4 +1,21 @@
-// Firebase Config
+// ===============================
+// 🔹 ZHOBCHAT - Signup Page Script
+// ===============================
+
+// Firebase import
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import {
+  getDatabase,
+  ref,
+  set
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+// 🔹 Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -6,66 +23,59 @@ const firebaseConfig = {
   projectId: "zhobchat-33d8e",
   storageBucket: "zhobchat-33d8e.appspot.com",
   messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-  measurementId: "G-LX9P9LRLV8"
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+// 🔹 Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-const signupForm = document.getElementById("signupForm");
+// 🔹 Signup Button Click
+document.getElementById("signupBtn").addEventListener("click", async () => {
+  const name = document.getElementById("su_name").value.trim();
+  const gender = document.getElementById("su_gender").value;
+  const city = document.getElementById("su_city").value.trim();
+  const email = document.getElementById("su_email").value.trim();
+  const password = document.getElementById("su_password").value.trim();
+  const msg = document.getElementById("signupMsg");
 
-signupForm.addEventListener("submit", function(e) {
-  e.preventDefault();
-
-  const name = document.getElementById("name").value.trim();
-  const age = document.getElementById("age").value.trim();
-  const gender = document.getElementById("gender").value.trim();
-  const city = document.getElementById("city").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const dpFile = document.getElementById("dp").files[0];
-
-  if (!name || !email || !password) {
-    alert("براہ کرم نام، ای میل اور پاس ورڈ ضرور بھریں");
+  if (!name || !email || !password || !city || !gender) {
+    msg.textContent = "❌ Please fill all required fields.";
     return;
   }
 
-  auth.createUserWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
+  msg.textContent = "⏳ Creating your account...";
 
-      // DP optional
-      if (dpFile) {
-        const reader = new FileReader();
-        reader.onload = function() {
-          saveUser(user.uid, reader.result);
-        }
-        reader.readAsDataURL(dpFile);
-      } else {
-        saveUser(user.uid, "default_dp.png");
-      }
+  try {
+    // Create account
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCred.user;
 
-      function saveUser(uid, dpURL) {
-        db.ref("users/" + uid).set({
-          name,
-          age,
-          gender,
-          city,
-          email,
-          dp: dpURL,
-          blockedUsers: []
-        })
-        .then(() => {
-          alert("Signup کامیاب 🎉");
-          window.location = "chat.html";
-        })
-        .catch((err) => alert("Database error: " + err.message));
-      }
-    })
-    .catch((error) => {
-      alert("Signup Error: " + error.message);
+    // Update user profile (optional)
+    await updateProfile(user, {
+      displayName: name,
+      photoURL: "default_dp.png" // default DP
     });
+
+    // Save to Database
+    await set(ref(db, "users/" + user.uid), {
+      uid: user.uid,
+      name,
+      gender,
+      city,
+      email,
+      photoURL: "default_dp.png",
+      joinedAt: new Date().toLocaleString()
+    });
+
+    msg.textContent = "✅ Account created successfully! Redirecting...";
+    setTimeout(() => {
+      window.location.href = "chat.html";
+    }, 1500);
+
+  } catch (err) {
+    console.error("Signup error:", err);
+    msg.textContent = "❌ " + err.message;
+  }
 });
