@@ -1,239 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZHOBCHAT - Chat Room</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT 💬</title>
+  <script type="module">
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getDatabase, ref, push, set, onChildAdded, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-    header {
-      background: #2c3e50;
-      color: white;
-      padding: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-    }
-
-    #profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    #profile-img {
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid white;
-    }
-
-    #profile-name {
-      font-weight: bold;
-    }
-
-    #menu-btn {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 22px;
-      cursor: pointer;
-    }
-
-    #menu-box {
-      display: none;
-      position: absolute;
-      top: 60px;
-      right: 10px;
-      background: white;
-      color: black;
-      border-radius: 8px;
-      width: 200px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      z-index: 100;
-    }
-
-    #menu-box h4 {
-      margin: 0;
-      padding: 10px;
-      background: #3498db;
-      color: white;
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
-    }
-
-    #user-list {
-      max-height: 300px;
-      overflow-y: auto;
-      padding: 10px;
-    }
-
-    #user-list div {
-      padding: 5px;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    #user-list img {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-    }
-
-    #logout-btn, #edit-btn {
-      background: #3498db;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-left: 5px;
-    }
-
-    #logout-btn {
-      background: crimson;
-    }
-
-    #chat-box {
-      flex: 1;
-      padding: 10px;
-      overflow-y: auto;
-      background: white;
-      border-top: 1px solid #ccc;
-    }
-
-    .message {
-      margin-bottom: 10px;
-      padding: 8px;
-      border-radius: 6px;
-      background: #e5e5e5;
-      max-width: 80%;
-      word-wrap: break-word;
-    }
-
-    .my-message {
-      background: #d1f7d1;
-      margin-left: auto;
-    }
-
-    #message-form {
-      display: flex;
-      padding: 10px;
-      background: #ecf0f1;
-    }
-
-    #message-input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-
-    #send-btn {
-      background: #3498db;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-left: 5px;
-    }
-
-    /* Profile Edit Modal */
-    #editModal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-    }
-
-    #editBox {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-    }
-
-    #editBox input[type="file"] {
-      margin: 10px 0;
-    }
-
-    #saveEdit, #closeEdit {
-      padding: 8px 15px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      color: white;
-    }
-
-    #saveEdit { background: green; }
-    #closeEdit { background: gray; margin-left: 5px; }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div id="profile">
-      <img id="profile-img" src="https://i.postimg.cc/3Rwgjfyk/default.png" alt="Profile">
-      <span id="profile-name">Loading...</span>
-    </div>
-
-    <div>
-      <button id="edit-btn">Edit Profile</button>
-      <button id="logout-btn">Logout</button>
-      <button id="menu-btn">⋮</button>
-    </div>
-
-    <div id="menu-box">
-      <h4>🟢 Online Users</h4>
-      <div id="user-list">Loading...</div>
-    </div>
-  </header>
-
-  <div id="chat-box"></div>
-
-  <form id="message-form">
-    <input type="text" id="message-input" placeholder="Type a message..." required />
-    <button type="submit" id="send-btn">Send</button>
-  </form>
-
-  <!-- Edit Profile Modal -->
-  <div id="editModal">
-    <div id="editBox">
-      <h3>Edit Profile</h3>
-      <input type="file" id="newDp" accept="image/*"><br>
-      <label>Name Color: <input type="color" id="newNameColor"></label><br><br>
-      <label>Message Color: <input type="color" id="newMsgColor"></label><br><br>
-      <button id="saveEdit">Save</button>
-      <button id="closeEdit">Cancel</button>
-    </div>
-  </div>
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-
-  <script>
-    // 🔥 Firebase Config
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
       authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -244,113 +21,242 @@
       appId: "1:116466089929:web:06e914c8ed81ba9391f218"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-    const storage = firebase.storage();
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-    const chatBox = document.getElementById("chat-box");
-    const userList = document.getElementById("user-list");
-    const modal = document.getElementById("editModal");
+    // Elements
+    const msgBox = document.getElementById("msgBox");
+    const msgInput = document.getElementById("msgInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const usersMenu = document.getElementById("usersMenu");
+    const usersList = document.getElementById("usersList");
+    const chatTitle = document.getElementById("chatTitle");
+    const backBtn = document.getElementById("backBtn");
 
     let currentUser = null;
+    let privateChatWith = null;
 
-    // 👤 Auth Check
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) return (window.location.href = "index.html");
-      currentUser = user;
-
-      // User info
-      const snap = await db.ref("users/" + user.uid).once("value");
-      const info = snap.val();
-      document.getElementById("profile-img").src = info.photoURL || "https://i.postimg.cc/3Rwgjfyk/default.png";
-      document.getElementById("profile-name").textContent = info.username;
-      document.getElementById("profile-name").style.color = info.nameColor;
-
-      // Mark user online
-      db.ref("users/" + user.uid).update({ online: true });
-      window.addEventListener("beforeunload", () => {
-        db.ref("users/" + user.uid).update({ online: false });
-      });
+    // Listen user auth
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        loadPublicChat();
+        loadUsersList();
+      } else {
+        window.location.href = "index.html";
+      }
     });
 
-    // 💬 Send Message
-    document.getElementById("message-form").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const text = document.getElementById("message-input").value.trim();
-      if (text && currentUser) {
-        db.ref("messages").push({
+    // Load public chat messages
+    function loadPublicChat() {
+      chatTitle.textContent = "Public Chat 🌍";
+      msgBox.innerHTML = "";
+      privateChatWith = null;
+      const chatRef = ref(db, "messages/");
+      onChildAdded(chatRef, (snapshot) => {
+        const msg = snapshot.val();
+        displayMessage(msg, msg.uid === currentUser.uid);
+      });
+    }
+
+    // Load users
+    function loadUsersList() {
+      const usersRef = ref(db, "users/");
+      onValue(usersRef, (snapshot) => {
+        usersList.innerHTML = "";
+        snapshot.forEach((child) => {
+          const u = child.val();
+          if (u.uid !== currentUser.uid) {
+            const li = document.createElement("li");
+            li.textContent = u.name;
+            li.onclick = () => openPrivateChat(u);
+            usersList.appendChild(li);
+          }
+        });
+      });
+    }
+
+    // Send message
+    sendBtn.onclick = () => {
+      const text = msgInput.value.trim();
+      if (!text) return;
+
+      if (privateChatWith) {
+        const chatID = makeChatId(currentUser.uid, privateChatWith.uid);
+        const msgRef = push(ref(db, `privateChats/${chatID}/messages`));
+        set(msgRef, {
           uid: currentUser.uid,
           text,
-          time: new Date().toISOString()
+          name: currentUser.displayName || "Anonymous",
+          time: new Date().toLocaleTimeString()
         });
-        document.getElementById("message-input").value = "";
+      } else {
+        const msgRef = push(ref(db, "messages"));
+        set(msgRef, {
+          uid: currentUser.uid,
+          text,
+          name: currentUser.displayName || "Anonymous",
+          time: new Date().toLocaleTimeString()
+        });
       }
-    });
+      msgInput.value = "";
+    };
 
-    // 📡 Receive Messages
-    db.ref("messages").on("child_added", async (snap) => {
-      const msg = snap.val();
-      const msgDiv = document.createElement("div");
-      msgDiv.classList.add("message");
-      if (msg.uid === currentUser?.uid) msgDiv.classList.add("my-message");
-
-      const userSnap = await db.ref("users/" + msg.uid).once("value");
-      const userInfo = userSnap.val();
-
-      msgDiv.innerHTML = `
-        <strong style="color:${userInfo?.nameColor || '#000'}">${userInfo?.username || 'User'}:</strong>
-        <span style="color:${userInfo?.msgColor || '#000'}">${msg.text}</span>
-      `;
-      chatBox.appendChild(msgDiv);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    });
-
-    // ⋮ Menu Toggle
-    const menuBtn = document.getElementById("menu-btn");
-    const menuBox = document.getElementById("menu-box");
-    menuBtn.addEventListener("click", () => {
-      menuBox.style.display = menuBox.style.display === "block" ? "none" : "block";
-    });
-
-    // 👥 Online Users
-    db.ref("users").on("value", (snap) => {
-      userList.innerHTML = "";
-      snap.forEach((u) => {
-        const data = u.val();
-        if (data.online) {
-          const div = document.createElement("div");
-          div.innerHTML = `<img src="${data.photoURL || 'https://i.postimg.cc/3Rwgjfyk/default.png'}"> <b style="color:${data.nameColor || '#000'}">${data.username}</b>`;
-          userList.appendChild(div);
-        }
+    // Open private chat
+    function openPrivateChat(user2) {
+      privateChatWith = user2;
+      chatTitle.textContent = "Private Chat with " + user2.name + " 🔒";
+      msgBox.innerHTML = "";
+      const chatID = makeChatId(currentUser.uid, user2.uid);
+      const chatRef = ref(db, `privateChats/${chatID}/messages`);
+      onChildAdded(chatRef, (snapshot) => {
+        const msg = snapshot.val();
+        displayMessage(msg, msg.uid === currentUser.uid);
       });
-      if (userList.innerHTML === "") userList.innerHTML = "<p>No users online</p>";
-    });
+    }
 
-    // 🧾 Edit Profile
-    document.getElementById("edit-btn").onclick = () => modal.style.display = "flex";
-    document.getElementById("closeEdit").onclick = () => modal.style.display = "none";
-    document.getElementById("logout-btn").onclick = () => auth.signOut().then(() => window.location.href = "index.html");
+    // Back to Public Chat
+    backBtn.onclick = loadPublicChat;
 
-    document.getElementById("saveEdit").addEventListener("click", async () => {
-      const uid = currentUser.uid;
-      const newDp = document.getElementById("newDp").files[0];
-      const newNameColor = document.getElementById("newNameColor").value;
-      const newMsgColor = document.getElementById("newMsgColor").value;
+    // Display message
+    function displayMessage(msg, isOwn) {
+      const div = document.createElement("div");
+      div.className = "message " + (isOwn ? "own" : "other");
+      div.innerHTML = `<b>${msg.name}:</b> ${msg.text} <span class="time">${msg.time}</span>`;
+      msgBox.appendChild(div);
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }
 
-      let photoURL = document.getElementById("profile-img").src;
-      if (newDp) {
-        const dpRef = storage.ref("profilePics/" + uid);
-        await dpRef.put(newDp);
-        photoURL = await dpRef.getDownloadURL();
-      }
+    // Chat ID generator (for private chat)
+    function makeChatId(uid1, uid2) {
+      return uid1 < uid2 ? uid1 + "_" + uid2 : uid2 + "_" + uid1;
+    }
 
-      await db.ref("users/" + uid).update({ photoURL, nameColor: newNameColor, msgColor: newMsgColor });
-      document.getElementById("profile-img").src = photoURL;
-      document.getElementById("profile-name").style.color = newNameColor;
-      modal.style.display = "none";
-      alert("✅ Profile updated!");
-    });
+    // Toggle users menu
+    document.getElementById("menuBtn").onclick = () => {
+      usersMenu.classList.toggle("show");
+    };
+
+    // Logout
+    document.getElementById("logoutBtn").onclick = () => {
+      signOut(auth);
+    };
   </script>
+
+  <style>
+    body {
+      font-family: "Noto Nastaliq Urdu", "Segoe UI", sans-serif;
+      margin: 0;
+      background: #f1f5f9;
+    }
+    header {
+      background: #1e293b;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 15px;
+      position: relative;
+    }
+    #menuBtn {
+      font-size: 22px;
+      cursor: pointer;
+    }
+    #usersMenu {
+      position: absolute;
+      top: 50px;
+      right: 10px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      display: none;
+      width: 180px;
+    }
+    #usersMenu.show { display: block; }
+    #usersList li {
+      list-style: none;
+      padding: 8px 10px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    #usersList li:hover {
+      background: #f1f5f9;
+    }
+    main {
+      padding: 10px;
+      height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+    .message {
+      margin: 6px 0;
+      padding: 8px 10px;
+      border-radius: 10px;
+      max-width: 70%;
+    }
+    .message.own {
+      background: #3b82f6;
+      color: white;
+      margin-left: auto;
+    }
+    .message.other {
+      background: #e2e8f0;
+    }
+    .time {
+      font-size: 10px;
+      color: gray;
+      display: block;
+      text-align: right;
+    }
+    footer {
+      display: flex;
+      padding: 10px;
+      background: white;
+      border-top: 1px solid #ddd;
+    }
+    footer input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+    footer button {
+      margin-left: 8px;
+      padding: 8px 14px;
+      border: none;
+      background: #1e3a8a;
+      color: white;
+      border-radius: 10px;
+    }
+    #backBtn {
+      background: #ef4444;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h3 id="chatTitle">Public Chat 🌍</h3>
+    <div>
+      <button id="backBtn">Back</button>
+      <span id="menuBtn">⋮</span>
+      <button id="logoutBtn">Logout</button>
+    </div>
+    <div id="usersMenu">
+      <ul id="usersList"></ul>
+    </div>
+  </header>
+
+  <main id="msgBox"></main>
+
+  <footer>
+    <input type="text" id="msgInput" placeholder="اپنا پیغام لکھیں..." />
+    <button id="sendBtn">Send</button>
+  </footer>
 </body>
 </html>
