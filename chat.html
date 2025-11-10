@@ -1,157 +1,127 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ZHOBCHAT - Chat Room</title>
   <style>
     body {
-      background: #f4f4f4;
-      font-family: "Noto Nastaliq Urdu", sans-serif;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
       margin: 0;
       padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
 
     header {
-      background: #007bff;
+      background: #2c3e50;
       color: white;
       padding: 10px;
-      text-align: center;
-      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #profile-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid white;
+    }
+
+    #profile-name {
       font-weight: bold;
     }
 
-    #chatBox {
-      height: 70vh;
+    #logout-btn {
+      background: crimson;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #chat-box {
+      flex: 1;
+      padding: 10px;
       overflow-y: auto;
       background: white;
-      margin: 10px;
-      border-radius: 10px;
-      padding: 10px;
-      border: 1px solid #ccc;
+      border-top: 1px solid #ccc;
     }
 
     .message {
-      margin: 8px 0;
-      padding: 8px 12px;
-      border-radius: 15px;
+      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 6px;
+      background: #e5e5e5;
       max-width: 80%;
       word-wrap: break-word;
     }
 
-    .myMsg {
-      background: #dcf8c6;
+    .my-message {
+      background: #d1f7d1;
       margin-left: auto;
-      text-align: right;
     }
 
-    .otherMsg {
-      background: #fff;
-      border: 1px solid #ddd;
-    }
-
-    #sendBox {
+    #message-form {
       display: flex;
       padding: 10px;
-      gap: 10px;
+      background: #ecf0f1;
     }
 
-    #msgInput {
+    #message-input {
       flex: 1;
       padding: 10px;
-      border-radius: 10px;
+      border-radius: 6px;
       border: 1px solid #ccc;
     }
 
-    #sendBtn {
-      background: #007bff;
+    #send-btn {
+      background: #3498db;
       color: white;
       border: none;
       padding: 10px 15px;
-      border-radius: 10px;
+      border-radius: 6px;
       cursor: pointer;
-    }
-
-    /* 🔹 Profile Popup */
-    #popup {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #popupContent {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      width: 280px;
-    }
-
-    #popupContent img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-    }
-
-    #pLastSeen {
-      color: #555;
-      font-style: italic;
-    }
-
-    #closePopup {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 8px;
-      margin-top: 10px;
-      cursor: pointer;
+      margin-left: 5px;
     }
   </style>
 </head>
-
 <body>
-  <header>ZHOBCHAT 💬</header>
 
-  <div id="chatBox"></div>
-
-  <div id="sendBox">
-    <input id="msgInput" type="text" placeholder="اپنا پیغام لکھیں..." />
-    <button id="sendBtn">📩 بھیجیں</button>
-  </div>
-
-  <!-- 🔹 Profile Popup -->
-  <div id="popup">
-    <div id="popupContent">
-      <img id="pPhoto" src="default.png" alt="User" />
-      <h3 id="pName">👤 نام</h3>
-      <p id="pGender"></p>
-      <p id="pCity"></p>
-      <p id="pAge"></p>
-      <p id="pLastSeen"></p>
-      <button id="closePopup">بند کریں</button>
+  <header>
+    <div id="profile">
+      <img id="profile-img" src="https://i.postimg.cc/3Rwgjfyk/default.png" alt="Profile">
+      <span id="profile-name">Loading...</span>
     </div>
-  </div>
+    <button id="logout-btn">Logout</button>
+  </header>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      push,
-      set,
-      onChildAdded,
-      get
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  <div id="chat-box"></div>
 
+  <form id="message-form">
+    <input type="text" id="message-input" placeholder="Type a message..." required />
+    <button type="submit" id="send-btn">Send</button>
+  </form>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+  <script>
+    // 🔥 Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
       authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -159,133 +129,80 @@
       projectId: "zhobchat-33d8e",
       storageBucket: "zhobchat-33d8e.appspot.com",
       messagingSenderId: "116466089929",
-      appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-      measurementId: "G-LX9P9LRLV8"
+      appId: "1:116466089929:web:06e914c8ed81ba9391f218"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-    const chatBox = document.getElementById("chatBox");
-    const msgInput = document.getElementById("msgInput");
-    const sendBtn = document.getElementById("sendBtn");
-
-    const popup = document.getElementById("popup");
-    const pPhoto = document.getElementById("pPhoto");
-    const pName = document.getElementById("pName");
-    const pGender = document.getElementById("pGender");
-    const pCity = document.getElementById("pCity");
-    const pAge = document.getElementById("pAge");
-    const closePopup = document.getElementById("closePopup");
-
-    let currentUser = null;
-
-    // 🔹 Auth Check
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-        loadMessages();
-      } else {
+    // 🧍‍♂️ User Auth Check + Profile Load
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
         window.location.href = "index.html";
+        return;
+      }
+
+      const uid = user.uid;
+      db.ref("users/" + uid).once("value").then((snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          document.getElementById("profile-name").textContent = data.username;
+          document.getElementById("profile-name").style.color = data.nameColor;
+          document.getElementById("profile-img").src = data.photoURL || "https://i.postimg.cc/3Rwgjfyk/default.png";
+        }
+      });
+    });
+
+    // 🚪 Logout
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      auth.signOut().then(() => {
+        window.location.href = "index.html";
+      });
+    });
+
+    // 💬 Message Send
+    const form = document.getElementById("message-form");
+    const input = document.getElementById("message-input");
+    const chatBox = document.getElementById("chat-box");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const message = input.value.trim();
+      const user = auth.currentUser;
+
+      if (message && user) {
+        db.ref("messages").push({
+          uid: user.uid,
+          text: message,
+          time: new Date().toISOString()
+        });
+        input.value = "";
       }
     });
 
-    // 🔹 Send Message
-    sendBtn.onclick = async () => {
-      const text = msgInput.value.trim();
-      if (!text) return;
+    // 📡 Real-Time Messages
+    db.ref("messages").on("child_added", async (snapshot) => {
+      const msgData = snapshot.val();
+      const msgDiv = document.createElement("div");
 
-      const msgRef = ref(db, "messages");
-      await push(msgRef, {
-        text,
-        sender: currentUser.uid,
-        time: new Date().toLocaleTimeString()
-      });
-      msgInput.value = "";
-    };
+      // Get user info for color and name
+      const userSnap = await db.ref("users/" + msgData.uid).once("value");
+      const userInfo = userSnap.val();
 
-    // 🔹 Load Messages
-    function loadMessages() {
-      const msgRef = ref(db, "messages");
-      onChildAdded(msgRef, async (snapshot) => {
-        const data = snapshot.val();
-        const div = document.createElement("div");
-        div.classList.add("message");
-
-        const userRef = ref(db, "users/" + data.sender);
-        const userSnap = await get(userRef);
-        const userData = userSnap.val();
-
-        const senderName = userData?.name || "Unknown";
-        const msgColor = userData?.msgColor || "#000";
-        const nameColor = userData?.nameColor || "#007bff";
-        const photo = userData?.photoURL || "default.png";
-
-        if (data.sender === currentUser.uid) {
-          div.classList.add("myMsg");
-        } else {
-          div.classList.add("otherMsg");
-          div.style.cursor = "pointer";
-          div.onclick = () => showProfile(data.sender);
-        }
-
-        div.innerHTML = `
-          <b style="color:${nameColor}">
-            <img src="${photo}" width="25" height="25" style="border-radius:50%;vertical-align:middle;margin-right:5px;">
-            ${senderName}
-          </b><br>
-          <span style="color:${msgColor}">${data.text}</span>
-        `;
-
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
-    }
-
-    // 🔹 Show Profile Popup (with Last Seen)
-    async function showProfile(uid) {
-      const userRef = ref(db, "users/" + uid);
-      const statusRef = ref(db, "status/" + uid);
-
-      const [userSnap, statusSnap] = await Promise.all([get(userRef), get(statusRef)]);
-      const data = userSnap.val();
-      const status = statusSnap.val();
-
-      if (!data) return;
-
-      pPhoto.src = data.photoURL || "default.png";
-      pName.textContent = "👤 " + (data.name || "User");
-      pGender.textContent = "🚻 جنس: " + (data.gender || "نامعلوم");
-      pCity.textContent = "🏙️ شہر: " + (data.city || "نامعلوم");
-      pAge.textContent = "🎂 عمر: " + (data.age || "نامعلوم");
-
-      // 🕓 Last Seen
-      let lastSeenText = "نامعلوم";
-      if (status) {
-        if (status.online) {
-          lastSeenText = "آن لائن ✅";
-        } else if (status.lastSeen) {
-          const lastSeenDate = new Date(status.lastSeen);
-          const now = new Date();
-          const diff = now - lastSeenDate;
-          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const hours = lastSeenDate.getHours().toString().padStart(2, "0");
-          const mins = lastSeenDate.getMinutes().toString().padStart(2, "0");
-          if (days === 0) {
-            lastSeenText = `آخری بار آج ${hours}:${mins} پر دیکھا گیا`;
-          } else if (days === 1) {
-            lastSeenText = `آخری بار کل ${hours}:${mins} پر دیکھا گیا`;
-          } else {
-            lastSeenText = `آخری بار ${days} دن پہلے دیکھا گیا`;
-          }
-        }
+      msgDiv.classList.add("message");
+      if (msgData.uid === (auth.currentUser?.uid)) {
+        msgDiv.classList.add("my-message");
       }
-      document.getElementById("pLastSeen").textContent = `🕓 ${lastSeenText}`;
-      popup.style.display = "flex";
-    }
 
-    closePopup.onclick = () => (popup.style.display = "none");
+      msgDiv.innerHTML = `
+        <strong style="color:${userInfo?.nameColor || '#000'}">${userInfo?.username || 'Unknown'}:</strong>
+        <span style="color:${userInfo?.msgColor || '#000'}">${msgData.text}</span>
+      `;
+
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
   </script>
 </body>
 </html>
