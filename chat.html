@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZHOBCHAT - Chat Room</title>
-<link rel="stylesheet" href="style.css">
 <style>
-body { font-family:sans-serif; margin:0; padding:0; background:#f4f4f4; }
+body { margin:0; padding:0; font-family:sans-serif; height:100vh; display:flex; flex-direction:column; background:#f4f4f4; }
 .chat-header { display:flex; justify-content:space-between; align-items:center; padding:15px; background:#2ea043; color:#fff; font-size:20px; }
 #usersBtn { background:none; border:none; color:#fff; font-weight:bold; cursor:pointer; font-size:16px; }
-.chat-container { display:flex; }
-#userSidebar { width:250px; background:#fff; border-right:1px solid #ccc; display:none; flex-direction:column; padding:10px; max-height:500px; overflow-y:auto; }
+.chat-container { flex:1; display:flex; overflow:hidden; }
+#userSidebar { width:250px; background:#fff; border-right:1px solid #ccc; display:none; flex-direction:column; padding:10px; overflow-y:auto; }
 .user-item { display:flex; align-items:center; margin-bottom:10px; cursor:pointer; }
 .user-item img { width:40px; height:40px; border-radius:50%; margin-right:10px; }
 .user-status { width:10px; height:10px; border-radius:50%; margin-right:5px; }
-.chat-box { flex:1; padding:10px; display:flex; flex-direction:column; }
+.chat-box { flex:1; display:flex; flex-direction:column; padding:10px; }
+#userDetail { background:#fff; padding:10px; margin-bottom:5px; border-radius:5px; display:none; }
 #messages { flex:1; overflow-y:auto; background:#fff; padding:10px; border-radius:5px; margin-bottom:10px; }
 .message { margin-bottom:5px; padding:5px 10px; border-radius:5px; max-width:70%; word-wrap:break-word; }
 .message.self { background:#d4f8d4; align-self:flex-end; }
@@ -22,8 +22,6 @@ body { font-family:sans-serif; margin:0; padding:0; background:#f4f4f4; }
 #chatForm { display:flex; }
 #msgInput { flex:1; padding:10px; border-radius:5px; border:1px solid #ccc; }
 #sendBtn { padding:10px 15px; margin-left:5px; border:none; border-radius:5px; background:#2ea043; color:#fff; cursor:pointer; }
-#userDetail { background:#fff; padding:10px; margin-bottom:10px; border-radius:5px; display:none; }
-#privateMsgBtn { background:#2ea043; color:#fff; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; margin-top:5px; }
 </style>
 </head>
 <body>
@@ -35,7 +33,6 @@ body { font-family:sans-serif; margin:0; padding:0; background:#f4f4f4; }
 
 <div class="chat-container">
   <div id="userSidebar"></div>
-
   <div class="chat-box">
     <div id="userDetail"></div>
     <div id="messages"></div>
@@ -51,7 +48,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase, ref, set, push, onChildAdded, onValue, serverTimestamp, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// 🔹 Firebase Config
+// Firebase Config
 const firebaseConfig = {
   apiKey:"AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain:"zhobchat-33d8e.firebaseapp.com",
@@ -63,13 +60,12 @@ const firebaseConfig = {
   measurementId:"G-LX9P9LRLV8"
 };
 
-// 🔹 Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-let currentUser = null;
-let selectedUser = null;
+let currentUser=null;
+let selectedUser=null;
 
 const usersBtn = document.getElementById("usersBtn");
 const userSidebar = document.getElementById("userSidebar");
@@ -78,16 +74,15 @@ const messagesDiv = document.getElementById("messages");
 const chatForm = document.getElementById("chatForm");
 const msgInput = document.getElementById("msgInput");
 
-// Toggle sidebar
-usersBtn.addEventListener("click",()=>{ 
-  userSidebar.style.display = userSidebar.style.display==="none"?"flex":"none"; 
-});
+// Sidebar toggle
+usersBtn.addEventListener("click",()=>{ userSidebar.style.display = userSidebar.style.display==="none"?"flex":"none"; });
 
 // Auth state
 onAuthStateChanged(auth,user=>{
   if(!user) return window.location.href="login.html";
   currentUser=user;
 
+  // Online status
   const statusRef = ref(db,"users/"+currentUser.uid+"/status");
   set(statusRef,"online");
   statusRef.onDisconnect().set("offline");
@@ -98,41 +93,42 @@ onAuthStateChanged(auth,user=>{
   loadMessages();
 });
 
-// 🔹 Load Users
+// Load Users
 function loadUsers(){
   const usersRef = ref(db,"users");
   onValue(usersRef,snapshot=>{
     userSidebar.innerHTML="";
     snapshot.forEach(child=>{
       const u = child.val();
-      if(u.uid === currentUser.uid) return;
+      if(u.uid===currentUser.uid) return;
 
       const div = document.createElement("div");
       div.classList.add("user-item");
       const onlineColor = u.status==="online"?"green":"gray";
       const lastSeenText = u.status==="online"?"Online":"Last seen: "+(u.lastSeen?new Date(u.lastSeen).toLocaleString():"Unknown");
-      div.innerHTML = `
-        <div class="user-status" style="background:${onlineColor}" title="${lastSeenText}"></div>
-        <img src="${u.photoURL}" alt="DP">
-        <span style="color:${u.color}">${u.name}</span>
-      `;
+
+      div.innerHTML = `<div class="user-status" style="background:${onlineColor}" title="${lastSeenText}"></div>
+                       <img src="${u.photoURL}" alt="DP">
+                       <span style="color:${u.color || '#000'}">${u.name}</span>`;
+
       div.addEventListener("click",()=>{
         selectedUser=u.uid;
         userDetailDiv.style.display="block";
         userDetailDiv.innerHTML = `
           <h4>${u.name}</h4>
-          <p>Age: ${u.age}, Gender: ${u.gender}, City: ${u.city}</p>
+          <p>Age: ${u.age || 'N/A'}, Gender: ${u.gender || 'N/A'}, City: ${u.city || 'N/A'}</p>
           <p>Status: ${lastSeenText}</p>
           <button id="privateMsgBtn">Private Message</button>
         `;
         document.getElementById("privateMsgBtn").onclick = ()=>{ msgInput.focus(); };
       });
+
       userSidebar.appendChild(div);
     });
   });
 }
 
-// 🔹 Load Messages
+// Load Messages
 function loadMessages(){
   const messagesRef = ref(db,"messages");
   onChildAdded(messagesRef,snapshot=>{
@@ -151,7 +147,7 @@ function loadMessages(){
   });
 }
 
-// 🔹 Send Message
+// Send Message
 chatForm.addEventListener("submit", async e=>{
   e.preventDefault();
   if(!currentUser) return;
@@ -166,7 +162,7 @@ chatForm.addEventListener("submit", async e=>{
     fromUid: currentUser.uid,
     fromName: u.name,
     toUid: selectedUser||null,
-    color: u.color,
+    color: u.color || "#000",
     time: new Date().toLocaleTimeString()
   });
   msgInput.value="";
