@@ -49,9 +49,9 @@ body { font-family:sans-serif; margin:0; padding:0; background:#f4f4f4; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref, set, push, onChildAdded, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref, set, push, onChildAdded, onValue, serverTimestamp, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// Firebase Config
+// 🔹 Firebase Config
 const firebaseConfig = {
   apiKey:"AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain:"zhobchat-33d8e.firebaseapp.com",
@@ -59,15 +59,17 @@ const firebaseConfig = {
   projectId:"zhobchat-33d8e",
   storageBucket:"zhobchat-33d8e.appspot.com",
   messagingSenderId:"116466089929",
-  appId:"1:116466089929:web:06e914c8ed81ba9391f218"
+  appId:"1:116466089929:web:06e914c8ed81ba9391f218",
+  measurementId:"G-LX9P9LRLV8"
 };
 
+// 🔹 Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-let currentUser=null;
-let selectedUser=null;
+let currentUser = null;
+let selectedUser = null;
 
 const usersBtn = document.getElementById("usersBtn");
 const userSidebar = document.getElementById("userSidebar");
@@ -77,75 +79,97 @@ const chatForm = document.getElementById("chatForm");
 const msgInput = document.getElementById("msgInput");
 
 // Toggle sidebar
-usersBtn.addEventListener("click",()=>{ userSidebar.style.display = userSidebar.style.display==="none"?"flex":"none"; });
+usersBtn.addEventListener("click",()=>{ 
+  userSidebar.style.display = userSidebar.style.display==="none"?"flex":"none"; 
+});
 
 // Auth state
 onAuthStateChanged(auth,user=>{
-  if(user) currentUser=user;
-  else window.location.href="login.html";
+  if(!user) return window.location.href="login.html";
+  currentUser=user;
+
+  const statusRef = ref(db,"users/"+currentUser.uid+"/status");
+  set(statusRef,"online");
+  statusRef.onDisconnect().set("offline");
+  const lastSeenRef = ref(db,"users/"+currentUser.uid+"/lastSeen");
+  lastSeenRef.onDisconnect().set(serverTimestamp());
+
+  loadUsers();
+  loadMessages();
 });
 
-// Load users
-const usersRef = ref(db,"users");
-onValue(usersRef,snapshot=>{
-  userSidebar.innerHTML="";
-  snapshot.forEach(child=>{
-    const u = child.val();
-    if(u.uid===currentUser.uid) return;
-    const div = document.createElement("div");
-    div.classList.add("user-item");
-    const online = Math.random()>0.5?"green":"gray"; // Example online/offline. Replace with real status
-    div.innerHTML = `<div class="user-status" style="background:${online}"></div><img src="${u.photoURL}" alt="DP"><span style="color:${u.color}">${u.name}</span>`;
-    div.addEventListener("click",()=>{
-      selectedUser=u.uid;
-      userDetailDiv.style.display="block";
-      userDetailDiv.innerHTML = `
-        <h4>${u.name}</h4>
-        <p>Age: ${u.age}, Gender: ${u.gender}, City: ${u.city}</p>
-        <button id="privateMsgBtn">Private Message</button>
+// 🔹 Load Users
+function loadUsers(){
+  const usersRef = ref(db,"users");
+  onValue(usersRef,snapshot=>{
+    userSidebar.innerHTML="";
+    snapshot.forEach(child=>{
+      const u = child.val();
+      if(u.uid === currentUser.uid) return;
+
+      const div = document.createElement("div");
+      div.classList.add("user-item");
+      const onlineColor = u.status==="online"?"green":"gray";
+      const lastSeenText = u.status==="online"?"Online":"Last seen: "+(u.lastSeen?new Date(u.lastSeen).toLocaleString():"Unknown");
+      div.innerHTML = `
+        <div class="user-status" style="background:${onlineColor}" title="${lastSeenText}"></div>
+        <img src="${u.photoURL}" alt="DP">
+        <span style="color:${u.color}">${u.name}</span>
       `;
-      document.getElementById("privateMsgBtn").onclick = ()=>{
-        msgInput.focus();
-      };
+      div.addEventListener("click",()=>{
+        selectedUser=u.uid;
+        userDetailDiv.style.display="block";
+        userDetailDiv.innerHTML = `
+          <h4>${u.name}</h4>
+          <p>Age: ${u.age}, Gender: ${u.gender}, City: ${u.city}</p>
+          <p>Status: ${lastSeenText}</p>
+          <button id="privateMsgBtn">Private Message</button>
+        `;
+        document.getElementById("privateMsgBtn").onclick = ()=>{ msgInput.focus(); };
+      });
+      userSidebar.appendChild(div);
     });
-    userSidebar.appendChild(div);
   });
-});
+}
 
-// Load messages
-onChildAdded(ref(db,"messages"),snapshot=>{
-  const m = snapshot.val();
-  if(!currentUser) return;
-  if(m.toUid && m.toUid!==currentUser.uid && m.fromUid!==currentUser.uid) return;
-  const p=document.createElement("p");
-  p.classList.add("message");
-  p.classList.add(m.fromUid===currentUser.uid?"self":"other");
-  p.style.color=m.color||"#000";
-  const senderName = m.fromName || "Anonymous";
-  p.textContent = (m.toUid?"[Private] ":"")+senderName+": "+m.text;
-  messagesDiv.appendChild(p);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-});
+// 🔹 Load Messages
+function loadMessages(){
+  const messagesRef = ref(db,"messages");
+  onChildAdded(messagesRef,snapshot=>{
+    const m = snapshot.val();
+    if(!currentUser) return;
+    if(m.toUid && m.toUid!==currentUser.uid && m.fromUid!==currentUser.uid) return;
 
-// Send message
-chatForm.addEventListener("submit",e=>{
+    const p=document.createElement("p");
+    p.classList.add("message");
+    p.classList.add(m.fromUid===currentUser.uid?"self":"other");
+    p.style.color = m.color || "#000";
+    const senderName = m.fromName || "Anonymous";
+    p.textContent = (m.toUid?"[Private] ":"")+senderName+": "+m.text;
+    messagesDiv.appendChild(p);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
+}
+
+// 🔹 Send Message
+chatForm.addEventListener("submit", async e=>{
   e.preventDefault();
   if(!currentUser) return;
   const text = msgInput.value.trim();
   if(!text) return;
-  set(ref(db,"users/"+currentUser.uid+"/color"),"#127a1f"); // just example
-  get(ref(db,"users/"+currentUser.uid)).then(snap=>{
-    const u=snap.val();
-    push(ref(db,"messages"),{
-      text,
-      fromUid: currentUser.uid,
-      fromName: u.name,
-      toUid: selectedUser||null,
-      color: u.color,
-      time:new Date().toLocaleTimeString()
-    });
-    msgInput.value="";
+
+  const userRef = ref(db,"users/"+currentUser.uid);
+  const userSnap = await get(userRef);
+  const u = userSnap.val();
+  push(ref(db,"messages"),{
+    text,
+    fromUid: currentUser.uid,
+    fromName: u.name,
+    toUid: selectedUser||null,
+    color: u.color,
+    time: new Date().toLocaleTimeString()
   });
+  msgInput.value="";
 });
 </script>
 </body>
