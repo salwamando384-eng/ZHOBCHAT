@@ -1,4 +1,15 @@
-// Firebase Config (same as other files)
+// ===============================
+// 🔹 ZHOBCHAT - Login Page Script
+// ===============================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+// 🔹 Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -9,19 +20,38 @@ const firebaseConfig = {
   appId: "1:116466089929:web:06e914c8ed81ba9391f218"
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+// 🔹 Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-const form = document.getElementById("loginForm");
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
+// 🔹 Login Handler
+document.getElementById("loginBtn").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-  if (!email || !password) { alert("ای میل اور پاس ورڈ درج کریں"); return; }
+  const msg = document.getElementById("loginMsg");
 
-  auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      window.location = "chat.html";
-    })
-    .catch(err => alert("Login error: " + err.message));
+  if (!email || !password) {
+    msg.textContent = "⚠️ ای میل اور پاس ورڈ درج کریں۔";
+    return;
+  }
+
+  msg.textContent = "⏳ لاگ ان ہو رہا ہے...";
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    msg.style.color = "#2ea043";
+    msg.textContent = "✅ کامیابی سے لاگ ان ہو گیا! Redirect ہو رہا ہے...";
+    setTimeout(() => window.location.href = "chat.html", 1500);
+  } catch (err) {
+    console.error("Login error:", err);
+    msg.style.color = "#f85149";
+    msg.textContent = "❌ " + err.message;
+  }
+});
+
+// 🔹 Auto Redirect if Already Logged In
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    window.location.href = "chat.html";
+  }
 });
