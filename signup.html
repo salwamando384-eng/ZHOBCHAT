@@ -6,7 +6,7 @@
   <title>ZHOBCHAT - Signup</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    body { font-family: sans-serif; background:#f4f4f4; display:flex; justify-content:center; align-items:center; height:100vh; }
+    body { font-family:sans-serif; background:#f4f4f4; display:flex; justify-content:center; align-items:center; height:100vh; }
     .signup-container { background:#fff; padding:30px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); width:350px; }
     h2 { text-align:center; margin-bottom:20px; }
     input, select, button { width:100%; padding:10px; margin:5px 0; border-radius:5px; border:1px solid #ccc; }
@@ -31,23 +31,17 @@
     <input type="password" id="su_password" placeholder="پاسورڈ" required>
     <button type="submit">سائن اپ کریں</button>
     <p id="signupMsg"></p>
+    <p style="text-align:center; margin-top:10px;">
+      پہلے سے اکاؤنٹ ہے؟ <a href="login.html">لاگ ان کریں</a>
+    </p>
   </form>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  updateProfile
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import {
-  getDatabase,
-  ref,
-  set
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// 🔹 Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -58,61 +52,61 @@ const firebaseConfig = {
   appId: "1:116466089929:web:06e914c8ed81ba9391f218"
 };
 
-// 🔹 Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// 🔹 Signup Form
-const signupForm = document.getElementById("signupForm");
-const msg = document.getElementById("signupMsg");
+document.addEventListener("DOMContentLoaded", () => {
+  const signupForm = document.getElementById("signupForm");
+  const msg = document.getElementById("signupMsg");
 
-signupForm.addEventListener("submit", async (e) => {
-  e.preventDefault(); // پیج ری لوڈ روکنے کے لیے
+  signupForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const name = document.getElementById("su_name").value.trim();
-  const gender = document.getElementById("su_gender").value;
-  const city = document.getElementById("su_city").value.trim();
-  const email = document.getElementById("su_email").value.trim();
-  const password = document.getElementById("su_password").value.trim();
+    const name = document.getElementById("su_name").value.trim();
+    const gender = document.getElementById("su_gender").value;
+    const city = document.getElementById("su_city").value.trim();
+    const email = document.getElementById("su_email").value.trim();
+    const password = document.getElementById("su_password").value.trim();
 
-  if (!name || !email || !password || !city || !gender) {
-    msg.style.color = "#f85149";
-    msg.textContent = "⚠️ تمام خانے پر کریں۔";
-    return;
-  }
+    if (!name || !email || !password || !city || !gender) {
+      msg.style.color = "#f85149";
+      msg.textContent = "⚠️ تمام خانے پر کریں۔";
+      return;
+    }
 
-  msg.style.color = "#000";
-  msg.textContent = "⏳ آپ کا اکاؤنٹ بن رہا ہے...";
+    msg.style.color = "#000";
+    msg.textContent = "⏳ آپ کا اکاؤنٹ بن رہا ہے...";
 
-  try {
-    const userCred = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCred.user;
+    try {
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCred.user;
 
-    await updateProfile(user, {
-      displayName: name,
-      photoURL: "default_dp.png"
-    });
+      await updateProfile(user, {
+        displayName: name,
+        photoURL: "default_dp.png"
+      });
 
-    await set(ref(db, "users/" + user.uid), {
-      uid: user.uid,
-      name,
-      gender,
-      city,
-      email,
-      photoURL: "default_dp.png",
-      joinedAt: new Date().toLocaleString()
-    });
+      await set(ref(db, "users/" + user.uid), {
+        uid: user.uid,
+        name,
+        gender,
+        city,
+        email,
+        photoURL: "default_dp.png",
+        joinedAt: new Date().toLocaleString()
+      });
 
-    msg.style.color = "#2ea043";
-    msg.textContent = "✅ اکاؤنٹ بن گیا! Redirect ہو رہا ہے...";
-    setTimeout(() => window.location.href = "chat.html", 1500);
+      msg.style.color = "#2ea043";
+      msg.textContent = "✅ اکاؤنٹ بن گیا! Redirect ہو رہا ہے...";
+      setTimeout(() => window.location.href = "chat.html", 1500);
 
-  } catch (err) {
-    console.error("Signup error:", err);
-    msg.style.color = "#f85149";
-    msg.textContent = "❌ " + err.message;
-  }
+    } catch (err) {
+      console.error("Signup error:", err);
+      msg.style.color = "#f85149";
+      msg.textContent = "❌ " + err.message;
+    }
+  });
 });
 </script>
 
