@@ -1,5 +1,6 @@
 // === ZHOBCHAT Chat JS ===
-// Firebase import
+
+// --- Firebase Imports ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
   getDatabase,
@@ -8,7 +9,6 @@ import {
   onChildAdded,
   set,
   onValue,
-  update,
   remove
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
@@ -18,7 +18,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// === Firebase Config ===
+// --- Firebase Config ---
 const firebaseConfig = {
   apiKey: "AIzaSyB-WYRWq3pQ1r_hLzMZ_4FItTd0jRclB1Q",
   authDomain: "zhobchat-2a01e.firebaseapp.com",
@@ -29,12 +29,12 @@ const firebaseConfig = {
   appId: "1:1003454915453:web:73a7e4d5c2b3b6bfb2b30e"
 };
 
-// === Initialize Firebase ===
+// --- Initialize Firebase ---
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// === Elements ===
+// --- Elements ---
 const chatBox = document.getElementById("chatBox");
 const msgInput = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
@@ -47,7 +47,7 @@ const typingStatus = document.getElementById("typingStatus");
 let currentUser = null;
 let typingTimer;
 
-// === Check User Auth ===
+// --- Check Login ---
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "index.html";
@@ -59,7 +59,7 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// === Add User Online ===
+// --- Add Online User ---
 function addUserStatus(user) {
   const userRef = ref(db, "activeUsers/" + user.uid);
   set(userRef, {
@@ -67,12 +67,13 @@ function addUserStatus(user) {
     online: true
   });
 
+  // Remove on exit
   window.addEventListener("beforeunload", () => {
     remove(userRef);
   });
 }
 
-// === Load Active Users ===
+// --- Load Active Users ---
 function loadActiveUsers() {
   const activeRef = ref(db, "activeUsers/");
   onValue(activeRef, (snapshot) => {
@@ -85,7 +86,7 @@ function loadActiveUsers() {
   });
 }
 
-// === Load Messages ===
+// --- Load Messages ---
 function loadMessages() {
   const chatRef = ref(db, "messages/");
   onChildAdded(chatRef, (data) => {
@@ -94,7 +95,7 @@ function loadMessages() {
   });
 }
 
-// === Display Message ===
+// --- Display Message ---
 function displayMessage(msg) {
   const div = document.createElement("div");
   div.classList.add("msg");
@@ -108,7 +109,7 @@ function displayMessage(msg) {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// === Send Message ===
+// --- Send Message ---
 sendBtn.addEventListener("click", sendMessage);
 msgInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
@@ -120,7 +121,10 @@ function sendMessage() {
   if (!text) return;
 
   const chatRef = ref(db, "messages/");
-  const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const time = new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 
   push(chatRef, {
     text,
@@ -132,7 +136,7 @@ function sendMessage() {
   setTypingStatus(false);
 }
 
-// === Typing Indicator ===
+// --- Typing Indicator ---
 function setTypingStatus(isTyping) {
   const typingRef = ref(db, "typing/" + currentUser.uid);
   if (isTyping) {
@@ -157,13 +161,13 @@ onValue(typingRef, (snapshot) => {
   typingStatus.textContent = someoneTyping ? "کوئی لکھ رہا ہے..." : "";
 });
 
-// === Toggle User List ===
+// --- Toggle Users ---
 usersBtn.addEventListener("click", () => {
   usersListBox.style.display =
     usersListBox.style.display === "block" ? "none" : "block";
 });
 
-// === Logout ===
+// --- Logout ---
 logoutBtn.addEventListener("click", () => {
   signOut(auth).then(() => {
     window.location.href = "index.html";
