@@ -1,33 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZHOBCHAT - Login / Signup</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+    #container {
+      max-width: 420px;
+      margin: 50px auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px gray;
+      overflow: hidden;
+    }
+    h2 {
+      background: #3f51b5;
+      color: white;
+      margin: 0;
+      padding: 12px;
+      text-align: center;
+    }
+    input, button {
+      width: 90%;
+      margin: 8px auto;
+      display: block;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    #chatArea {
+      display: none;
+    }
+    #chatMessages {
+      height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      background: #fafafa;
+    }
+    .msgBox {
+      margin: 5px 0;
+      padding: 5px 10px;
+      background: #e1e1ff;
+      border-radius: 5px;
+    }
+    .msgBox span {
+      font-size: 10px;
+      color: #777;
+      float: right;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>ZHOBCHAT</h1>
+  <div id="container">
+    <h2>ZHOBCHAT</h2>
 
-    <div id="loginBox">
-      <h2>Login</h2>
-      <input type="email" id="loginEmail" placeholder="Email" />
-      <input type="password" id="loginPassword" placeholder="Password" />
-      <button onclick="loginUser()">Login</button>
+    <!-- Signup -->
+    <div id="signupArea">
+      <h3>Signup</h3>
+      <input id="signupName" placeholder="Name" />
+      <input id="signupEmail" placeholder="Email" type="email" />
+      <input id="signupPass" placeholder="Password" type="password" />
+      <button onclick="signup()">Signup</button>
+      <button onclick="showLogin()">Already have account?</button>
     </div>
 
-    <div id="signupBox">
-      <h2>Signup</h2>
-      <input type="text" id="signupName" placeholder="Name" />
-      <input type="email" id="signupEmail" placeholder="Email" />
-      <input type="password" id="signupPassword" placeholder="Password" />
-      <button onclick="signupUser()">Signup</button>
+    <!-- Login -->
+    <div id="loginArea" style="display:none;">
+      <h3>Login</h3>
+      <input id="loginEmail" placeholder="Email" type="email" />
+      <input id="loginPass" placeholder="Password" type="password" />
+      <button onclick="login()">Login</button>
+      <button onclick="showSignup()">Create new account</button>
     </div>
 
-    <p id="message"></p>
+    <!-- Chat -->
+    <div id="chatArea" style="display:none;">
+      <div id="chatMessages"></div>
+      <input id="messageInput" placeholder="Type message..." />
+      <button onclick="sendMessage()">Send</button>
+      <button onclick="logout()">Logout</button>
+    </div>
   </div>
 
-  <script type="module" src="index.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
