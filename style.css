@@ -14,7 +14,7 @@ input, select, button {
 button { cursor: pointer; }
 
 .user-list {
-  width: 200px;
+  width: 220px;
   background: #fff;
   padding: 10px;
   border-right: 1px solid #ccc;
@@ -38,6 +38,7 @@ button { cursor: pointer; }
 
 .chat-container {
   display: flex;
+  padding: 10px;
 }
 
 .chat-box {
@@ -60,6 +61,8 @@ button { cursor: pointer; }
   margin-bottom: 5px;
   padding: 5px 10px;
   border-radius: 5px;
+  max-width: 70%;
+  word-wrap: break-word;
 }
 
 .message.self {
