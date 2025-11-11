@@ -11,6 +11,7 @@
 #chatForm { display:flex; }
 #msgInput { flex:1; padding:10px; border-radius:5px; border:1px solid #ccc; }
 #sendBtn { padding:10px 15px; margin-left:5px; border:none; border-radius:5px; background:#2ea043; color:#fff; cursor:pointer; }
+.user-selected { font-weight:bold; color:#127a1f; margin-bottom:10px; }
 </style>
 </head>
 <body>
@@ -19,6 +20,7 @@
 <div class="chat-container">
 <div class="user-list" id="userList"></div>
 <div class="chat-box">
+<div id="selectedUser" class="user-selected">سب کے لیے پیغام</div>
 <div id="messages"></div>
 <form id="chatForm">
 <input type="text" id="msgInput" placeholder="پیغام لکھیں..." required>
@@ -47,7 +49,7 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 
 let currentUser=null;
-let selectedUser=null; // For private messages
+let selectedUser=null;
 
 onAuthStateChanged(auth,user=>{
   if(user) currentUser=user;
@@ -58,6 +60,7 @@ const userListDiv=document.getElementById("userList");
 const messagesDiv=document.getElementById("messages");
 const chatForm=document.getElementById("chatForm");
 const msgInput=document.getElementById("msgInput");
+const selectedUserDiv=document.getElementById("selectedUser");
 
 // Load users
 const usersRef=ref(db,"users");
@@ -65,10 +68,14 @@ get(usersRef).then(snapshot=>{
   if(snapshot.exists()){
     snapshot.forEach(child=>{
       const u=child.val();
+      if(u.uid===currentUser.uid) return; // skip self
       const div=document.createElement("div");
       div.classList.add("user-item");
       div.innerHTML=`<img src="${u.photoURL}" alt="DP"><span style="color:${u.color}">${u.name} (${u.age},${u.gender})</span>`;
-      div.addEventListener("click",()=>{ selectedUser=u.uid; });
+      div.addEventListener("click",()=>{
+        selectedUser=u.uid;
+        selectedUserDiv.textContent="Private: "+u.name;
+      });
       userListDiv.appendChild(div);
     });
   }
@@ -78,12 +85,15 @@ get(usersRef).then(snapshot=>{
 onChildAdded(ref(db,"messages"),snapshot=>{
   const m=snapshot.val();
   if(!currentUser) return;
-  if(m.toUid && m.toUid!==currentUser.uid && m.fromUid!==currentUser.uid) return; // Private filter
+  // Filter private messages
+  if(m.toUid && m.toUid!==currentUser.uid && m.fromUid!==currentUser.uid) return;
+
   const p=document.createElement("p");
   p.classList.add("message");
   p.classList.add(m.fromUid===currentUser.uid?"self":"other");
   p.style.color=m.color||"#000";
-  p.textContent=(m.toUid?"[Private] ":"")+m.text;
+  const senderName = m.fromName || "Anonymous";
+  p.textContent = (m.toUid?"[Private] ":"")+senderName+": "+m.text;
   messagesDiv.appendChild(p);
   messagesDiv.scrollTop=messagesDiv.scrollHeight;
 });
@@ -94,14 +104,20 @@ chatForm.addEventListener("submit",e=>{
   if(!currentUser) return;
   const text=msgInput.value.trim();
   if(text==="") return;
-  push(ref(db,"messages"),{
-    text,
-    fromUid:currentUser.uid,
-    toUid:selectedUser||null,
-    color:"#000",
-    time:new Date().toLocaleTimeString()
+
+  // Get user color
+  get(ref(db,"users/"+currentUser.uid)).then(snap=>{
+    const u=snap.val();
+    push(ref(db,"messages"),{
+      text,
+      fromUid:currentUser.uid,
+      fromName:u.name,
+      toUid:selectedUser||null,
+      color:u.color,
+      time:new Date().toLocaleTimeString()
+    });
+    msgInput.value="";
   });
-  msgInput.value="";
 });
 </script>
 
