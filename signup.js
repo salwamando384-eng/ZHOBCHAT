@@ -2,7 +2,6 @@
 // 🔹 ZHOBCHAT - Signup Page Script
 // ===============================
 
-// Firebase import
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import {
   getAuth,
@@ -31,7 +30,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// 🔹 Signup Button Click
+// 🔹 Signup Button
 document.getElementById("signupBtn").addEventListener("click", async () => {
   const name = document.getElementById("su_name").value.trim();
   const gender = document.getElementById("su_gender").value;
@@ -41,24 +40,24 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
   const msg = document.getElementById("signupMsg");
 
   if (!name || !email || !password || !city || !gender) {
-    msg.textContent = "❌ Please fill all required fields.";
+    msg.textContent = "⚠️ تمام خانے پر کریں۔";
     return;
   }
 
-  msg.textContent = "⏳ Creating your account...";
+  msg.textContent = "⏳ آپ کا اکاؤنٹ بن رہا ہے...";
 
   try {
     // Create account
     const userCred = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCred.user;
 
-    // Update user profile (optional)
+    // Update user profile
     await updateProfile(user, {
       displayName: name,
-      photoURL: "default_dp.png" // default DP
+      photoURL: "default_dp.png"
     });
 
-    // Save to Database
+    // Save in database
     await set(ref(db, "users/" + user.uid), {
       uid: user.uid,
       name,
@@ -69,13 +68,13 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
       joinedAt: new Date().toLocaleString()
     });
 
-    msg.textContent = "✅ Account created successfully! Redirecting...";
-    setTimeout(() => {
-      window.location.href = "chat.html";
-    }, 1500);
+    msg.style.color = "#2ea043";
+    msg.textContent = "✅ اکاؤنٹ بن گیا! Redirect ہو رہا ہے...";
+    setTimeout(() => window.location.href = "chat.html", 1500);
 
   } catch (err) {
     console.error("Signup error:", err);
+    msg.style.color = "#f85149";
     msg.textContent = "❌ " + err.message;
   }
 });
