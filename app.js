@@ -1,27 +1,24 @@
-// === ZHOBCHAT Chat JS ===
-// Firebase import
+// =====================
+// 🔹 Firebase Imports
+// =====================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
   getDatabase,
   ref,
   push,
   onChildAdded,
-  set,
-  onValue,
-  update,
-  remove
+  set
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
 import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut,
-  updateProfile
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// === Firebase Config ===
+// =====================
+// 🔹 Firebase Config
+// =====================
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -33,88 +30,133 @@ const firebaseConfig = {
   measurementId: "G-LX9P9LRLV8"
 };
 
-// === Initialize Firebase ===
+// =====================
+// 🔹 Initialize Firebase
+// =====================
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// === Signup ===
-window.signup = function() {
-  const name = document.getElementById("signupName").value;
-  const email = document.getElementById("signupEmail").value;
-  const pass = document.getElementById("signupPass").value;
+// =====================
+// 🔹 HTML Elements
+// =====================
+const signupArea = document.getElementById("signupArea");
+const loginArea = document.getElementById("loginArea");
+const chatArea = document.getElementById("chatArea");
+const chatMessages = document.getElementById("chatMessages");
+const messageInput = document.getElementById("messageInput");
 
-  createUserWithEmailAndPassword(auth, email, pass)
-    .then((cred) => {
-      updateProfile(cred.user, { displayName: name });
-      set(ref(db, "users/" + cred.user.uid), {
-        name: name,
-        email: email,
-        joinedAt: new Date().toISOString(),
-        lastSeen: new Date().toISOString(),
-        status: "online"
-      });
-      alert("Signup successful!");
-      showChat();
-    })
-    .catch((err) => alert(err.message));
+// =====================
+// 🔹 Signup Function
+// =====================
+window.signup = async function () {
+  const name = document.getElementById("signupName").value.trim();
+  const email = document.getElementById("signupEmail").value.trim();
+  const pass = document.getElementById("signupPass").value.trim();
+
+  if (!name || !email || !pass) {
+    alert("⚠️ تمام خانے پر کریں");
+    return;
+  }
+
+  try {
+    const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+    const user = userCred.user;
+
+    await set(ref(db, "users/" + user.uid), {
+      uid: user.uid,
+      name,
+      email,
+      joinedAt: new Date().toLocaleString(),
+    });
+
+    alert("✅ Signup مکمل!");
+    signupArea.style.display = "none";
+    chatArea.style.display = "block";
+  } catch (e) {
+    alert("❌ Signup Error: " + e.message);
+  }
 };
 
-// === Login ===
-window.login = function() {
-  const email = document.getElementById("loginEmail").value;
-  const pass = document.getElementById("loginPass").value;
+// =====================
+// 🔹 Login Function
+// =====================
+window.login = async function () {
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass = document.getElementById("loginPass").value.trim();
 
-  signInWithEmailAndPassword(auth, email, pass)
-    .then(() => {
-      alert("Login successful!");
-      showChat();
-    })
-    .catch((err) => alert(err.message));
+  try {
+    const userCred = await signInWithEmailAndPassword(auth, email, pass);
+    alert("✅ Login Successful!");
+    loginArea.style.display = "none";
+    chatArea.style.display = "block";
+    loadMessages();
+  } catch (e) {
+    alert("❌ Login Error: " + e.message);
+  }
 };
 
-// === Logout ===
-window.logout = function() {
-  signOut(auth);
-  document.getElementById("chatArea").style.display = "none";
-  document.getElementById("loginArea").style.display = "block";
-};
-
-// === Send Message ===
-window.sendMessage = function() {
-  const msg = document.getElementById("messageInput").value.trim();
-  if (!msg) return;
-
+// =====================
+// 🔹 Send Message
+// =====================
+window.sendMessage = async function () {
+  const msg = messageInput.value.trim();
   const user = auth.currentUser;
+
+  if (!msg) return;
+  if (!user) {
+    alert("⚠️ پہلے Login کریں!");
+    return;
+  }
+
   const msgRef = push(ref(db, "messages"));
-  set(msgRef, {
-    fromUid: user.uid,
-    fromName: user.displayName || "Unknown",
+  await set(msgRef, {
+    from: user.email,
     text: msg,
     time: new Date().toLocaleTimeString()
   });
 
-  document.getElementById("messageInput").value = "";
+  messageInput.value = "";
 };
 
-// === Show Messages in Realtime ===
-onChildAdded(ref(db, "messages"), (data) => {
-  const msg = data.val();
-  const div = document.createElement("div");
-  div.className = "msgBox";
-  div.innerHTML = `<b>${msg.fromName}:</b> ${msg.text} <span>${msg.time}</span>`;
-  document.getElementById("chatMessages").appendChild(div);
-  div.scrollIntoView();
-});
-
-// === Auth State Change ===
-onAuthStateChanged(auth, (user) => {
-  if (user) showChat();
-});
-
-// === Show Chat UI ===
-function showChat() {
-  document.getElementById("loginArea").style.display = "none";
-  document.getElementById("signupArea").style.display = "none";
-  document.getElementById("chatArea").style.display = "block";
+// =====================
+// 🔹 Load Messages
+// =====================
+function loadMessages() {
+  const msgRef = ref(db, "messages");
+  onChildAdded(msgRef, (snapshot) => {
+    const data = snapshot.val();
+    const div = document.createElement("div");
+    div.className = "msgBox";
+    div.innerHTML = `<b>${data.from}:</b> ${data.text} <span>${data.time}</span>`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
 }
+
+// =====================
+// 🔹 Logout Function
+// =====================
+window.logout = function () {
+  signOut(auth).then(() => {
+    chatArea.style.display = "none";
+    loginArea.style.display = "block";
+  });
+};
+
+// =====================
+// 🔹 UI Switchers
+// =====================
+window.showLogin = function () {
+  signupArea.style.display = "none";
+  loginArea.style.display = "block";
+};
+window.showSignup = function () {
+  loginArea.style.display = "none";
+  signupArea.style.display = "block";
+};
+
+// =====================
+// 🔹 Global Error Catch
+// =====================
+window.addEventListener("error", (e) => alert("⚠️ Error: " + e.message));
