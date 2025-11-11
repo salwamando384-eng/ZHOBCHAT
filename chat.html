@@ -6,63 +6,102 @@
 <title>ZHOBCHAT - Chat Room</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  body { font-family:sans-serif; margin:0; padding:0; background:#f4f4f4; }
-  .chat-header { background:#2ea043; color:#fff; padding:15px; text-align:center; font-size:20px; }
-  #messages { height:400px; overflow-y:auto; background:#fff; margin:10px; padding:10px; border-radius:5px; }
-  #chatForm { display:flex; margin:10px; }
-  #msgInput { flex:1; padding:10px; border-radius:5px; border:1px solid #ccc; }
-  #sendBtn { padding:10px 15px; margin-left:5px; border:none; border-radius:5px; background:#2ea043; color:#fff; cursor:pointer; }
+.chat-header { background:#2ea043; color:#fff; padding:15px; text-align:center; font-size:20px; }
+#messages { height:400px; overflow-y:auto; margin-bottom:10px; }
+#chatForm { display:flex; }
+#msgInput { flex:1; padding:10px; border-radius:5px; border:1px solid #ccc; }
+#sendBtn { padding:10px 15px; margin-left:5px; border:none; border-radius:5px; background:#2ea043; color:#fff; cursor:pointer; }
 </style>
 </head>
 <body>
 
 <div class="chat-header">ZHOBCHAT - چیٹ روم</div>
+<div class="chat-container">
+<div class="user-list" id="userList"></div>
+<div class="chat-box">
 <div id="messages"></div>
 <form id="chatForm">
-  <input type="text" id="msgInput" placeholder="پیغام لکھیں..." required>
-  <button type="submit" id="sendBtn">بھیجیں</button>
+<input type="text" id="msgInput" placeholder="پیغام لکھیں..." required>
+<button type="submit" id="sendBtn">بھیجیں</button>
 </form>
+</div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase, ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain: "zhobchat-33d8e.firebaseapp.com",
-  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "zhobchat-33d8e",
-  storageBucket: "zhobchat-33d8e.appspot.com",
-  messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
+  apiKey:"AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+  authDomain:"zhobchat-33d8e.firebaseapp.com",
+  databaseURL:"https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"zhobchat-33d8e",
+  storageBucket:"zhobchat-33d8e.appspot.com",
+  messagingSenderId:"116466089929",
+  appId:"1:116466089929:web:06e914c8ed81ba9391f218"
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getDatabase(app);
 
-const chatForm = document.getElementById("chatForm");
-const msgInput = document.getElementById("msgInput");
-const messagesDiv = document.getElementById("messages");
+let currentUser=null;
+let selectedUser=null; // For private messages
 
-chatForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const msg = msgInput.value.trim();
-  if(msg === "") return;
-
-  push(ref(db, "messages"), {
-    text: msg,
-    time: new Date().toLocaleTimeString()
-  });
-
-  msgInput.value = "";
+onAuthStateChanged(auth,user=>{
+  if(user) currentUser=user;
+  else window.location.href="login.html";
 });
 
-onChildAdded(ref(db, "messages"), (snapshot) => {
-  const msgData = snapshot.val();
-  const p = document.createElement("p");
-  p.textContent = `[${msgData.time}] ${msgData.text}`;
+const userListDiv=document.getElementById("userList");
+const messagesDiv=document.getElementById("messages");
+const chatForm=document.getElementById("chatForm");
+const msgInput=document.getElementById("msgInput");
+
+// Load users
+const usersRef=ref(db,"users");
+get(usersRef).then(snapshot=>{
+  if(snapshot.exists()){
+    snapshot.forEach(child=>{
+      const u=child.val();
+      const div=document.createElement("div");
+      div.classList.add("user-item");
+      div.innerHTML=`<img src="${u.photoURL}" alt="DP"><span style="color:${u.color}">${u.name} (${u.age},${u.gender})</span>`;
+      div.addEventListener("click",()=>{ selectedUser=u.uid; });
+      userListDiv.appendChild(div);
+    });
+  }
+});
+
+// Load messages
+onChildAdded(ref(db,"messages"),snapshot=>{
+  const m=snapshot.val();
+  if(!currentUser) return;
+  if(m.toUid && m.toUid!==currentUser.uid && m.fromUid!==currentUser.uid) return; // Private filter
+  const p=document.createElement("p");
+  p.classList.add("message");
+  p.classList.add(m.fromUid===currentUser.uid?"self":"other");
+  p.style.color=m.color||"#000";
+  p.textContent=(m.toUid?"[Private] ":"")+m.text;
   messagesDiv.appendChild(p);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  messagesDiv.scrollTop=messagesDiv.scrollHeight;
+});
+
+// Send message
+chatForm.addEventListener("submit",e=>{
+  e.preventDefault();
+  if(!currentUser) return;
+  const text=msgInput.value.trim();
+  if(text==="") return;
+  push(ref(db,"messages"),{
+    text,
+    fromUid:currentUser.uid,
+    toUid:selectedUser||null,
+    color:"#000",
+    time:new Date().toLocaleTimeString()
+  });
+  msgInput.value="";
 });
 </script>
 
