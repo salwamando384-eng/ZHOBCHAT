@@ -1,26 +1,83 @@
 <!DOCTYPE html>
 <html lang="ur">
 <head>
-  <meta charset="utf-8" />
-  <title>ZhobChat Login</title>
+  <meta charset="UTF-8">
+  <title>ZHOBCHAT - Login</title>
   <style>
-    body{font-family: sans-serif; text-align:center; padding:30px; background:#f7f7f7}
-    input,button{margin:6px;padding:10px;width:220px}
-    button{background:#007bff;color:#fff;border:none;border-radius:5px;cursor:pointer}
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0d1117;
+      color: #c9d1d9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    h2 {
+      color: #58a6ff;
+      margin-bottom: 20px;
+    }
+    form {
+      background: #161b22;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      width: 320px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    input {
+      background: #21262d;
+      color: #c9d1d9;
+    }
+    input::placeholder {
+      color: #8b949e;
+    }
+    button {
+      background-color: #238636;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #2ea043;
+    }
+    #loginMsg {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #f85149;
+    }
+    a {
+      color: #58a6ff;
+      text-decoration: none;
+      font-size: 13px;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-  <h2>ZhobChat — Login</h2>
+  <h2>ZHOBCHAT Login</h2>
   <form id="loginForm">
-    <input id="email" type="email" placeholder="ای میل" required /><br/>
-    <input id="password" type="password" placeholder="پاس ورڈ" required/><br/>
-    <button type="submit">Login</button>
+    <input type="email" id="email" placeholder="ای میل" required>
+    <input type="password" id="password" placeholder="پاس ورڈ" required>
+    <button type="button" id="loginBtn">لاگ ان</button>
+    <div id="loginMsg"></div>
+    <a href="signup.html">اکاؤنٹ نہیں ہے؟ سائن اپ کریں</a>
   </form>
-  <p>نیا اکاؤنٹ؟ <a href="signup.html">Signup</a></p>
 
-  <!-- Firebase compat -->
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
-  <script src="login.js"></script>
+  <!-- ✅ Firebase + JS -->
+  <script type="module" src="login.js"></script>
 </body>
 </html>
