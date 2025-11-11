@@ -34,7 +34,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-// 🔹 Firebase Config (Signup کے جیسا)
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -45,38 +44,39 @@ const firebaseConfig = {
   appId: "1:116466089929:web:06e914c8ed81ba9391f218"
 };
 
-// 🔹 Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const loginForm = document.getElementById("loginForm");
-const loginMsg = document.getElementById("loginMsg");
+document.addEventListener("DOMContentLoaded", () => {
+  const loginForm = document.getElementById("loginForm");
+  const loginMsg = document.getElementById("loginMsg");
 
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const email = document.getElementById("li_email").value.trim();
-  const password = document.getElementById("li_password").value.trim();
+    const email = document.getElementById("li_email").value.trim();
+    const password = document.getElementById("li_password").value.trim();
 
-  if (!email || !password) {
-    loginMsg.style.color = "#f85149";
-    loginMsg.textContent = "⚠️ تمام خانے پر کریں۔";
-    return;
-  }
+    if (!email || !password) {
+      loginMsg.style.color = "#f85149";
+      loginMsg.textContent = "⚠️ تمام خانے پر کریں۔";
+      return;
+    }
 
-  loginMsg.style.color = "#000";
-  loginMsg.textContent = "⏳ لاگ ان ہو رہا ہے...";
+    loginMsg.style.color = "#000";
+    loginMsg.textContent = "⏳ لاگ ان ہو رہا ہے...";
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    loginMsg.style.color = "#2ea043";
-    loginMsg.textContent = "✅ لاگ ان کامیاب! Redirect ہو رہا ہے...";
-    setTimeout(() => window.location.href = "chat.html", 1000);
-  } catch (err) {
-    console.error("Login error:", err);
-    loginMsg.style.color = "#f85149";
-    loginMsg.textContent = "❌ " + err.message;
-  }
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      loginMsg.style.color = "#2ea043";
+      loginMsg.textContent = "✅ لاگ ان کامیاب! Redirect ہو رہا ہے...";
+      setTimeout(() => window.location.href = "chat.html", 1000);
+    } catch (err) {
+      console.error("Login error:", err);
+      loginMsg.style.color = "#f85149";
+      loginMsg.textContent = "❌ " + err.message;
+    }
+  });
 });
 </script>
 
