@@ -2,36 +2,80 @@
 <html lang="ur">
 <head>
   <meta charset="UTF-8">
-  <title>ZhobChat Signup</title>
+  <title>ZHOBCHAT - Signup</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f7f7f7; }
-    input, select, button { margin: 5px; padding: 10px; width: 220px; }
-    button { cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
-    button:hover { background: #0056b3; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0d1117;
+      color: #c9d1d9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    h2 {
+      color: #58a6ff;
+      margin-bottom: 20px;
+    }
+    form {
+      background: #161b22;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      width: 320px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    input, select {
+      background: #21262d;
+      color: #c9d1d9;
+    }
+    input::placeholder {
+      color: #8b949e;
+    }
+    button {
+      background-color: #238636;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #2ea043;
+    }
+    #signupMsg {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #f85149;
+    }
   </style>
 </head>
 <body>
-  <h2>ZhobChat Signup</h2>
+  <h2>ZHOBCHAT Signup</h2>
   <form id="signupForm">
-    <input type="text" id="name" placeholder="نام" required><br>
-    <input type="number" id="age" placeholder="عمر"><br>
-    <select id="gender">
+    <input type="text" id="su_name" placeholder="نام" required>
+    <select id="su_gender" required>
       <option value="">جنس</option>
-      <option value="Male">Male</option>
-      <option value="Female">Female</option>
-    </select><br>
-    <input type="text" id="city" placeholder="شہر"><br>
-    <input type="email" id="email" placeholder="ای میل" required><br>
-    <input type="password" id="password" placeholder="پاس ورڈ" required><br>
-    <input type="file" id="dp" accept="image/*"><br>
-    <button type="submit">سائن اپ</button>
+      <option value="Male">مرد</option>
+      <option value="Female">عورت</option>
+    </select>
+    <input type="text" id="su_city" placeholder="شہر" required>
+    <input type="email" id="su_email" placeholder="ای میل" required>
+    <input type="password" id="su_password" placeholder="پاس ورڈ" required>
+    <button type="button" id="signupBtn">سائن اپ</button>
+    <div id="signupMsg"></div>
   </form>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
-
-  <script src="signup.js"></script>
+  <!-- ✅ Firebase + Script -->
+  <script type="module" src="signup.js"></script>
 </body>
 </html>
