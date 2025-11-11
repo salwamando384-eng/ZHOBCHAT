@@ -2,80 +2,119 @@
 <html lang="ur">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZHOBCHAT - Signup</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #0d1117;
-      color: #c9d1d9;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-    }
-    h2 {
-      color: #58a6ff;
-      margin-bottom: 20px;
-    }
-    form {
-      background: #161b22;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
-      text-align: center;
-      width: 320px;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-    input, select {
-      background: #21262d;
-      color: #c9d1d9;
-    }
-    input::placeholder {
-      color: #8b949e;
-    }
-    button {
-      background-color: #238636;
-      color: white;
-      cursor: pointer;
-      transition: 0.2s;
-      font-weight: bold;
-    }
-    button:hover {
-      background-color: #2ea043;
-    }
-    #signupMsg {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #f85149;
-    }
+    body { font-family: sans-serif; background:#f4f4f4; display:flex; justify-content:center; align-items:center; height:100vh; }
+    .signup-container { background:#fff; padding:30px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); width:350px; }
+    h2 { text-align:center; margin-bottom:20px; }
+    input, select, button { width:100%; padding:10px; margin:5px 0; border-radius:5px; border:1px solid #ccc; }
+    button { background:#2ea043; color:#fff; border:none; cursor:pointer; }
+    button:hover { background:#28a037; }
+    #signupMsg { text-align:center; margin-top:10px; }
   </style>
 </head>
 <body>
-  <h2>ZHOBCHAT Signup</h2>
+
+<div class="signup-container">
+  <h2>ZHOBCHAT - سائن اپ</h2>
   <form id="signupForm">
     <input type="text" id="su_name" placeholder="نام" required>
     <select id="su_gender" required>
-      <option value="">جنس</option>
-      <option value="Male">مرد</option>
-      <option value="Female">عورت</option>
+      <option value="">جنس منتخب کریں</option>
+      <option value="مرد">مرد</option>
+      <option value="عورت">عورت</option>
     </select>
     <input type="text" id="su_city" placeholder="شہر" required>
-    <input type="email" id="su_email" placeholder="ای میل" required>
-    <input type="password" id="su_password" placeholder="پاس ورڈ" required>
-    <button type="button" id="signupBtn">سائن اپ</button>
-    <div id="signupMsg"></div>
+    <input type="email" id="su_email" placeholder="جی میل" required>
+    <input type="password" id="su_password" placeholder="پاسورڈ" required>
+    <button type="submit">سائن اپ کریں</button>
+    <p id="signupMsg"></p>
   </form>
+</div>
 
-  <!-- ✅ Firebase + Script -->
-  <script type="module" src="signup.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import {
+  getDatabase,
+  ref,
+  set
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+// 🔹 Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+  authDomain: "zhobchat-33d8e.firebaseapp.com",
+  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "zhobchat-33d8e",
+  storageBucket: "zhobchat-33d8e.appspot.com",
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
+};
+
+// 🔹 Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// 🔹 Signup Form
+const signupForm = document.getElementById("signupForm");
+const msg = document.getElementById("signupMsg");
+
+signupForm.addEventListener("submit", async (e) => {
+  e.preventDefault(); // پیج ری لوڈ روکنے کے لیے
+
+  const name = document.getElementById("su_name").value.trim();
+  const gender = document.getElementById("su_gender").value;
+  const city = document.getElementById("su_city").value.trim();
+  const email = document.getElementById("su_email").value.trim();
+  const password = document.getElementById("su_password").value.trim();
+
+  if (!name || !email || !password || !city || !gender) {
+    msg.style.color = "#f85149";
+    msg.textContent = "⚠️ تمام خانے پر کریں۔";
+    return;
+  }
+
+  msg.style.color = "#000";
+  msg.textContent = "⏳ آپ کا اکاؤنٹ بن رہا ہے...";
+
+  try {
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCred.user;
+
+    await updateProfile(user, {
+      displayName: name,
+      photoURL: "default_dp.png"
+    });
+
+    await set(ref(db, "users/" + user.uid), {
+      uid: user.uid,
+      name,
+      gender,
+      city,
+      email,
+      photoURL: "default_dp.png",
+      joinedAt: new Date().toLocaleString()
+    });
+
+    msg.style.color = "#2ea043";
+    msg.textContent = "✅ اکاؤنٹ بن گیا! Redirect ہو رہا ہے...";
+    setTimeout(() => window.location.href = "chat.html", 1500);
+
+  } catch (err) {
+    console.error("Signup error:", err);
+    msg.style.color = "#f85149";
+    msg.textContent = "❌ " + err.message;
+  }
+});
+</script>
+
 </body>
 </html>
