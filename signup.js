@@ -1,7 +1,3 @@
-// ===============================
-// 🔹 ZHOBCHAT - Signup Page Script
-// ===============================
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import {
   getAuth,
@@ -30,34 +26,37 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// 🔹 Signup Button
-document.getElementById("signupBtn").addEventListener("click", async () => {
+// 🔹 Signup Form
+const signupForm = document.getElementById("signupForm");
+const msg = document.getElementById("signupMsg");
+
+signupForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
   const name = document.getElementById("su_name").value.trim();
   const gender = document.getElementById("su_gender").value;
   const city = document.getElementById("su_city").value.trim();
   const email = document.getElementById("su_email").value.trim();
   const password = document.getElementById("su_password").value.trim();
-  const msg = document.getElementById("signupMsg");
 
   if (!name || !email || !password || !city || !gender) {
+    msg.style.color = "#f85149";
     msg.textContent = "⚠️ تمام خانے پر کریں۔";
     return;
   }
 
+  msg.style.color = "#000";
   msg.textContent = "⏳ آپ کا اکاؤنٹ بن رہا ہے...";
 
   try {
-    // Create account
     const userCred = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCred.user;
 
-    // Update user profile
     await updateProfile(user, {
       displayName: name,
       photoURL: "default_dp.png"
     });
 
-    // Save in database
     await set(ref(db, "users/" + user.uid), {
       uid: user.uid,
       name,
