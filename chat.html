@@ -1,34 +1,39 @@
 <!DOCTYPE html>
 <html lang="ur">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ZHOBCHAT - Chat</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="chat-wrapper">
-    <header>
-      <h2>ZHOBCHAT</h2>
+  <div class="topbar">
+    <div class="brand">ZHOBCHAT</div>
+    <div class="controls">
+      <button id="usersToggle">Users</button>
+      <button id="adminClearAll" title="Delete all messages (admin)">Clear All</button>
       <button id="logoutBtn">Logout</button>
-    </header>
-
-    <div class="chat-main">
-      <aside class="users-list">
-        <h3>Users</h3>
-        <div id="usersContainer"></div>
-      </aside>
-
-      <section class="chat-section">
-        <div id="messagesContainer" class="messages-container"></div>
-        <form id="messageForm">
-          <input type="text" id="msgInput" placeholder="پیغام لکھیں..." required>
-          <button type="submit">Send</button>
-        </form>
-      </section>
     </div>
   </div>
 
-  <script type="module" src="chat.js"></script>
+  <div class="main">
+    <aside class="sidebar" id="sidebar">
+      <div class="profile-brief" id="myProfileBrief"></div>
+      <h4>Users</h4>
+      <div id="usersList" class="usersList"></div>
+    </aside>
+
+    <section class="chatSection">
+      <div id="messagesArea" class="messagesArea">پیغامات لوڈ ہو رہے ہیں...</div>
+
+      <form id="sendForm" class="sendForm">
+        <input id="messageInput" placeholder="پیغام لکھیں..." autocomplete="off" />
+        <input id="colorInput" type="color" title="Message color" value="#000000" />
+        <button type="submit">Send</button>
+      </form>
+    </section>
+  </div>
+
+<script type="module" src="chat.js"></script>
 </body>
 </html>
