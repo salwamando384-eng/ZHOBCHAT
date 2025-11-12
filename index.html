@@ -1,93 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: #f0f0f0;
-      margin: 0;
-      padding: 0;
-    }
-    #container {
-      max-width: 420px;
-      margin: 50px auto;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 0 10px gray;
-      overflow: hidden;
-    }
-    h2 {
-      background: #3f51b5;
-      color: white;
-      margin: 0;
-      padding: 12px;
-      text-align: center;
-    }
-    input, button {
-      width: 90%;
-      margin: 8px auto;
-      display: block;
-      padding: 8px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    #chatArea {
-      display: none;
-    }
-    #chatMessages {
-      height: 300px;
-      overflow-y: auto;
-      padding: 10px;
-      background: #fafafa;
-    }
-    .msgBox {
-      margin: 5px 0;
-      padding: 5px 10px;
-      background: #e1e1ff;
-      border-radius: 5px;
-    }
-    .msgBox span {
-      font-size: 10px;
-      color: #777;
-      float: right;
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZHOBCHAT — Login</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="container">
-    <h2>ZHOBCHAT</h2>
-
-    <!-- Signup -->
-    <div id="signupArea">
-      <h3>Signup</h3>
-      <input id="signupName" placeholder="Name" />
-      <input id="signupEmail" placeholder="Email" type="email" />
-      <input id="signupPass" placeholder="Password" type="password" />
-      <button onclick="signup()">Signup</button>
-      <button onclick="showLogin()">Already have account?</button>
-    </div>
-
-    <!-- Login -->
-    <div id="loginArea" style="display:none;">
-      <h3>Login</h3>
-      <input id="loginEmail" placeholder="Email" type="email" />
-      <input id="loginPass" placeholder="Password" type="password" />
-      <button onclick="login()">Login</button>
-      <button onclick="showSignup()">Create new account</button>
-    </div>
-
-    <!-- Chat -->
-    <div id="chatArea" style="display:none;">
-      <div id="chatMessages"></div>
-      <input id="messageInput" placeholder="Type message..." />
-      <button onclick="sendMessage()">Send</button>
-      <button onclick="logout()">Logout</button>
-    </div>
+  <div class="card center">
+    <h2>ZHOBCHAT — Start</h2>
+    <form id="startForm">
+      <input id="name" placeholder="نام" required />
+      <select id="gender" required>
+        <option value="">جنس منتخب کریں</option>
+        <option value="Male">مرد</option>
+        <option value="Female">عورت</option>
+      </select>
+      <input id="age" type="number" placeholder="عمر" required />
+      <input id="city" placeholder="شہر" required />
+      <label>نام کلر</label>
+      <input id="nameColor" type="color" value="#1565c0" />
+      <label>لکھائی کلر</label>
+      <input id="textColor" type="color" value="#000000" />
+      <label>پروفائل تصویر (اختیاری)</label>
+      <input id="dpFile" type="file" accept="image/*" />
+      <button type="submit">Start Chat</button>
+    </form>
+    <p id="startMsg" class="muted"></p>
   </div>
 
-  <script type="module" src="app.js"></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>
