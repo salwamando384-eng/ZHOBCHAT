@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html lang="ur">
 <head>
-  <meta charset="UTF-8">
-  <title>Signup - ZhobChat</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Signup - ZHOBCHAT</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h2>Signup</h2>
+  <div class="card center">
+    <h2>ZHOBCHAT - Signup</h2>
     <form id="signupForm">
-      <input type="text" id="su_name" placeholder="نام" required>
-      <input type="number" id="su_age" placeholder="عمر" required>
+      <input id="su_name" placeholder="نام" required />
+      <input id="su_age" type="number" placeholder="عمر" required />
       <select id="su_gender" required>
         <option value="">جنس منتخب کریں</option>
         <option value="Male">مرد</option>
         <option value="Female">عورت</option>
       </select>
-      <input type="text" id="su_city" placeholder="شہر" required>
-      <input type="email" id="su_email" placeholder="ای میل" required>
-      <input type="password" id="su_password" placeholder="پاسورڈ" required>
-      <button type="submit">سائن اپ</button>
+      <input id="su_city" placeholder="شہر" required />
+      <input id="su_email" type="email" placeholder="ای میل" required />
+      <input id="su_password" type="password" placeholder="پاس ورڈ" required />
+      <button type="submit">اکاؤنٹ بنائیں</button>
     </form>
-    <p id="signupMsg"></p>
-    <p>Already have account? <a href="login.html">Login</a></p>
+    <p id="signupMsg" class="muted"></p>
+    <p class="muted">پہلے سے اکاؤنٹ؟ <a href="login.html">Login</a></p>
   </div>
-  <script type="module" src="signup.js"></script>
+
+<script type="module" src="signup.js"></script>
 </body>
 </html>
