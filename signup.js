@@ -15,16 +15,16 @@ signupForm.addEventListener("submit", async (e) => {
   const email = document.getElementById("su_email").value.trim();
   const password = document.getElementById("su_password").value.trim();
 
-  if (!name || !age || !gender || !city || !email || !password) {
+  if(!name || !age || !gender || !city || !email || !password){
     msg.style.color = "red";
-    msg.textContent = "⚠️ تمام خانے پر کریں۔";
+    msg.textContent = "⚠️ تمام خانے پر کریں";
     return;
   }
 
   msg.style.color = "black";
-  msg.textContent = "⏳ آپ کا اکاؤنٹ بن رہا ہے...";
+  msg.textContent = "⏳ اکاؤنٹ بن رہا ہے...";
 
-  try {
+  try{
     const userCred = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCred.user;
 
@@ -37,19 +37,20 @@ signupForm.addEventListener("submit", async (e) => {
       gender,
       city,
       email,
-      photoURL: "default_dp.png",
+      dp: "default_dp.png",
       color: "#000000",
       status: "online",
-      joinedAt: new Date().toLocaleString()
+      joinedAt: new Date().toLocaleString(),
+      lastSeen: null,
+      isAdmin: false
     });
 
-    msg.style.color = "#2ea043";
-    msg.textContent = "✅ اکاؤنٹ بن گیا! Chat پر لے جایا جا رہا ہے...";
+    msg.style.color = "green";
+    msg.textContent = "✅ اکاؤنٹ بن گیا! Redirect ہو رہا ہے...";
+    setTimeout(()=>window.location.href="chat.html",1500);
 
-    setTimeout(() => window.location.href = "chat.html", 1000);
-  } catch (err) {
-    console.error(err);
-    msg.style.color = "red";
-    msg.textContent = "❌ " + err.message;
+  } catch(err){
+    msg.style.color="red";
+    msg.textContent="❌ " + err.message;
   }
 });
