@@ -1,88 +1,175 @@
-import { auth, db } from "./firebase_config.js";
-import { signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { ref, push, onChildAdded, update, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+// === ZHOBCHAT Chat JS ===
 
+// --- Firebase Imports ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  onChildAdded,
+  set,
+  onValue,
+  remove
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+// --- Firebase Config ---
+const firebaseConfig = {
+  apiKey: "AIzaSyB-WYRWq3pQ1r_hLzMZ_4FItTd0jRclB1Q",
+  authDomain: "zhobchat-2a01e.firebaseapp.com",
+  databaseURL: "https://zhobchat-2a01e-default-rtdb.firebaseio.com",
+  projectId: "zhobchat-2a01e",
+  storageBucket: "zhobchat-2a01e.appspot.com",
+  messagingSenderId: "1003454915453",
+  appId: "1:1003454915453:web:73a7e4d5c2b3b6bfb2b30e"
+};
+
+// --- Initialize Firebase ---
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+// --- Elements ---
+const chatBox = document.getElementById("chatBox");
+const msgInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
 const logoutBtn = document.getElementById("logoutBtn");
-const chatForm = document.getElementById("chatForm");
-const chatInput = document.getElementById("chatInput");
-const messagesContainer = document.getElementById("messagesContainer");
 const usersBtn = document.getElementById("usersBtn");
-const usersListDiv = document.getElementById("usersList");
+const usersListBox = document.getElementById("userList");
+const usersUl = document.getElementById("users");
+const typingStatus = document.getElementById("typingStatus");
 
-let currentUser;
+let currentUser = null;
+let typingTimer;
 
-// Load current user
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    currentUser = user;
-    listenMessages();
-    loadUsers();
+// --- Check Login ---
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "index.html";
   } else {
-    window.location.href = "login.html";
+    currentUser = user;
+    addUserStatus(user);
+    loadMessages();
+    loadActiveUsers();
   }
 });
 
-// Logout
-logoutBtn.addEventListener("click", async () => {
-  if (currentUser) {
-    await update(ref(db, "users/" + currentUser.uid), { status: "offline" });
-    await signOut(auth);
-    window.location.href = "login.html";
-  }
-});
-
-// Send message
-chatForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const text = chatInput.value.trim();
-  if (!text) return;
-  chatInput.value = "";
-
-  const msgRef = ref(db, "messages/");
-  await push(msgRef, {
-    fromUid: currentUser.uid,
-    fromName: currentUser.displayName,
-    text,
-    color: "#000000",
-    time: new Date().toLocaleTimeString()
+// --- Add Online User ---
+function addUserStatus(user) {
+  const userRef = ref(db, "activeUsers/" + user.uid);
+  set(userRef, {
+    email: user.email,
+    online: true
   });
-});
 
-// Listen messages
-function listenMessages() {
-  const msgRef = ref(db, "messages/");
-  onChildAdded(msgRef, (snap) => {
-    const msg = snap.val();
-    const div = document.createElement("div");
-    div.className = "message";
-    div.innerHTML = `<strong style="color:${msg.color}">${msg.fromName}:</strong> ${msg.text} <span class="time">${msg.time}</span>`;
-    messagesContainer.appendChild(div);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  // Remove on exit
+  window.addEventListener("beforeunload", () => {
+    remove(userRef);
   });
 }
 
-// Load users
-function loadUsers() {
-  const usersRef = ref(db, "users/");
-  onValue(usersRef, (snap) => {
-    usersListDiv.innerHTML = "";
-    snap.forEach((child) => {
-      const user = child.val();
-      const userDiv = document.createElement("div");
-      userDiv.className = "user-item";
-      userDiv.innerHTML = `${user.name} (${user.status})`;
-      userDiv.addEventListener("click", () => openUserProfile(user));
-      usersListDiv.appendChild(userDiv);
+// --- Load Active Users ---
+function loadActiveUsers() {
+  const activeRef = ref(db, "activeUsers/");
+  onValue(activeRef, (snapshot) => {
+    usersUl.innerHTML = "";
+    snapshot.forEach((child) => {
+      const li = document.createElement("li");
+      li.textContent = child.val().email;
+      usersUl.appendChild(li);
     });
   });
 }
 
-function openUserProfile(user) {
-  alert(`Name: ${user.name}\nAge: ${user.age}\nGender: ${user.gender}\nEmail: ${user.email}`);
-  // Future: Add private message / friend request options
+// --- Load Messages ---
+function loadMessages() {
+  const chatRef = ref(db, "messages/");
+  onChildAdded(chatRef, (data) => {
+    const msg = data.val();
+    displayMessage(msg);
+  });
 }
 
-// Users list toggle
+// --- Display Message ---
+function displayMessage(msg) {
+  const div = document.createElement("div");
+  div.classList.add("msg");
+  if (msg.email === currentUser.email) div.classList.add("self");
+  div.innerHTML = `
+    <strong>${msg.email.split("@")[0]}</strong><br>
+    ${msg.text}
+    <span class="timestamp">${msg.time}</span>
+  `;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// --- Send Message ---
+sendBtn.addEventListener("click", sendMessage);
+msgInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+  setTypingStatus(true);
+});
+
+function sendMessage() {
+  const text = msgInput.value.trim();
+  if (!text) return;
+
+  const chatRef = ref(db, "messages/");
+  const time = new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
+  push(chatRef, {
+    text,
+    email: currentUser.email,
+    time
+  });
+
+  msgInput.value = "";
+  setTypingStatus(false);
+}
+
+// --- Typing Indicator ---
+function setTypingStatus(isTyping) {
+  const typingRef = ref(db, "typing/" + currentUser.uid);
+  if (isTyping) {
+    set(typingRef, { email: currentUser.email, typing: true });
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => {
+      remove(typingRef);
+    }, 2000);
+  } else {
+    remove(typingRef);
+  }
+}
+
+const typingRef = ref(db, "typing/");
+onValue(typingRef, (snapshot) => {
+  let someoneTyping = false;
+  snapshot.forEach((child) => {
+    if (child.val().email !== currentUser.email) {
+      someoneTyping = true;
+    }
+  });
+  typingStatus.textContent = someoneTyping ? "کوئی لکھ رہا ہے..." : "";
+});
+
+// --- Toggle Users ---
 usersBtn.addEventListener("click", () => {
-  usersListDiv.classList.toggle("show");
+  usersListBox.style.display =
+    usersListBox.style.display === "block" ? "none" : "block";
+});
+
+// --- Logout ---
+logoutBtn.addEventListener("click", () => {
+  signOut(auth).then(() => {
+    window.location.href = "index.html";
+  });
 });
