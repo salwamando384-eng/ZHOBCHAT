@@ -1,175 +1,76 @@
-// === ZHOBCHAT Chat JS ===
-
-// --- Firebase Imports ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import {
-  getDatabase,
-  ref,
-  push,
-  onChildAdded,
-  set,
-  onValue,
-  remove
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-// --- Firebase Config ---
-const firebaseConfig = {
-  apiKey: "AIzaSyB-WYRWq3pQ1r_hLzMZ_4FItTd0jRclB1Q",
-  authDomain: "zhobchat-2a01e.firebaseapp.com",
-  databaseURL: "https://zhobchat-2a01e-default-rtdb.firebaseio.com",
-  projectId: "zhobchat-2a01e",
-  storageBucket: "zhobchat-2a01e.appspot.com",
-  messagingSenderId: "1003454915453",
-  appId: "1:1003454915453:web:73a7e4d5c2b3b6bfb2b30e"
-};
-
-// --- Initialize Firebase ---
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-
-// --- Elements ---
-const chatBox = document.getElementById("chatBox");
-const msgInput = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const usersBtn = document.getElementById("usersBtn");
-const usersListBox = document.getElementById("userList");
-const usersUl = document.getElementById("users");
-const typingStatus = document.getElementById("typingStatus");
-
-let currentUser = null;
-let typingTimer;
-
-// --- Check Login ---
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "index.html";
-  } else {
-    currentUser = user;
-    addUserStatus(user);
-    loadMessages();
-    loadActiveUsers();
-  }
-});
-
-// --- Add Online User ---
-function addUserStatus(user) {
-  const userRef = ref(db, "activeUsers/" + user.uid);
-  set(userRef, {
-    email: user.email,
-    online: true
-  });
-
-  // Remove on exit
-  window.addEventListener("beforeunload", () => {
-    remove(userRef);
-  });
-}
-
-// --- Load Active Users ---
-function loadActiveUsers() {
-  const activeRef = ref(db, "activeUsers/");
-  onValue(activeRef, (snapshot) => {
-    usersUl.innerHTML = "";
-    snapshot.forEach((child) => {
-      const li = document.createElement("li");
-      li.textContent = child.val().email;
-      usersUl.appendChild(li);
-    });
-  });
-}
-
-// --- Load Messages ---
-function loadMessages() {
-  const chatRef = ref(db, "messages/");
-  onChildAdded(chatRef, (data) => {
-    const msg = data.val();
-    displayMessage(msg);
-  });
-}
-
-// --- Display Message ---
-function displayMessage(msg) {
-  const div = document.createElement("div");
-  div.classList.add("msg");
-  if (msg.email === currentUser.email) div.classList.add("self");
-  div.innerHTML = `
-    <strong>${msg.email.split("@")[0]}</strong><br>
-    ${msg.text}
-    <span class="timestamp">${msg.time}</span>
-  `;
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-// --- Send Message ---
-sendBtn.addEventListener("click", sendMessage);
-msgInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") sendMessage();
-  setTypingStatus(true);
-});
-
-function sendMessage() {
-  const text = msgInput.value.trim();
-  if (!text) return;
-
-  const chatRef = ref(db, "messages/");
-  const time = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-
-  push(chatRef, {
-    text,
-    email: currentUser.email,
-    time
-  });
-
-  msgInput.value = "";
-  setTypingStatus(false);
-}
-
-// --- Typing Indicator ---
-function setTypingStatus(isTyping) {
-  const typingRef = ref(db, "typing/" + currentUser.uid);
-  if (isTyping) {
-    set(typingRef, { email: currentUser.email, typing: true });
-    clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => {
-      remove(typingRef);
-    }, 2000);
-  } else {
-    remove(typingRef);
-  }
-}
-
-const typingRef = ref(db, "typing/");
-onValue(typingRef, (snapshot) => {
-  let someoneTyping = false;
-  snapshot.forEach((child) => {
-    if (child.val().email !== currentUser.email) {
-      someoneTyping = true;
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+  <meta charset="UTF-8">
+  <title>ZhobChat - Chat Room</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #121212;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
-  });
-  typingStatus.textContent = someoneTyping ? "کوئی لکھ رہا ہے..." : "";
-});
+    header {
+      background-color: #1e1e1e;
+      padding: 10px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      border-bottom: 1px solid #333;
+    }
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    .msg {
+      background: #2a2a2a;
+      margin: 5px 0;
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+    .sender {
+      font-weight: bold;
+      color: #1db954;
+    }
+    footer {
+      display: flex;
+      padding: 10px;
+      background-color: #1e1e1e;
+      border-top: 1px solid #333;
+    }
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+      background: #2a2a2a;
+      color: white;
+    }
+    button {
+      background: #1db954;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      margin-left: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>ZHOBCHAT 💬</header>
+  <div id="messages"></div>
+  <footer>
+    <input type="text" id="messageInput" placeholder="اپنا پیغام لکھیں...">
+    <button id="sendBtn">Send</button>
+  </footer>
 
-// --- Toggle Users ---
-usersBtn.addEventListener("click", () => {
-  usersListBox.style.display =
-    usersListBox.style.display === "block" ? "none" : "block";
-});
-
-// --- Logout ---
-logoutBtn.addEventListener("click", () => {
-  signOut(auth).then(() => {
-    window.location.href = "index.html";
-  });
-});
+  <script type="module" src="chat.js"></script>
+</body>
+</html>
