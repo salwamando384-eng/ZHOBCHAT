@@ -1,162 +1,271 @@
-// =====================
-// 🔹 Firebase Imports
-// =====================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+// app.js  (single place for index.html + chat.html logic)
+// It detects current page by checking for elements
+
+import { auth, db, storage } from "./firebase_config.js";
 import {
-  getDatabase,
-  ref,
-  push,
-  onChildAdded,
-  set
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  signInAnonymously, updateProfile, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  ref, set, push, onChildAdded, get, child, onValue, update
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { ref as sref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// =====================
-// 🔹 Firebase Config
-// =====================
-const firebaseConfig = {
-  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain: "zhobchat-33d8e.firebaseapp.com",
-  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "zhobchat-33d8e",
-  storageBucket: "zhobchat-33d8e.firebasestorage.app",
-  messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-  measurementId: "G-LX9P9LRLV8"
-};
+/* ---------- helpers ---------- */
+function esc(s=""){ return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+function byId(id){ return document.getElementById(id); }
 
-// =====================
-// 🔹 Initialize Firebase
-// =====================
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
+/* ---------- PAGE: index.html (Start form) ---------- */
+const startForm = byId("startForm");
+if (startForm) {
+  const msg = byId("startMsg");
 
-// =====================
-// 🔹 HTML Elements
-// =====================
-const signupArea = document.getElementById("signupArea");
-const loginArea = document.getElementById("loginArea");
-const chatArea = document.getElementById("chatArea");
-const chatMessages = document.getElementById("chatMessages");
-const messageInput = document.getElementById("messageInput");
-
-// =====================
-// 🔹 Signup Function
-// =====================
-window.signup = async function () {
-  const name = document.getElementById("signupName").value.trim();
-  const email = document.getElementById("signupEmail").value.trim();
-  const pass = document.getElementById("signupPass").value.trim();
-
-  if (!name || !email || !pass) {
-    alert("⚠️ تمام خانے پر کریں");
-    return;
-  }
-
-  try {
-    const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-    const user = userCred.user;
-
-    await set(ref(db, "users/" + user.uid), {
-      uid: user.uid,
-      name,
-      email,
-      joinedAt: new Date().toLocaleString(),
-    });
-
-    alert("✅ Signup مکمل!");
-    signupArea.style.display = "none";
-    chatArea.style.display = "block";
-  } catch (e) {
-    alert("❌ Signup Error: " + e.message);
-  }
-};
-
-// =====================
-// 🔹 Login Function
-// =====================
-window.login = async function () {
-  const email = document.getElementById("loginEmail").value.trim();
-  const pass = document.getElementById("loginPass").value.trim();
-
-  try {
-    const userCred = await signInWithEmailAndPassword(auth, email, pass);
-    alert("✅ Login Successful!");
-    loginArea.style.display = "none";
-    chatArea.style.display = "block";
-    loadMessages();
-  } catch (e) {
-    alert("❌ Login Error: " + e.message);
-  }
-};
-
-// =====================
-// 🔹 Send Message
-// =====================
-window.sendMessage = async function () {
-  const msg = messageInput.value.trim();
-  const user = auth.currentUser;
-
-  if (!msg) return;
-  if (!user) {
-    alert("⚠️ پہلے Login کریں!");
-    return;
-  }
-
-  const msgRef = push(ref(db, "messages"));
-  await set(msgRef, {
-    from: user.email,
-    text: msg,
-    time: new Date().toLocaleTimeString()
+  // If already logged-in, redirect to chat
+  onAuthStateChanged(auth, (u) => {
+    if (u) location.href = "chat.html";
   });
 
-  messageInput.value = "";
-};
+  startForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msg.style.display = "block";
+    msg.style.color = "#000";
+    msg.textContent = "⏳ براہ کرم انتظار کریں...";
 
-// =====================
-// 🔹 Load Messages
-// =====================
-function loadMessages() {
-  const msgRef = ref(db, "messages");
-  onChildAdded(msgRef, (snapshot) => {
-    const data = snapshot.val();
-    const div = document.createElement("div");
-    div.className = "msgBox";
-    div.innerHTML = `<b>${data.from}:</b> ${data.text} <span>${data.time}</span>`;
-    chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    const name = byId("name").value.trim();
+    const gender = byId("gender").value;
+    const age = byId("age").value.trim();
+    const city = byId("city").value.trim();
+    const nameColor = byId("nameColor").value || "#1565c0";
+    const textColor = byId("textColor").value || "#000000";
+    const file = byId("dpFile").files[0];
+
+    if (!name || !gender || !age || !city) {
+      msg.style.color = "red";
+      msg.textContent = "⚠️ تمام خانے بھریں۔";
+      return;
+    }
+
+    try {
+      // 1) sign in anonymously (persistent)
+      const cred = await signInAnonymously(auth);
+      const user = cred.user;
+
+      // 2) if file provided upload to storage
+      let dpUrl = "default_dp.png";
+      if (file) {
+        const storageRef = sref(storage, `dps/${user.uid}_${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        dpUrl = await getDownloadURL(storageRef);
+      }
+
+      // 3) update profile
+      await updateProfile(user, { displayName: name, photoURL: dpUrl });
+
+      // 4) write user record
+      await set(ref(db, `users/${user.uid}`), {
+        uid: user.uid,
+        name,
+        gender,
+        age,
+        city,
+        dp: dpUrl,
+        nameColor,
+        textColor,
+        status: "online",
+        joinedAt: new Date().toISOString()
+      });
+
+      msg.style.color = "green";
+      msg.textContent = "✅ آپ لاگ ان ہو گئے ہیں — Chat کھول رہے ہیں...";
+      setTimeout(()=>location.href="chat.html",800);
+
+    } catch (err) {
+      console.error(err);
+      msg.style.color = "red";
+      msg.textContent = "❌ " + err.message;
+    }
   });
 }
 
-// =====================
-// 🔹 Logout Function
-// =====================
-window.logout = function () {
-  signOut(auth).then(() => {
-    chatArea.style.display = "none";
-    loginArea.style.display = "block";
+/* ---------- PAGE: chat.html ---------- */
+const messagesEl = byId("messages");
+if (messagesEl) {
+  const sendForm = byId("sendForm");
+  const msgInput = byId("msgInput");
+  const msgColor = byId("msgColor");
+  const usersList = byId("usersList");
+  const openUsers = byId("openUsers");
+  const logoutBtn = byId("logoutBtn");
+  const myBrief = byId("myBrief");
+
+  // private popup elements
+  const privatePopup = byId("privatePopup");
+  const ppTitle = byId("ppTitle");
+  const ppMessages = byId("ppMessages");
+  const ppForm = byId("ppForm");
+  const ppInput = byId("ppInput");
+  const ppClose = byId("ppClose");
+
+  let me = null;
+  let chatWithUid = null;
+
+  // if not logged in -> redirect to index
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { location.href = "index.html"; return; }
+    me = user;
+
+    // load my profile (database)
+    const uSnap = await get(ref(db, `users/${user.uid}`));
+    const u = uSnap.exists() ? uSnap.val() : { name: user.displayName || "Anonymous", dp: user.photoURL || "default_dp.png" };
+    myBrief.innerHTML = `<div style="display:flex;gap:8px;align-items:center">
+      <img src="${esc(u.dp)}" class="dpSmall" /><div><b style="color:${esc(u.nameColor||'#000')}">${esc(u.name)}</b><br/><small>${esc(u.city||'')}</small></div></div>`;
+
+    // mark online
+    await update(ref(db, `users/${user.uid}`), { status: "online", lastSeen: null });
+
+    // load existing public messages once
+    const msgsSnap = await get(ref(db, "messages"));
+    messagesEl.innerHTML = "";
+    if (!msgsSnap.exists()) {
+      messagesEl.innerHTML = "<p class='muted'>کوئی پیغام نہیں — پہلا پیغام آپ بھیجیں</p>";
+    } else {
+      msgsSnap.forEach(child => renderPublicMessage(child.key, child.val()));
+    }
+
+    // realtime listener for public messages
+    onChildAdded(ref(db, "messages"), (snap) => {
+      // avoid duplicates
+      if (!messagesEl.querySelector(`[data-key="${snap.key}"]`)) renderPublicMessage(snap.key, snap.val());
+    });
+
+    // load users list realtime
+    onValue(ref(db, "users"), (snap) => {
+      usersList.innerHTML = "";
+      snap.forEach(child => {
+        const uid = child.key;
+        const uobj = child.val();
+        const div = document.createElement("div");
+        div.className = "userRow";
+        div.innerHTML = `<img src="${esc(uobj.dp||'default_dp.png')}" class="dpSmall" /><div style="flex:1;text-align:right">
+          <b style="color:${esc(uobj.nameColor||'#000')}">${esc(uobj.name)}</b><br/><small>${esc(uobj.age||'')} • ${esc(uobj.gender||'')}</small></div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button data-uid="${uid}" class="profileBtn">Profile</button>
+            <button data-uid="${uid}" class="pmBtn">Private</button>
+          </div>`;
+        usersList.appendChild(div);
+      });
+
+      // attach handlers (after list built)
+      document.querySelectorAll(".profileBtn").forEach(b => b.addEventListener("click", (e)=> {
+        const uid = e.target.dataset.uid;
+        openProfile(uid);
+      }));
+      document.querySelectorAll(".pmBtn").forEach(b => b.addEventListener("click", (e)=> {
+        const uid = e.target.dataset.uid;
+        openPrivate(uid);
+      }));
+    });
+
+  }); // end onAuthStateChanged
+
+  /* ---------- public message rendering ---------- */
+  function renderPublicMessage(key, m) {
+    const d = document.createElement("div");
+    d.className = "msg";
+    d.dataset.key = key;
+    const dp = esc(m.dp || "default_dp.png");
+    const name = esc(m.fromName || m.fromEmail || "Unknown");
+    const color = esc(m.nameColor || "#1565c0");
+    const textColor = esc(m.textColor || "#000000");
+    d.innerHTML = `<img src="${dp}" class="dpTiny" />
+      <div style="flex:1">
+        <div class="meta"><strong style="color:${color}">${name}</strong> <span style="color:var(--muted)">• ${esc(m.time||'')}</span></div>
+        <div style="color:${textColor}">${esc(m.text)}</div>
+      </div>`;
+    messagesEl.appendChild(d);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  /* ---------- send public message ---------- */
+  sendForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const text = msgInput.value.trim();
+    if (!text || !me) return;
+    // load my profile snapshot to get dp, colors
+    const snap = await get(ref(db, `users/${me.uid}`));
+    const u = snap.exists() ? snap.val() : {};
+    const msgObj = {
+      fromUid: me.uid,
+      fromName: u.name || me.displayName || "Anonymous",
+      fromEmail: me.email || null,
+      dp: u.dp || me.photoURL || "default_dp.png",
+      nameColor: u.nameColor || "#1565c0",
+      textColor: u.textColor || "#000000",
+      text,
+      time: new Date().toLocaleTimeString()
+    };
+    await push(ref(db, "messages"), msgObj);
+    msgInput.value = "";
   });
-};
 
-// =====================
-// 🔹 UI Switchers
-// =====================
-window.showLogin = function () {
-  signupArea.style.display = "none";
-  loginArea.style.display = "block";
-};
-window.showSignup = function () {
-  loginArea.style.display = "none";
-  signupArea.style.display = "block";
-};
+  /* ---------- private chat (popup) ---------- */
+  function openPrivate(uid) {
+    if (!me) return alert("لوگ ان کریں");
+    if (uid === me.uid) return alert("اپنے آپ کو پرائیویٹ پیغام نہیں بھیج سکتے");
+    chatWithUid = uid;
+    // show header
+    get(ref(db, `users/${uid}`)).then(snap => {
+      const u = snap.exists() ? snap.val() : { name: "User" };
+      ppTitle.innerHTML = `<img src="${esc(u.dp||'default_dp.png')}" class="dpTiny" /> <b style="color:${esc(u.nameColor||'#000')}">${esc(u.name)}</b>`;
+      // load private messages (simple): we'll listen to all privateMessages and filter
+      ppMessages.innerHTML = "";
+      onChildAdded(ref(db, "privateMessages"), (snap2) => {
+        const m = snap2.val();
+        if ((m.fromUid===me.uid && m.toUid===uid) || (m.fromUid===uid && m.toUid===me.uid)) {
+          const div = document.createElement("div");
+          div.className = "msg";
+          div.innerHTML = `<div style="font-size:12px;color:var(--muted)">${esc(m.time)}</div><div>${esc(m.fromName)}: ${esc(m.text)}</div>`;
+          ppMessages.appendChild(div);
+          ppMessages.scrollTop = ppMessages.scrollHeight;
+        }
+      });
+      privatePopup.classList.remove("hidden");
+    });
+  }
 
-// =====================
-// 🔹 Global Error Catch
-// =====================
-window.addEventListener("error", (e) => alert("⚠️ Error: " + e.message));
+  ppClose.addEventListener("click", ()=> privatePopup.classList.add("hidden"));
+
+  ppForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const txt = ppInput.value.trim();
+    if (!txt || !me || !chatWithUid) return;
+    const snap = await get(ref(db, `users/${me.uid}`));
+    const u = snap.exists() ? snap.val() : {};
+    await push(ref(db, "privateMessages"), {
+      fromUid: me.uid,
+      fromName: u.name || me.displayName || "You",
+      toUid: chatWithUid,
+      text: txt,
+      time: new Date().toLocaleTimeString()
+    });
+    ppInput.value = "";
+  });
+
+  /* ---------- profile view (simple modal via alert) ---------- */
+  async function openProfile(uid) {
+    const snap = await get(ref(db, `users/${uid}`));
+    if (!snap.exists()) return alert("یوزر نہیں ملا");
+    const u = snap.val();
+    const info = `نام: ${u.name}\nعمر: ${u.age}\nجنس: ${u.gender}\nشہر: ${u.city}`;
+    if (confirm(info + "\n\nپرائیویٹ پیغام بھیجیں؟")) openPrivate(uid);
+  }
+
+  /* ---------- logout ---------- */
+  logoutBtn.addEventListener("click", async () => {
+    if (!me) return;
+    await update(ref(db, `users/${me.uid}`), { status: "offline", lastSeen: new Date().toISOString() });
+    await signOut(auth);
+    location.href = "index.html";
+  });
+
+  /* helper end */
+} // end if chat page
