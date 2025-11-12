@@ -3,44 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT 💬</title>
+  <title>ZhobChat</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <header>ZhobChat</header>
+  <div id="messages"></div>
+  <form id="chatForm">
+    <input id="msgInput" placeholder="اپنا پیغام لکھیں..." />
+    <button type="submit">Send</button>
+  </form>
 
-  <h2 id="logo">ZHOBCHAT 💬</h2>
-
-  <!-- Signup -->
-  <div id="signupArea">
-    <h3>نیا اکاؤنٹ بنائیں</h3>
-    <input id="signupName" placeholder="نام">
-    <input id="signupEmail" placeholder="ای میل">
-    <input id="signupPass" type="password" placeholder="پاس ورڈ">
-    <button onclick="signup()">Signup</button>
-    <p>پہلے سے اکاؤنٹ ہے؟ <a href="#" onclick="showLogin()">Login</a></p>
-  </div>
-
-  <!-- Login -->
-  <div id="loginArea" style="display:none;">
-    <h3>Login کریں</h3>
-    <input id="loginEmail" placeholder="ای میل">
-    <input id="loginPass" type="password" placeholder="پاس ورڈ">
-    <button onclick="login()">Login</button>
-    <p>اکاؤنٹ نہیں ہے؟ <a href="#" onclick="showSignup()">Signup</a></p>
-  </div>
-
-  <!-- Chat -->
-  <div id="chatArea" style="display:none;">
-    <div class="chatBox">
-      <div id="chatMessages" class="messages"></div>
-      <div class="sendBox">
-        <input id="messageInput" placeholder="میسج لکھیں...">
-        <button onclick="sendMessage()">📤</button>
-      </div>
-    </div>
-    <button class="logoutBtn" onclick="logout()">Logout</button>
-  </div>
-
-  <script type="module" src="app.js"></script>
+  <script type="module" src="chat.js"></script>
 </body>
 </html>
