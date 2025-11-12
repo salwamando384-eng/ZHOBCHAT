@@ -1,31 +1,17 @@
 <!DOCTYPE html>
 <html lang="ur">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile - ZHOBCHAT</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    body { text-align: center; font-family: sans-serif; }
-    img { width: 120px; height: 120px; border-radius: 50%; margin: 10px auto; display: block; border: 3px solid #ccc; }
-    input[type="file"] { margin: 10px; }
-    button { margin: 10px; padding: 8px 15px; border: none; background: #2196F3; color: #fff; border-radius: 5px; cursor: pointer; }
-    button:hover { background: #0b7dda; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Profile - ZHOBCHAT</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h2>میرا پروفائل</h2>
-  <img id="profile-pic" src="https://i.postimg.cc/3Rwgjfyk/default.png" alt="Profile Picture">
-  <h3 id="username">Loading...</h3>
+  <div class="card">
+    <div id="profileArea">Loading...</div>
+    <p><a href="chat.html">Back</a></p>
+  </div>
 
-  <input type="file" id="new-pic" accept="image/*">
-  <button id="upload-btn">Change Profile Picture</button>
-  <button id="logout-btn">Logout</button>
-
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-  <script src="profile.js"></script>
+<script type="module" src="profile.js"></script>
 </body>
 </html>
