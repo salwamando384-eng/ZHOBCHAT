@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html lang="ur">
 <head>
-  <meta charset="utf-8" />
-  <title>Private Chat</title>
-  <style>
-    body{font-family:sans-serif;padding:10px}
-    #chatBox{height:60vh;overflow:auto;border:1px solid #ddd;padding:8px}
-    input{width:70%;padding:8px}
-    button{padding:8px}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Private Chat - ZHOBCHAT</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h3 id="chatWithName">Private Chat</h3>
-  <div id="chatBox"></div>
-  <input id="msgInput" placeholder="Write message..." />
-  <button id="sendBtn">Send</button>
-  <p><a href="users.html">Back</a></p>
+  <div class="topbar">
+    <div class="brand">Private Chat</div>
+    <div><button id="backBtn">Back</button></div>
+  </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
-  <script src="private_chat.js"></script>
+  <div class="main privateMain">
+    <section class="chatSection">
+      <div id="privateMessagesArea" class="messagesArea">لوڈ ہو رہا ہے...</div>
+      <form id="privateSendForm" class="sendForm">
+        <input id="privateMessageInput" placeholder="پیغام لکھیں..." autocomplete="off" />
+        <button type="submit">Send</button>
+      </form>
+    </section>
+  </div>
+
+<script type="module" src="private_chat.js"></script>
 </body>
 </html>
