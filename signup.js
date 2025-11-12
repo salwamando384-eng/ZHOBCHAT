@@ -1,26 +1,12 @@
-// === signup.js ===
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain: "zhobchat-33d8e.firebaseapp.com",
-  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "zhobchat-33d8e",
-  storageBucket: "zhobchat-33d8e.firebasestorage.app",
-  messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+// signup.js
+import { auth, db } from "./firebase_config.js";
+import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const signupForm = document.getElementById("signupForm");
 const msg = document.getElementById("msg");
 
-signupForm.addEventListener("submit", (e) => {
+signupForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const name = document.getElementById("name").value.trim();
@@ -33,27 +19,34 @@ signupForm.addEventListener("submit", (e) => {
     return;
   }
 
-  createUserWithEmailAndPassword(auth, email, password)
-    .then(async (userCredential) => {
-      const user = userCredential.user;
+  msg.textContent = "⏳ اکاؤنٹ بنایا جا رہا ہے...";
+  msg.style.color = "black";
 
-      await updateProfile(user, { displayName: name });
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-      await set(ref(db, "users/" + user.uid), {
-        name: name,
-        email: email,
-        joinedAt: new Date().toLocaleString(),
-      });
+    // Update displayName
+    await updateProfile(user, { displayName: name });
 
-      msg.textContent = "✅ اکاؤنٹ بن گیا! Redirect ہو رہا ہے...";
-      msg.style.color = "#2ea043";
-
-      setTimeout(() => {
-        window.location.href = "chat.html";
-      }, 2000);
-    })
-    .catch((error) => {
-      msg.textContent = "❌ " + error.message;
-      msg.style.color = "red";
+    // Save in database
+    await set(ref(db, "users/" + user.uid), {
+      uid: user.uid,
+      name: name,
+      email: email,
+      joinedAt: new Date().toLocaleString(),
+      status: "online"
     });
+
+    msg.textContent = "✅ اکاؤنٹ بن گیا! Chat پر لے جایا جا رہا ہے...";
+    msg.style.color = "#2ea043";
+
+    setTimeout(() => {
+      window.location.href = "chat.html";
+    }, 2000);
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "❌ " + err.message;
+    msg.style.color = "red";
+  }
 });
