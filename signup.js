@@ -1,4 +1,3 @@
-// signup.js
 import { auth, db } from "./firebase_config.js";
 import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
@@ -14,7 +13,7 @@ signupForm.addEventListener("submit", async (e) => {
   const password = document.getElementById("password").value.trim();
 
   if (!name || !email || !password) {
-    msg.textContent = "⚠️ براہ کرم تمام فیلڈز بھریں۔";
+    msg.textContent = "⚠️ تمام خانے پر کریں۔";
     msg.style.color = "red";
     return;
   }
@@ -26,24 +25,22 @@ signupForm.addEventListener("submit", async (e) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Update displayName
     await updateProfile(user, { displayName: name });
 
-    // Save in database
     await set(ref(db, "users/" + user.uid), {
       uid: user.uid,
-      name: name,
-      email: email,
-      joinedAt: new Date().toLocaleString(),
-      status: "online"
+      name,
+      email,
+      photoURL: "default_dp.png",
+      status: "online",
+      joinedAt: new Date().toLocaleString()
     });
 
     msg.textContent = "✅ اکاؤنٹ بن گیا! Chat پر لے جایا جا رہا ہے...";
     msg.style.color = "#2ea043";
 
-    setTimeout(() => {
-      window.location.href = "chat.html";
-    }, 2000);
+    setTimeout(() => window.location.href = "chat.html", 1500);
+
   } catch (err) {
     console.error(err);
     msg.textContent = "❌ " + err.message;
