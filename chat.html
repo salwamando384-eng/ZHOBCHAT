@@ -1,39 +1,51 @@
 <!DOCTYPE html>
 <html lang="ur">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ZHOBCHAT - Chat</title>
-<link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZHOBCHAT — Chat</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="topbar">
     <div class="brand">ZHOBCHAT</div>
-    <div class="controls">
-      <button id="usersToggle">Users</button>
-      <button id="adminClearAll" title="Delete all messages (admin)">Clear All</button>
+    <div>
+      <button id="openUsers">Users</button>
       <button id="logoutBtn">Logout</button>
     </div>
   </div>
 
-  <div class="main">
+  <div class="layout">
     <aside class="sidebar" id="sidebar">
-      <div class="profile-brief" id="myProfileBrief"></div>
+      <div id="myBrief"></div>
       <h4>Users</h4>
-      <div id="usersList" class="usersList"></div>
+      <div id="usersList"></div>
     </aside>
 
-    <section class="chatSection">
-      <div id="messagesArea" class="messagesArea">پیغامات لوڈ ہو رہے ہیں...</div>
+    <main class="main">
+      <div id="messages" class="messages">پیغامات لوڈ ہو رہے ہیں...</div>
 
       <form id="sendForm" class="sendForm">
-        <input id="messageInput" placeholder="پیغام لکھیں..." autocomplete="off" />
-        <input id="colorInput" type="color" title="Message color" value="#000000" />
+        <input id="msgInput" placeholder="پیغام لکھیں..." autocomplete="off" />
+        <input id="msgColor" type="color" value="#000000" title="Message color" />
         <button type="submit">Send</button>
       </form>
-    </section>
+    </main>
   </div>
 
-<script type="module" src="chat.js"></script>
+  <!-- Private chat popup (WhatsApp-like) -->
+  <div id="privatePopup" class="privatePopup hidden">
+    <div class="ppHeader">
+      <div id="ppTitle"></div>
+      <button id="ppClose">✕</button>
+    </div>
+    <div id="ppMessages" class="ppMessages"></div>
+    <form id="ppForm" class="ppForm">
+      <input id="ppInput" placeholder="Private message..." />
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+<script type="module" src="app.js"></script>
 </body>
 </html>
