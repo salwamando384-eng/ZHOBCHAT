@@ -3,23 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT Room</title>
+  <title>ZHOBCHAT</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h2>ZHOBCHAT</h2>
-    <button id="usersBtn">Users</button>
-    <button id="logoutBtn">Logout</button>
-  </header>
-  <div class="chat-container">
-    <div id="usersList" class="users-list"></div>
-    <div class="messages-container" id="messagesContainer"></div>
-    <form id="chatForm">
-      <input type="text" id="chatInput" placeholder="Message..." required>
-      <button type="submit">Send</button>
-    </form>
+  <div class="chat-wrapper">
+    <header>
+      <h2>ZHOBCHAT</h2>
+      <button id="logoutBtn">Logout</button>
+    </header>
+
+    <div class="chat-main">
+      <aside class="users-list">
+        <h3>Users</h3>
+        <div id="usersContainer"></div>
+      </aside>
+
+      <section class="chat-section">
+        <div id="messagesContainer" class="messages-container"></div>
+        <form id="messageForm">
+          <input type="text" id="msgInput" placeholder="پیغام لکھیں..." required>
+          <button type="submit">Send</button>
+        </form>
+      </section>
+    </div>
   </div>
+
   <script type="module" src="chat.js"></script>
 </body>
 </html>
