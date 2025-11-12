@@ -11,21 +11,22 @@ signupForm.addEventListener("submit", async (e) => {
   const name = document.getElementById("su_name").value.trim();
   const age = document.getElementById("su_age").value.trim();
   const gender = document.getElementById("su_gender").value;
+  const city = document.getElementById("su_city").value.trim();
   const email = document.getElementById("su_email").value.trim();
   const password = document.getElementById("su_password").value.trim();
 
-  if (!name || !email || !password || !age || !gender) {
-    msg.textContent = "⚠️ تمام خانے پر کریں۔";
+  if (!name || !age || !gender || !city || !email || !password) {
     msg.style.color = "red";
+    msg.textContent = "⚠️ تمام خانے پر کریں۔";
     return;
   }
 
-  msg.textContent = "⏳ اکاؤنٹ بنایا جا رہا ہے...";
   msg.style.color = "black";
+  msg.textContent = "⏳ آپ کا اکاؤنٹ بن رہا ہے...";
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCred.user;
 
     await updateProfile(user, { displayName: name, photoURL: "default_dp.png" });
 
@@ -34,21 +35,21 @@ signupForm.addEventListener("submit", async (e) => {
       name,
       age,
       gender,
+      city,
       email,
       photoURL: "default_dp.png",
-      status: "online",
       color: "#000000",
+      status: "online",
       joinedAt: new Date().toLocaleString()
     });
 
-    msg.textContent = "✅ اکاؤنٹ بن گیا! Chat پر لے جایا جا رہا ہے...";
     msg.style.color = "#2ea043";
+    msg.textContent = "✅ اکاؤنٹ بن گیا! Chat پر لے جایا جا رہا ہے...";
 
-    setTimeout(() => window.location.href = "chat.html", 1500);
-
+    setTimeout(() => window.location.href = "chat.html", 1000);
   } catch (err) {
     console.error(err);
-    msg.textContent = "❌ " + err.message;
     msg.style.color = "red";
+    msg.textContent = "❌ " + err.message;
   }
 });
