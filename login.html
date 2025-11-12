@@ -1,95 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZHOBCHAT - Login</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="login-box">
-    <h2>Start Chat</h2>
-    <input type="text" id="name" placeholder="Name" required />
-    <select id="gender">
-      <option value="">Select Gender</option>
-      <option value="Male">Male</option>
-      <option value="Female">Female</option>
-    </select>
-    <input type="number" id="age" placeholder="Age" required />
-    <input type="text" id="city" placeholder="City" required />
-    <input type="email" id="email" placeholder="Email" required />
-    <input type="password" id="password" placeholder="Password" required />
-    <label>Name Color</label>
-    <input type="color" id="nameColor" />
-    <label>Text Color</label>
-    <input type="color" id="textColor" />
-    <label>Profile Picture (optional)</label>
-    <input type="file" id="profilePic" accept="image/*" />
-    <button id="startChat">Start Chat</button>
-    <p id="error"></p>
-  </div>
+  <h2>Login</h2>
+  <div id="loginMsg"></div>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required><br>
+    <input type="password" id="password" placeholder="Password" required><br>
+    <button type="submit">Login</button>
+  </form>
+  <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
 
   <script type="module">
-    import { auth, db, storage } from "./firebase_config.js";
-    import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-    import { getDownloadURL, ref as sRef, uploadBytes } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-    import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { auth } from './firebase_config.js';
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-    const startBtn = document.getElementById("startChat");
-    const err = document.getElementById("error");
+    const loginForm = document.getElementById("loginForm");
+    const msg = document.getElementById("loginMsg");
 
-    startBtn.onclick = async () => {
-      const name = nameEl.value.trim();
-      const gender = genderEl.value;
-      const age = ageEl.value;
-      const city = cityEl.value.trim();
-      const email = emailEl.value.trim();
-      const password = passwordEl.value.trim();
-      const nameColor = nameColorEl.value;
-      const textColor = textColorEl.value;
-      const file = profilePic.files[0];
+    loginForm.addEventListener("submit", async e => {
+      e.preventDefault();
 
-      if (!name || !gender || !age || !city || !email || !password) {
-        err.textContent = "Please fill in all fields.";
-        return;
-      }
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      msg.style.color = "#000";
+      msg.textContent = "Logging in...";
 
       try {
-        const cred = await createUserWithEmailAndPassword(auth, email, password)
-          .catch(async (error) => {
-            if (error.code === "auth/email-already-in-use") {
-              return await signInWithEmailAndPassword(auth, email, password);
-            } else throw error;
-          });
-
-        const uid = cred.user.uid;
-        let photoURL = "";
-
-        if (file) {
-          const storageRef = sRef(storage, "profiles/" + uid);
-          await uploadBytes(storageRef, file);
-          photoURL = await getDownloadURL(storageRef);
-        }
-
-        await set(ref(db, "users/" + uid), {
-          name,
-          gender,
-          age,
-          city,
-          nameColor,
-          textColor,
-          photoURL,
-          joinedAt: new Date().toISOString(),
-          status: "online"
-        });
-
-        localStorage.setItem("uid", uid);
-        localStorage.setItem("name", name);
-        location.href = "chat.html";
-      } catch (error) {
-        err.textContent = "Error: " + error.message;
+        await signInWithEmailAndPassword(auth, email, password);
+        msg.style.color = "green";
+        msg.textContent = "Login successful! Redirecting...";
+        setTimeout(() => location.href="chat.html", 1000);
+      } catch(err){
+        console.error(err);
+        msg.style.color = "red";
+        msg.textContent = err.message;
       }
-    };
+    });
   </script>
 </body>
 </html>
