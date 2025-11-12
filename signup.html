@@ -1,18 +1,26 @@
 <!DOCTYPE html>
 <html lang="ur">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Signup - ZhobChat</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT Signup</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: sans-serif; background: #f1f1f1; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .signup-container { background: #fff; padding: 20px 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 320px; text-align: center; }
+    .signup-container input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid #ccc; }
+    .signup-container button { width: 100%; padding: 10px; background: #1976d2; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+    .signup-container button:hover { background: #1565c0; }
+    #msg { margin-top: 10px; font-size: 14px; }
+  </style>
 </head>
 <body>
   <div class="signup-container">
     <h2>ZHOBCHAT Signup</h2>
     <form id="signupForm">
-      <input type="text" id="name" placeholder="نام" required />
-      <input type="email" id="email" placeholder="ای میل" required />
-      <input type="password" id="password" placeholder="پاس ورڈ" required />
+      <input type="text" id="name" placeholder="نام" required>
+      <input type="email" id="email" placeholder="ای میل" required>
+      <input type="password" id="password" placeholder="پاس ورڈ" required>
       <button type="submit">اکاؤنٹ بنائیں</button>
     </form>
     <p id="msg"></p>
