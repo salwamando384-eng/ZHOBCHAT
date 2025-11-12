@@ -1,87 +1,50 @@
 body {
-  font-family: "Noto Naskh Arabic", sans-serif;
-  background: #121212;
-  color: white;
-  text-align: center;
+  font-family: sans-serif;
+  background: #f1f1f1;
   margin: 0;
   padding: 0;
-}
-
-#logo {
-  background: #0d47a1;
-  padding: 15px;
-  color: #fff;
-  margin: 0;
-}
-
-input, button {
-  padding: 10px;
-  margin: 5px;
-  border-radius: 8px;
-  border: none;
-  font-size: 16px;
-}
-
-input {
-  width: 80%;
-  max-width: 300px;
-}
-
-button {
-  background: #0d47a1;
-  color: #fff;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-button:hover {
-  background: #1976d2;
-}
-
-.chatBox {
-  width: 90%;
-  max-width: 500px;
-  margin: 20px auto;
-  background: #1e1e1e;
-  border-radius: 10px;
-  padding: 10px;
-}
-
-.messages {
-  height: 400px;
-  overflow-y: auto;
-  text-align: left;
-  background: #222;
-  padding: 10px;
-  border-radius: 10px;
-}
-
-.msgBox {
-  background: #333;
-  color: #fff;
-  padding: 8px 10px;
-  border-radius: 10px;
-  margin: 5px 0;
-}
-
-.msgBox span {
-  font-size: 12px;
-  float: right;
-  color: #aaa;
-}
-
-.sendBox {
   display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
+  flex-direction: column;
+  height: 100vh;
 }
-
-.sendBox input {
+header {
+  background: #4b7bec;
+  color: white;
+  padding: 10px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+#messages {
   flex: 1;
-  margin-right: 5px;
+  overflow-y: auto;
+  padding: 10px;
 }
-
-.logoutBtn {
-  background: #c62828;
-  margin-top: 10px;
+.msg {
+  background: white;
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+form {
+  display: flex;
+  padding: 10px;
+  background: #fff;
+  border-top: 1px solid #ddd;
+}
+input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+button {
+  margin-left: 8px;
+  padding: 10px 15px;
+  border: none;
+  background: #4b7bec;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
 }
