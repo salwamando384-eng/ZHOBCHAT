@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="ur">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT Login</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Login - ZHOBCHAT</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="login-container">
-    <h2>ZHOBCHAT Login</h2>
+  <div class="card center">
+    <h2>ZHOBCHAT - Login</h2>
     <form id="loginForm">
-      <input type="email" id="li_email" placeholder="ای میل" required>
-      <input type="password" id="li_password" placeholder="پاس ورڈ" required>
+      <input id="li_email" type="email" placeholder="ای میل" required />
+      <input id="li_password" type="password" placeholder="پاس ورڈ" required />
       <button type="submit">Login</button>
     </form>
-    <p id="loginMsg"></p>
-    <p>New user? <a href="signup.html">Signup</a></p>
+    <p id="loginMsg" class="muted"></p>
+    <p class="muted">نیا یوزر؟ <a href="signup.html">Signup</a></p>
   </div>
-  <script type="module" src="login.js"></script>
+
+<script type="module" src="login.js"></script>
 </body>
 </html>
