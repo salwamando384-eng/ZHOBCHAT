@@ -1,172 +1,46 @@
 <!DOCTYPE html>
 <html lang="ur">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZHOBCHAT - Chat Room</title>
-<style>
-body { margin:0; padding:0; font-family:sans-serif; height:100vh; display:flex; flex-direction:column; background:#f4f4f4; }
-.chat-header { display:flex; justify-content:space-between; align-items:center; padding:15px; background:#2ea043; color:#fff; font-size:20px; }
-#usersBtn { background:none; border:none; color:#fff; font-weight:bold; cursor:pointer; font-size:16px; }
-.chat-container { flex:1; display:flex; overflow:hidden; }
-#userSidebar { width:250px; background:#fff; border-right:1px solid #ccc; display:none; flex-direction:column; padding:10px; overflow-y:auto; }
-.user-item { display:flex; align-items:center; margin-bottom:10px; cursor:pointer; }
-.user-item img { width:40px; height:40px; border-radius:50%; margin-right:10px; }
-.user-status { width:10px; height:10px; border-radius:50%; margin-right:5px; }
-.chat-box { flex:1; display:flex; flex-direction:column; padding:10px; }
-#userDetail { background:#fff; padding:10px; margin-bottom:5px; border-radius:5px; display:none; }
-#messages { flex:1; overflow-y:auto; background:#fff; padding:10px; border-radius:5px; margin-bottom:10px; }
-.message { margin-bottom:5px; padding:5px 10px; border-radius:5px; max-width:70%; word-wrap:break-word; }
-.message.self { background:#d4f8d4; align-self:flex-end; }
-.message.other { background:#e6e6e6; align-self:flex-start; }
-#chatForm { display:flex; }
-#msgInput { flex:1; padding:10px; border-radius:5px; border:1px solid #ccc; }
-#sendBtn { padding:10px 15px; margin-left:5px; border:none; border-radius:5px; background:#2ea043; color:#fff; cursor:pointer; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT 💬</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="chat-header">
-  ZHOBCHAT
-  <button id="usersBtn">Users</button>
-</div>
+  <h2 id="logo">ZHOBCHAT 💬</h2>
 
-<div class="chat-container">
-  <div id="userSidebar"></div>
-  <div class="chat-box">
-    <div id="userDetail"></div>
-    <div id="messages"></div>
-    <form id="chatForm">
-      <input type="text" id="msgInput" placeholder="پیغام لکھیں..." required>
-      <button type="submit" id="sendBtn">بھیجیں</button>
-    </form>
+  <!-- Signup -->
+  <div id="signupArea">
+    <h3>نیا اکاؤنٹ بنائیں</h3>
+    <input id="signupName" placeholder="نام">
+    <input id="signupEmail" placeholder="ای میل">
+    <input id="signupPass" type="password" placeholder="پاس ورڈ">
+    <button onclick="signup()">Signup</button>
+    <p>پہلے سے اکاؤنٹ ہے؟ <a href="#" onclick="showLogin()">Login</a></p>
   </div>
-</div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref, set, push, onChildAdded, onValue, serverTimestamp, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+  <!-- Login -->
+  <div id="loginArea" style="display:none;">
+    <h3>Login کریں</h3>
+    <input id="loginEmail" placeholder="ای میل">
+    <input id="loginPass" type="password" placeholder="پاس ورڈ">
+    <button onclick="login()">Login</button>
+    <p>اکاؤنٹ نہیں ہے؟ <a href="#" onclick="showSignup()">Signup</a></p>
+  </div>
 
-// Firebase Config
-const firebaseConfig = {
-  apiKey:"AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain:"zhobchat-33d8e.firebaseapp.com",
-  databaseURL:"https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"zhobchat-33d8e",
-  storageBucket:"zhobchat-33d8e.appspot.com",
-  messagingSenderId:"116466089929",
-  appId:"1:116466089929:web:06e914c8ed81ba9391f218",
-  measurementId:"G-LX9P9LRLV8"
-};
+  <!-- Chat -->
+  <div id="chatArea" style="display:none;">
+    <div class="chatBox">
+      <div id="chatMessages" class="messages"></div>
+      <div class="sendBox">
+        <input id="messageInput" placeholder="میسج لکھیں...">
+        <button onclick="sendMessage()">📤</button>
+      </div>
+    </div>
+    <button class="logoutBtn" onclick="logout()">Logout</button>
+  </div>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-let currentUser=null;
-let selectedUser=null;
-
-const usersBtn = document.getElementById("usersBtn");
-const userSidebar = document.getElementById("userSidebar");
-const userDetailDiv = document.getElementById("userDetail");
-const messagesDiv = document.getElementById("messages");
-const chatForm = document.getElementById("chatForm");
-const msgInput = document.getElementById("msgInput");
-
-// Sidebar toggle
-usersBtn.addEventListener("click",()=>{ userSidebar.style.display = userSidebar.style.display==="none"?"flex":"none"; });
-
-// Auth state
-onAuthStateChanged(auth,user=>{
-  if(!user) return window.location.href="login.html";
-  currentUser=user;
-
-  // Online status
-  const statusRef = ref(db,"users/"+currentUser.uid+"/status");
-  set(statusRef,"online");
-  statusRef.onDisconnect().set("offline");
-  const lastSeenRef = ref(db,"users/"+currentUser.uid+"/lastSeen");
-  lastSeenRef.onDisconnect().set(serverTimestamp());
-
-  loadUsers();
-  loadMessages();
-});
-
-// Load Users
-function loadUsers(){
-  const usersRef = ref(db,"users");
-  onValue(usersRef,snapshot=>{
-    userSidebar.innerHTML="";
-    snapshot.forEach(child=>{
-      const u = child.val();
-      if(u.uid===currentUser.uid) return;
-
-      const div = document.createElement("div");
-      div.classList.add("user-item");
-      const onlineColor = u.status==="online"?"green":"gray";
-      const lastSeenText = u.status==="online"?"Online":"Last seen: "+(u.lastSeen?new Date(u.lastSeen).toLocaleString():"Unknown");
-
-      div.innerHTML = `<div class="user-status" style="background:${onlineColor}" title="${lastSeenText}"></div>
-                       <img src="${u.photoURL}" alt="DP">
-                       <span style="color:${u.color || '#000'}">${u.name}</span>`;
-
-      div.addEventListener("click",()=>{
-        selectedUser=u.uid;
-        userDetailDiv.style.display="block";
-        userDetailDiv.innerHTML = `
-          <h4>${u.name}</h4>
-          <p>Age: ${u.age || 'N/A'}, Gender: ${u.gender || 'N/A'}, City: ${u.city || 'N/A'}</p>
-          <p>Status: ${lastSeenText}</p>
-          <button id="privateMsgBtn">Private Message</button>
-        `;
-        document.getElementById("privateMsgBtn").onclick = ()=>{ msgInput.focus(); };
-      });
-
-      userSidebar.appendChild(div);
-    });
-  });
-}
-
-// Load Messages
-function loadMessages(){
-  const messagesRef = ref(db,"messages");
-  onChildAdded(messagesRef,snapshot=>{
-    const m = snapshot.val();
-    if(!currentUser) return;
-    if(m.toUid && m.toUid!==currentUser.uid && m.fromUid!==currentUser.uid) return;
-
-    const p=document.createElement("p");
-    p.classList.add("message");
-    p.classList.add(m.fromUid===currentUser.uid?"self":"other");
-    p.style.color = m.color || "#000";
-    const senderName = m.fromName || "Anonymous";
-    p.textContent = (m.toUid?"[Private] ":"")+senderName+": "+m.text;
-    messagesDiv.appendChild(p);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  });
-}
-
-// Send Message
-chatForm.addEventListener("submit", async e=>{
-  e.preventDefault();
-  if(!currentUser) return;
-  const text = msgInput.value.trim();
-  if(!text) return;
-
-  const userRef = ref(db,"users/"+currentUser.uid);
-  const userSnap = await get(userRef);
-  const u = userSnap.val();
-  push(ref(db,"messages"),{
-    text,
-    fromUid: currentUser.uid,
-    fromName: u.name,
-    toUid: selectedUser||null,
-    color: u.color || "#000",
-    time: new Date().toLocaleTimeString()
-  });
-  msgInput.value="";
-});
-</script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
