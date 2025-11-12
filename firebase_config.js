@@ -1,4 +1,5 @@
-// Firebase v9+ modular SDK
+// firebase_config.js  (v9+ modular)
+// اپنی موجودہ فائل اگر یہی ہے تو یہی رہنے دیں
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
