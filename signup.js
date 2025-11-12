@@ -37,10 +37,8 @@ signupForm.addEventListener("submit", (e) => {
     .then(async (userCredential) => {
       const user = userCredential.user;
 
-      // نام اپڈیٹ کرو
       await updateProfile(user, { displayName: name });
 
-      // ڈیٹا بیس میں یوزر محفوظ کرو
       await set(ref(db, "users/" + user.uid), {
         name: name,
         email: email,
@@ -50,10 +48,9 @@ signupForm.addEventListener("submit", (e) => {
       msg.textContent = "✅ اکاؤنٹ بن گیا! Redirect ہو رہا ہے...";
       msg.style.color = "#2ea043";
 
-      // تھوڑا انتظار کر کے ری ڈائریکٹ کرو تاکہ auth مکمل ہو جائے
       setTimeout(() => {
         window.location.href = "chat.html";
-      }, 2500);
+      }, 2000);
     })
     .catch((error) => {
       msg.textContent = "❌ " + error.message;
