@@ -1,34 +1,53 @@
 body {
   font-family: Arial, sans-serif;
-  background-color: #f5f5f5;
-  margin: 0;
-  padding: 0;
+  background-color: #f0f0f0;
 }
 
-header {
+.signup-container, .login-container {
+  width: 300px;
+  margin: 50px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+}
+
+.signup-container input, .login-container input, select, button {
+  width: 100%;
+  margin: 5px 0;
+  padding: 8px;
+}
+
+.chat-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.chat-wrapper header {
   display: flex;
   justify-content: space-between;
   padding: 10px;
-  background-color: #2e8b57;
+  background: #3b5998;
   color: white;
 }
 
-.chat-container {
+.chat-main {
   display: flex;
-  height: calc(100vh - 50px);
+  flex: 1;
+  overflow: hidden;
 }
 
 .users-list {
   width: 200px;
-  background: #fff;
-  border-right: 1px solid #ccc;
-  display: none;
-  flex-direction: column;
+  background: #ddd;
+  padding: 10px;
   overflow-y: auto;
 }
 
-.users-list.show {
+.chat-section {
+  flex: 1;
   display: flex;
+  flex-direction: column;
 }
 
 .messages-container {
@@ -42,32 +61,11 @@ header {
   margin-bottom: 5px;
 }
 
-.message .time {
-  font-size: 0.8em;
-  color: #555;
-}
-
-.user-item {
-  padding: 5px;
-  cursor: pointer;
-  border-bottom: 1px solid #ccc;
-}
-
-.user-item:hover {
-  background-color: #f0f0f0;
-}
-
-form {
+#messageForm {
   display: flex;
-  padding: 10px;
-  background-color: #fff;
 }
 
-form input[type="text"] {
+#msgInput {
   flex: 1;
-  padding: 5px;
-}
-
-form button {
-  padding: 5px 10px;
+  padding: 8px;
 }
