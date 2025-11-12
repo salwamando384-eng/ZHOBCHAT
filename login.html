@@ -1,71 +1,22 @@
 <!DOCTYPE html>
 <html lang="ur">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZHOBCHAT - Login</title>
-<link rel="stylesheet" href="style.css">
-<style>
-.login-container { background:#fff; padding:30px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); width:350px; margin:50px auto; }
-#loginMsg { text-align:center; margin-top:10px; font-weight:bold; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="login-container">
-<h2>ZHOBCHAT - لاگ ان</h2>
-<form id="loginForm">
-<input type="email" id="li_email" placeholder="جی میل" required>
-<input type="password" id="li_password" placeholder="پاسورڈ" required>
-<button type="submit">لاگ ان کریں</button>
-<p id="loginMsg"></p>
-<p style="text-align:center; margin-top:10px;">نیا اکاؤنٹ؟ <a href="signup.html">سائن اپ کریں</a></p>
-</form>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey:"AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain:"zhobchat-33d8e.firebaseapp.com",
-  databaseURL:"https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"zhobchat-33d8e",
-  storageBucket:"zhobchat-33d8e.appspot.com",
-  messagingSenderId:"116466089929",
-  appId:"1:116466089929:web:06e914c8ed81ba9391f218"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-document.addEventListener("DOMContentLoaded",()=>{
-  const loginForm=document.getElementById("loginForm");
-  const loginMsg=document.getElementById("loginMsg");
-
-  loginForm.addEventListener("submit",async (e)=>{
-    e.preventDefault();
-    const email=document.getElementById("li_email").value.trim();
-    const password=document.getElementById("li_password").value.trim();
-
-    if(!email||!password){ loginMsg.style.color="#f85149"; loginMsg.textContent="⚠️ تمام خانے پر کریں۔"; return; }
-
-    loginMsg.style.color="#000"; loginMsg.textContent="⏳ لاگ ان ہو رہا ہے...";
-
-    try{
-      await signInWithEmailAndPassword(auth,email,password);
-      loginMsg.style.color="#127a1f";
-      loginMsg.style.backgroundColor="#d4f8d4";
-      loginMsg.style.padding="5px 10px"; loginMsg.style.borderRadius="5px";
-      loginMsg.textContent="✅ لاگ ان کامیاب! Redirect ہو رہا ہے...";
-      setTimeout(()=>window.location.href="chat.html",1000);
-    }catch(err){
-      console.error("Login error:",err);
-      loginMsg.style.color="#f85149";
-      loginMsg.textContent="❌ "+err.message;
-    }
-  });
-});
-</script>
+  <div class="login-container">
+    <h2>ZHOBCHAT Login</h2>
+    <form id="loginForm">
+      <input type="email" id="li_email" placeholder="ای میل" required>
+      <input type="password" id="li_password" placeholder="پاس ورڈ" required>
+      <button type="submit">Login</button>
+    </form>
+    <p id="loginMsg"></p>
+    <p>اکاؤنٹ نہیں ہے؟ <a href="signup.html">Signup</a></p>
+  </div>
+  <script type="module" src="login.js"></script>
 </body>
 </html>
