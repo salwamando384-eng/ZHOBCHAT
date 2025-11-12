@@ -1,18 +1,71 @@
 <!DOCTYPE html>
 <html lang="ur">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ZhobChat</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f1f1f1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+    }
+    header {
+      background: #1976d2;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    #chatArea {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      background: white;
+    }
+    .msg {
+      margin-bottom: 8px;
+      padding: 6px 10px;
+      background: #e3f2fd;
+      border-radius: 8px;
+    }
+    .msg b {
+      color: #1565c0;
+    }
+    footer {
+      display: flex;
+      padding: 10px;
+      background: #fff;
+      border-top: 1px solid #ddd;
+    }
+    #msgBox {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    #sendBtn {
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      margin-left: 6px;
+    }
+  </style>
 </head>
 <body>
   <header>ZhobChat</header>
-  <div id="messages"></div>
-  <form id="chatForm">
-    <input id="msgInput" placeholder="اپنا پیغام لکھیں..." />
-    <button type="submit">Send</button>
-  </form>
+  <div id="chatArea"></div>
+  <footer>
+    <input id="msgBox" type="text" placeholder="پیغام لکھیں..." />
+    <button id="sendBtn">Send</button>
+  </footer>
 
   <script type="module" src="chat.js"></script>
 </body>
