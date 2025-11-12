@@ -12,29 +12,28 @@ loginForm.addEventListener("submit", async (e) => {
   const password = document.getElementById("li_password").value.trim();
 
   if (!email || !password) {
-    msg.textContent = "⚠️ تمام خانے پر کریں۔";
     msg.style.color = "red";
+    msg.textContent = "⚠️ تمام خانے پر کریں۔";
     return;
   }
 
-  msg.textContent = "⏳ Login ہو رہا ہے...";
   msg.style.color = "black";
+  msg.textContent = "⏳ لاگ ان ہو رہا ہے...";
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCred.user;
 
-    // Set user status to online
+    // Update status online
     await update(ref(db, "users/" + user.uid), { status: "online" });
 
-    msg.textContent = "✅ Login ہوگیا! Chat پر لے جایا جا رہا ہے...";
     msg.style.color = "#2ea043";
-
+    msg.textContent = "✅ لاگ ان ہو گیا! Chat پر لے جایا جا رہا ہے...";
     setTimeout(() => window.location.href = "chat.html", 1000);
 
   } catch (err) {
     console.error(err);
-    msg.textContent = "❌ " + err.message;
     msg.style.color = "red";
+    msg.textContent = "❌ " + err.message;
   }
 });
