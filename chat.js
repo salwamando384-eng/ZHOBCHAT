@@ -23,7 +23,6 @@ const chatArea = document.getElementById("chatArea");
 
 let currentUser = null;
 
-// ✅ جب user لاگ ان ہو
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = {
@@ -35,7 +34,6 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// ✅ میسج بھیجنا
 sendBtn.addEventListener("click", () => {
   const text = msgBox.value.trim();
   if (text === "" || !currentUser) return;
@@ -50,7 +48,6 @@ sendBtn.addEventListener("click", () => {
   msgBox.value = "";
 });
 
-// ✅ میسجز دکھانا
 onChildAdded(ref(db, "messages"), (snapshot) => {
   const msg = snapshot.val();
   const div = document.createElement("div");
