@@ -1,45 +1,88 @@
-// chat.js
 import { auth, db } from "./firebase_config.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref, push, onChildAdded, update, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const chatArea = document.getElementById("chatArea");
-const msgBox = document.getElementById("msgBox");
-const sendBtn = document.getElementById("sendBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const chatForm = document.getElementById("chatForm");
+const chatInput = document.getElementById("chatInput");
+const messagesContainer = document.getElementById("messagesContainer");
+const usersBtn = document.getElementById("usersBtn");
+const usersListDiv = document.getElementById("usersList");
 
-let currentUser = null;
+let currentUser;
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
+// Load current user
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    currentUser = user;
+    listenMessages();
+    loadUsers();
+  } else {
     window.location.href = "login.html";
-    return;
   }
-  currentUser = { uid: user.uid, name: user.displayName || user.email };
-
-  // Mark user online
-  const userRef = ref(db, "users/" + currentUser.uid);
-  userRef.update({ status: "online" });
 });
 
-sendBtn.addEventListener("click", () => {
-  const text = msgBox.value.trim();
-  if (!text || !currentUser) return;
+// Logout
+logoutBtn.addEventListener("click", async () => {
+  if (currentUser) {
+    await update(ref(db, "users/" + currentUser.uid), { status: "offline" });
+    await signOut(auth);
+    window.location.href = "login.html";
+  }
+});
 
-  push(ref(db, "messages"), {
+// Send message
+chatForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = chatInput.value.trim();
+  if (!text) return;
+  chatInput.value = "";
+
+  const msgRef = ref(db, "messages/");
+  await push(msgRef, {
     fromUid: currentUser.uid,
-    fromName: currentUser.name,
+    fromName: currentUser.displayName,
     text,
+    color: "#000000",
     time: new Date().toLocaleTimeString()
   });
-
-  msgBox.value = "";
 });
 
-onChildAdded(ref(db, "messages"), (snapshot) => {
-  const msg = snapshot.val();
-  const div = document.createElement("div");
-  div.classList.add("msg");
-  div.innerHTML = `<b>${msg.fromName}</b>: ${msg.text} <small>(${msg.time})</small>`;
-  chatArea.appendChild(div);
-  chatArea.scrollTop = chatArea.scrollHeight;
+// Listen messages
+function listenMessages() {
+  const msgRef = ref(db, "messages/");
+  onChildAdded(msgRef, (snap) => {
+    const msg = snap.val();
+    const div = document.createElement("div");
+    div.className = "message";
+    div.innerHTML = `<strong style="color:${msg.color}">${msg.fromName}:</strong> ${msg.text} <span class="time">${msg.time}</span>`;
+    messagesContainer.appendChild(div);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  });
+}
+
+// Load users
+function loadUsers() {
+  const usersRef = ref(db, "users/");
+  onValue(usersRef, (snap) => {
+    usersListDiv.innerHTML = "";
+    snap.forEach((child) => {
+      const user = child.val();
+      const userDiv = document.createElement("div");
+      userDiv.className = "user-item";
+      userDiv.innerHTML = `${user.name} (${user.status})`;
+      userDiv.addEventListener("click", () => openUserProfile(user));
+      usersListDiv.appendChild(userDiv);
+    });
+  });
+}
+
+function openUserProfile(user) {
+  alert(`Name: ${user.name}\nAge: ${user.age}\nGender: ${user.gender}\nEmail: ${user.email}`);
+  // Future: Add private message / friend request options
+}
+
+// Users list toggle
+usersBtn.addEventListener("click", () => {
+  usersListDiv.classList.toggle("show");
 });
