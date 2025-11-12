@@ -1,45 +1,24 @@
-const firebaseConfig = {
-  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain: "zhobchat-33d8e.firebaseapp.com",
-  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "zhobchat-33d8e",
-  storageBucket: "zhobchat-33d8e.appspot.com",
-  messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+// users.js
+import { auth, db } from "./firebase_config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const usersList = document.getElementById("usersList");
+const usersTable = document.getElementById("usersTable");
 
-auth.onAuthStateChanged(user => {
-  if (!user) return location.href = "login.html";
-  db.ref("users").on("value", snap => {
-    usersList.innerHTML = "";
+onAuthStateChanged(auth, user => {
+  if (!user) { window.location.href = "login.html"; return; }
+  const uRef = ref(db, "users");
+  onValue(uRef, snap => {
+    usersTable.innerHTML = "";
     snap.forEach(child => {
-      const uid = child.key;
       const u = child.val();
-      if (uid === user.uid) return;
       const div = document.createElement("div");
-      div.className = 'user';
-      div.innerHTML = `<img src="${u.dp || 'default_dp.png'}" class="dp"/><div><b>${u.name||''}</b><br/>${u.city||''}</div>`;
-      const chatBtn = document.createElement("button");
-      chatBtn.textContent = "Chat";
-      chatBtn.onclick = () => {
-        // store who to chat with
-        localStorage.setItem("chatWith", uid);
-        location.href = "private_chat.html";
-      };
-      const profileBtn = document.createElement("button");
-      profileBtn.textContent = "Profile";
-      profileBtn.onclick = () => {
-        localStorage.setItem("profileView", uid);
-        location.href = "profile.html";
-      };
-      div.appendChild(chatBtn);
-      div.appendChild(profileBtn);
-      usersList.appendChild(div);
+      div.className = "userRowFull";
+      div.innerHTML = `<img src="${u.dp||'default_dp.png'}" class="dpSmall"/><div><b>${escapeHtml(u.name)}</b><br/>${escapeHtml(u.age)} | ${escapeHtml(u.gender)} | ${escapeHtml(u.city)}<br/><small>${escapeHtml(u.status)}</small></div>
+        <div><button onclick="(function(){ localStorage.setItem('profileView','${child.key}'); location.href='profile.html' })()">Profile</button></div>`;
+      usersTable.appendChild(div);
     });
   });
 });
+
+function escapeHtml(s=""){ return (s+"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
