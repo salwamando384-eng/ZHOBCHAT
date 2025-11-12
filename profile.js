@@ -1,70 +1,39 @@
-// Firebase Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain: "zhobchat-33d8e.firebaseapp.com",
-  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "zhobchat-33d8e",
-  storageBucket: "zhobchat-33d8e.appspot.com",
-  messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-};
+// profile.js
+import { auth, db } from "./firebase_config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref, get, push } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
-const storage = firebase.storage();
+const profileArea = document.getElementById("profileArea");
 
-const usernameElem = document.getElementById("username");
-const profilePicElem = document.getElementById("profile-pic");
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = "login.html"; return; }
+  const viewUid = localStorage.getItem("profileView");
+  if (!viewUid) { profileArea.innerHTML = "<p class='muted'>کوئی پروفائل منتخب نہیں۔</p>"; return; }
 
-// Check user login
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    const uid = user.uid;
-    db.ref("users/" + uid).once("value").then((snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        usernameElem.textContent = data.username || "User";
-        profilePicElem.src = data.photoURL || "https://i.postimg.cc/3Rwgjfyk/default.png";
-      }
+  const snap = await get(ref(db, `users/${viewUid}`));
+  if (!snap.exists()) { profileArea.innerHTML = "<p class='muted'>یوزر نہیں ملا</p>"; return; }
+  const u = snap.val();
+
+  profileArea.innerHTML = `
+    <img src="${u.dp||'default_dp.png'}" class="dpBig" />
+    <h3>${escapeHtml(u.name)}</h3>
+    <p>عمر: ${escapeHtml(u.age)}<br/>جنس: ${escapeHtml(u.gender)}<br/>شہر: ${escapeHtml(u.city)}</p>
+    <p><button id="sendFriend">Send Friend Request</button> <button id="privateBtn">Private Message</button></p>
+  `;
+
+  document.getElementById("sendFriend").onclick = async () => {
+    await push(ref(db, `friendRequests/${viewUid}`), {
+      fromUid: user.uid,
+      fromName: user.displayName || user.email,
+      time: new Date().toISOString()
     });
-  } else {
-    alert("Please login first!");
-    window.location.href = "index.html";
-  }
+    alert("Friend request sent.");
+  };
+
+  document.getElementById("privateBtn").onclick = () => {
+    localStorage.setItem("chatWith", viewUid);
+    window.location.href = "private_chat.html";
+  };
 });
 
-// Upload new profile picture
-document.getElementById("upload-btn").addEventListener("click", () => {
-  const file = document.getElementById("new-pic").files[0];
-  const user = auth.currentUser;
-
-  if (!file) {
-    alert("Please select an image first!");
-    return;
-  }
-
-  if (user) {
-    const uid = user.uid;
-    const ref = storage.ref("profilePics/" + uid);
-
-    ref.put(file).then(() => {
-      return ref.getDownloadURL();
-    }).then((url) => {
-      profilePicElem.src = url;
-      return db.ref("users/" + uid + "/photoURL").set(url);
-    }).then(() => {
-      alert("Profile picture updated successfully!");
-    }).catch((error) => {
-      alert("Error: " + error.message);
-    });
-  }
-});
-
-// Logout
-document.getElementById("logout-btn").addEventListener("click", () => {
-  auth.signOut().then(() => {
-    window.location.href = "index.html";
-  });
-});
+function escapeHtml(s=""){ return (s+"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
