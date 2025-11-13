@@ -1,8 +1,9 @@
-// firebase_config.js
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
+// Your Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -16,7 +17,5 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Auth and Database
 export const auth = getAuth(app);
 export const db = getDatabase(app);
