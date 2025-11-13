@@ -1,28 +1,41 @@
-// === firebase_config.js ===
+import { auth, db } from './firebase_config.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
+const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+const messagesDiv = document.getElementById('messages');
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain: "zhobchat-33d8e.firebaseapp.com",
-  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "zhobchat-33d8e",
-  storageBucket: "zhobchat-33d8e.appspot.com", // ✅ درست کیا گیا
-  messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-  measurementId: "G-LX9P9LRLV8"
-};
+let userName = "Anonymous"; // default
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-const analytics = getAnalytics(app);
+// ✅ جب user login ہوا، اس کا UID اور نام Firebase DB سے لوڈ کرو
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const uid = user.uid;
+    const snapshot = await get(ref(db, 'users/' + uid));
+    if (snapshot.exists()) {
+      const userData = snapshot.val();
+      userName = userData.name || "User";
+    }
+  }
+});
 
-// ✅ Export objects for other files
-export { app, auth, db };
+sendBtn.addEventListener('click', async () => {
+  const text = messageInput.value.trim();
+  if (!text) return;
+
+  await push(ref(db, 'messages'), {
+    name: userName,
+    text
+  });
+
+  messageInput.value = '';
+});
+
+// ✅ Messages display
+onChildAdded(ref(db, 'messages'), (data) => {
+  const msg = data.val();
+  const div = document.createElement('div');
+  div.textContent = `${msg.name}: ${msg.text}`;
+  messagesDiv.appendChild(div);
+});
