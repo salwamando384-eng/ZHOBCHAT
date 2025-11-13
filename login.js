@@ -1,37 +1,47 @@
-import { auth, db } from './firebase_config.js';
-import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+// === login.js ===
+// Import Firebase modules
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { app } from "./firebase_config.js";
 
-const form = document.getElementById('loginForm');
+// Initialize Firebase Auth
+const auth = getAuth(app);
 
-form.addEventListener('submit', async (e) => {
+// Keep user logged in (for GitHub Pages)
+setPersistence(auth, browserLocalPersistence);
+
+// Login Button Click
+document.getElementById("loginBtn").addEventListener("click", async (e) => {
   e.preventDefault();
 
-  const name = document.getElementById('name').value.trim();
-  const password = document.getElementById('password').value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!email || !password) {
+    alert("براہ کرم ای میل اور پاس ورڈ درج کریں۔");
+    return;
+  }
 
   try {
-    // Find user by name in database
-    let userUid = null;
-    const snapshot = await get(ref(db, 'users'));
-    snapshot.forEach(child => {
-      if (child.val().name === name) {
-        userUid = child.key;
-      }
-    });
-
-    if (!userUid) throw new Error('User not found');
-
-    // Use email hack (since signup uses dummy email)
-    const email = name.replace(/\s+/g, '') + Date.now() + '@example.com';
-
-    await signInWithEmailAndPassword(auth, email, password);
-
-    localStorage.setItem('userUid', userUid);
-
-    window.location.href = "chat.html";
-
+    // Sign In User
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    alert("Login successful! Redirecting...");
+    window.location.replace("chat.html");
   } catch (error) {
-    alert(error.message);
+    console.error("Login Error:", error.message);
+    alert("Login Error: " + error.message);
+  }
+});
+
+// Auto redirect if already logged in
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User is already logged in
+    window.location.replace("chat.html");
   }
 });
