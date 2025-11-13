@@ -2,106 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZHOBCHAT</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>ZHOBCHAT</h2>
-  <div style="display:flex">
-    <div id="usersList" style="width:200px; border-right:1px solid #ccc; padding-right:10px; overflow-y:auto; height:400px;"></div>
-    <div style="flex:1; padding-left:10px;">
-      <div id="chatBox" style="border:1px solid #ccc; height:300px; overflow-y:auto; padding:5px;"></div>
-      <input type="text" id="msgInput" placeholder="Type a message" style="width:70%">
+  <header>
+    <h1>ZHOBCHAT</h1>
+    <button id="logoutBtn">Logout</button>
+  </header>
+  <div class="chat-container">
+    <div class="users-list" id="usersList"></div>
+    <div class="chat-box" id="chatBox">
+      <div id="messages"></div>
+      <input type="text" id="msgInput" placeholder="Type a message...">
       <button id="sendBtn">Send</button>
-      <button id="logoutBtn">Logout</button>
     </div>
   </div>
-
-  <script type="module">
-    import { auth, db } from './firebase_config.js';
-    import { ref, set, push, onChildAdded, get, child, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-    import { signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-    const usersList = document.getElementById("usersList");
-    const chatBox = document.getElementById("chatBox");
-    const msgInput = document.getElementById("msgInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    let currentUser = null;
-    let chatWith = null; // for private chat
-
-    auth.onAuthStateChanged(async user => {
-      if(!user) return location.href="login.html";
-      currentUser = user;
-
-      // Mark user online
-      update(ref(db, "users/"+user.uid), { status:"online" });
-
-      // Load users list
-      const usersSnap = await get(ref(db,"users"));
-      usersList.innerHTML = "";
-      usersSnap.forEach(uSnap => {
-        if(uSnap.key===user.uid) return;
-        const u = uSnap.val();
-        const div = document.createElement("div");
-        div.style.borderBottom = "1px solid #ccc";
-        div.innerHTML = `<b style="color:${u.nameColor}">${u.name}</b><br>${u.city || ''} <button>Chat</button>`;
-        const chatBtn = div.querySelector("button");
-        chatBtn.onclick = () => {
-          chatWith = u.uid;
-          chatBox.innerHTML = "";
-          loadMessages();
-        }
-        usersList.appendChild(div);
-      });
-
-      // Load public messages
-      onChildAdded(ref(db,"messages/public"), snap => {
-        const m = snap.val();
-        const div = document.createElement("div");
-        div.innerHTML = `<b style="color:${m.nameColor}">${m.fromName}:</b> <span style="color:${m.textColor}">${m.text}</span>`;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
-    });
-
-    // Send message
-    sendBtn.onclick = async () => {
-      const text = msgInput.value.trim();
-      if(!text) return;
-      const msgData = {
-        fromUid: currentUser.uid,
-        fromName: currentUser.displayName || "Unknown",
-        text,
-        nameColor:"#000",
-        textColor:"#000",
-        time: new Date().toISOString()
-      };
-      if(chatWith){
-        await push(ref(db,"messages/private/"+currentUser.uid+"/"+chatWith), msgData);
-        await push(ref(db,"messages/private/"+chatWith+"/"+currentUser.uid), msgData);
-      }else{
-        await push(ref(db,"messages/public"), msgData);
-      }
-      msgInput.value="";
-    }
-
-    // Load private messages
-    function loadMessages(){
-      onChildAdded(ref(db,"messages/private/"+currentUser.uid+"/"+chatWith), snap => {
-        const m = snap.val();
-        const div = document.createElement("div");
-        div.innerHTML = `<b style="color:${m.nameColor}">${m.fromName}:</b> <span style="color:${m.textColor}">${m.text}</span>`;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
-    }
-
-    logoutBtn.onclick = () => {
-      update(ref(db,"users/"+currentUser.uid), {status:"offline"});
-      signOut(auth);
-    }
-  </script>
+  <script type="module" src="chat.js"></script>
 </body>
 </html>
