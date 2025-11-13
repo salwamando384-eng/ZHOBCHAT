@@ -1,31 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>ZHOBCHAT</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT - Chat</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <button id="profileBtn">Profile</button>
+    <h1>ZHOBCHAT</h1>
+    <a href="profile.html">Profile</a>
   </header>
-  <main id="chatContainer">
-    <h2>Welcome to ZHOBCHAT</h2>
+  <div id="chatContainer">
     <div id="messages"></div>
-  </main>
-
-  <!-- Profile Modal -->
-  <div id="profileModal" style="display:none;position:fixed;top:10%;left:50%;transform:translateX(-50%);background:white;padding:20px;border-radius:10px;box-shadow:0px 0px 15px rgba(0,0,0,0.3);">
-    <h3>Profile</h3>
-    <input id="name" placeholder="Name"><br>
-    <input id="age" placeholder="Age"><br>
-    <input id="gender" placeholder="Gender"><br>
-    <input id="city" placeholder="City"><br>
-    <input id="dp" placeholder="Profile Pic URL"><br>
-    <button id="saveProfile">Save</button>
-    <button id="closeProfile">Close</button>
+    <form id="chatForm">
+      <input type="text" id="messageInput" placeholder="Type a message..." required>
+      <button type="submit">Send</button>
+    </form>
   </div>
-
-<script type="module" src="chat.js"></script>
+  <script type="module" src="chat.js"></script>
 </body>
 </html>
