@@ -1,84 +1,36 @@
-body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-}
-
-/* 🌈 Login Page */
-.login-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-}
-
-.login-box {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 30px;
-  border-radius: 15px;
-  text-align: center;
-  backdrop-filter: blur(8px);
-}
-
-.login-box input {
-  display: block;
-  width: 250px;
-  margin: 10px auto;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-}
-
-.login-box button {
-  background-color: #4e54c8;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.login-box button:hover {
-  background-color: #5a60d1;
-}
-
 /* 💬 Chat Page */
 .chat-page {
   background: linear-gradient(120deg, #89f7fe, #66a6ff);
   height: 100vh;
+  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 0;
+  margin: 0;
 }
 
 .chat-container {
   background: white;
-  width: 90%;
-  max-width: 500px;
-  height: 85vh;
-  border-radius: 15px;
+  width: 100%;       /* Full width */
+  height: 100%;      /* Full height */
+  max-width: 500px;  /* Optional: for larger screens, limit width */
+  border-radius: 0;  /* Remove rounded corners for fullscreen */
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: none;  /* Remove shadow for fullscreen */
 }
 
-.chat-header {
-  background: #4e54c8;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  padding: 15px;
-}
-
+/* Messages Box takes all remaining space */
 .messages-box {
   flex: 1;
-  padding: 15px;
+  padding: 10px;
   overflow-y: auto;
   background: #f5f7fa;
 }
 
+/* Input Area fixed at bottom */
 .input-area {
   display: flex;
   padding: 10px;
@@ -102,9 +54,43 @@ body {
   cursor: pointer;
 }
 
+/* Message bubble */
 .message {
+  display: flex;
+  align-items: center;
   margin-bottom: 10px;
   background: #dfe9f3;
   padding: 8px 12px;
   border-radius: 10px;
+}
+
+.message img.dp {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.message .text-content {
+  flex: 1;
+}
+
+/* Chat Header adjustments */
+.chat-header {
+  background: #4e54c8;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.chat-header button {
+  margin-left: 5px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  background-color: #fff;
+  color: #4e54c8;
 }
