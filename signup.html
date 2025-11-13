@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZHOBCHAT - Signup</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>ZHOBCHAT Sign Up</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-<div class="signup-container">
-  <h1>Create Account</h1>
-  <form id="signupForm">
-    <input type="text" id="name" placeholder="Name" required>
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Password" required>
-    <button type="submit">Sign Up</button>
-  </form>
-  <p>Already have an account? <a href="login.html">Login</a></p>
-  <div id="status"></div>
-</div>
-
-<script type="module" src="signup.js"></script>
+<body class="login-page">
+  <div class="login-box">
+    <h1>ZHOBCHAT Sign Up</h1>
+    <form id="signupForm">
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Sign Up</button>
+    </form>
+    <div id="status"></div>
+    <p>Already have an account? <a href="index.html">Login here</a></p>
+  </div>
+  <script type="module" src="signup.js"></script>
 </body>
 </html>
