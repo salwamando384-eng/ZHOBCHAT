@@ -1,38 +1,73 @@
-import { db } from './firebase_config.js';
-import { ref, get, set, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { auth, db } from './firebase_config.js';
+import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 const uid = localStorage.getItem('userUid');
-if(!uid) location.href = 'login.html';
+if (!uid) {
+  location.href = 'login.html';
+}
+
+const chatBox = document.getElementById('chatBox');
+const messageForm = document.getElementById('messageForm');
+const messageInput = document.getElementById('messageInput');
+const logoutBtn = document.getElementById('logoutBtn');
 
 const profileBtn = document.getElementById('profileBtn');
 const profileModal = document.getElementById('profileModal');
-const closeProfile = document.getElementById('closeProfile');
+const closeModal = document.getElementById('closeModal');
 const saveProfile = document.getElementById('saveProfile');
+const profileName = document.getElementById('profileName');
+const profileCity = document.getElementById('profileCity');
 
-profileBtn.onclick = () => profileModal.style.display = 'block';
-closeProfile.onclick = () => profileModal.style.display = 'none';
+// Logout
+logoutBtn.addEventListener('click', async () => {
+  await signOut(auth);
+  localStorage.removeItem('userUid');
+  location.href = 'login.html';
+});
 
-async function loadProfile() {
-  const snapshot = await get(ref(db, 'users/' + uid));
-  const data = snapshot.val();
-  if(data){
-    document.getElementById('name').value = data.name || '';
-    document.getElementById('age').value = data.age || '';
-    document.getElementById('gender').value = data.gender || '';
-    document.getElementById('city').value = data.city || '';
-    document.getElementById('dp').value = data.dp || '';
-  }
-}
+// Profile modal
+profileBtn.addEventListener('click', () => {
+  profileModal.style.display = 'block';
+});
 
-saveProfile.onclick = async () => {
+closeModal.addEventListener('click', () => {
+  profileModal.style.display = 'none';
+});
+
+// Save profile
+saveProfile.addEventListener('click', async () => {
   await update(ref(db, 'users/' + uid), {
-    name: document.getElementById('name').value,
-    age: document.getElementById('age').value,
-    gender: document.getElementById('gender').value,
-    city: document.getElementById('city').value,
-    dp: document.getElementById('dp').value
+    name: profileName.value,
+    city: profileCity.value
   });
   profileModal.style.display = 'none';
-}
+});
 
-loadProfile();
+// Chat messages listener (simple)
+onValue(ref(db, 'messages/'), (snapshot) => {
+  chatBox.innerHTML = '';
+  snapshot.forEach(msgSnap => {
+    const msg = msgSnap.val();
+    const div = document.createElement('div');
+    div.textContent = `${msg.name}: ${msg.text}`;
+    chatBox.appendChild(div);
+  });
+});
+
+// Send message
+messageForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msgText = messageInput.value.trim();
+  if (!msgText) return;
+  const userSnap = await ref(db, 'users/' + uid);
+  onValue(userSnap, (snapshot) => {
+    const user = snapshot.val();
+    const newMsgRef = ref(db, 'messages/' + Date.now());
+    set(newMsgRef, {
+      name: user.name,
+      text: msgText
+    });
+  }, { once: true });
+  messageInput.value = '';
+});
