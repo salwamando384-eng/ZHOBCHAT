@@ -6,16 +6,13 @@ const statusDiv = document.getElementById('status');
 
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const uid = userCredential.user.uid;
-    localStorage.setItem('userUid', uid);
+    await signInWithEmailAndPassword(auth, email, password);
     location.href = 'chat.html';
   } catch (err) {
-    statusDiv.textContent = "Error: " + err.message;
+    statusDiv.textContent = "⚠️ " + err.message;
   }
 });
