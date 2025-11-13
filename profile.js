@@ -1,67 +1,52 @@
-import { auth, db } from './firebase_config.js';
+import { auth, db, storage } from './firebase_config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { ref, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { ref as dbRef, get, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 const nameInput = document.getElementById('name');
 const cityInput = document.getElementById('city');
 const ageInput = document.getElementById('age');
-const dpInput = document.getElementById('dpInput');
-const dpPreview = document.getElementById('dpPreview');
-const saveBtn = document.getElementById('saveBtn');
+const dpImg = document.getElementById('dpImg');
+const dpUpload = document.getElementById('dpUpload');
+const saveBtn = document.getElementById('saveProfileBtn');
 const statusDiv = document.getElementById('status');
-const backBtn = document.getElementById('backBtn');
 
 let currentUser = null;
-let dpDataUrl = 'default_dp.png';
+let uploadedDPUrl = null;
 
-// Load user data
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    location.href = 'index.html';
-    return;
-  }
+  if (!user) location.href = 'index.html';
   currentUser = user;
-  const userRef = ref(db, 'users/' + user.uid);
-  const snapshot = await get(userRef);
+
+  const snapshot = await get(dbRef(db, 'users/' + user.uid));
   if (snapshot.exists()) {
     const data = snapshot.val();
     nameInput.value = data.name || '';
     cityInput.value = data.city || '';
     ageInput.value = data.age || '';
-    dpDataUrl = data.dp || 'default_dp.png';
-    dpPreview.src = dpDataUrl;
+    dpImg.src = data.dp || 'default_dp.png';
+    uploadedDPUrl = data.dp || 'default_dp.png';
   }
 });
 
-// Preview selected DP
-dpInput.addEventListener('change', (e) => {
+dpUpload.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = function(event) {
-    dpDataUrl = event.target.result;
-    dpPreview.src = dpDataUrl;
-  };
-  reader.readAsDataURL(file);
+  const storageReference = storageRef(storage, `profile_pics/${currentUser.uid}`);
+  await uploadBytes(storageReference, file);
+  uploadedDPUrl = await getDownloadURL(storageReference);
+  dpImg.src = uploadedDPUrl;
 });
 
-// Save profile
 saveBtn.addEventListener('click', async () => {
   if (!currentUser) return;
 
-  const profileData = {
-    name: nameInput.value.trim(),
-    city: cityInput.value.trim(),
-    age: ageInput.value.trim(),
-    dp: dpDataUrl
-  };
-
-  await set(ref(db, 'users/' + currentUser.uid), profileData);
-  statusDiv.textContent = '✅ Profile saved successfully!';
-});
-
-// Back to Chat
-backBtn.addEventListener('click', () => {
-  location.href = 'chat.html';
+  await set(dbRef(db, 'users/' + currentUser.uid), {
+    name: nameInput.value,
+    city: cityInput.value,
+    age: ageInput.value,
+    dp: uploadedDPUrl || 'default_dp.png'
+  });
+  statusDiv.textContent = '✅ Profile Saved!';
 });
