@@ -1,9 +1,22 @@
 import { auth, db } from './firebase_config.js';
-import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { 
+  createUserWithEmailAndPassword, 
+  setPersistence, 
+  browserLocalPersistence 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const signupForm = document.getElementById('signupForm');
 const statusDiv = document.getElementById('status');
+
+// ✅ Login session محفوظ رکھنے کے لیے (Fix redirect issue)
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("Auth persistence enabled (local storage).");
+  })
+  .catch((error) => {
+    console.error("Persistence error:", error);
+  });
 
 signupForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -17,11 +30,18 @@ signupForm.addEventListener('submit', async (e) => {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
 
+  // ✅ Check required fields
+  if (!name || !email || !password) {
+    statusDiv.textContent = "Please fill in all required fields!";
+    return;
+  }
+
   try {
+    // ✅ Create new user
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const uid = userCredential.user.uid;
 
-    // Store user info in Realtime DB
+    // ✅ Store user info in Realtime Database
     await set(ref(db, 'users/' + uid), {
       name,
       age,
@@ -29,14 +49,19 @@ signupForm.addEventListener('submit', async (e) => {
       city,
       nameColor,
       textColor,
-      dp: ''  // optional, can be updated later
+      dp: '' // optional profile picture (can be updated later)
     });
 
-    statusDiv.textContent = "Account created successfully!";
-    // redirect to chat page
+    // ✅ Success message
+    statusDiv.textContent = "Account created successfully! Redirecting...";
+
+    // ✅ Save UID in localStorage and redirect
     localStorage.setItem('userUid', uid);
-    location.href = 'chat.html';
+    window.location.href = 'chat.html';
+
   } catch (err) {
+    // ✅ Error handling
     statusDiv.textContent = "Error: " + err.message;
+    console.error("Signup error:", err);
   }
 });
