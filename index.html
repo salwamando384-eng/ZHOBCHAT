@@ -1,42 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZHOBCHAT - Login</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="card center">
-    <h2>ZHOBCHAT - Start Chat</h2>
-
-    <form id="startForm">
-      <input id="name" placeholder="Full Name" required />
-      <select id="gender" required>
-        <option value="">Select Gender</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-      </select>
-      <input id="age" type="number" placeholder="Age" required />
-      <input id="city" placeholder="City" required />
-
-      <label for="nameColor">Name Color</label>
-      <input id="nameColor" type="color" value="#1565c0" />
-
-      <label for="textColor">Text Color</label>
-      <input id="textColor" type="color" value="#000000" />
-
-      <input id="password" type="password" placeholder="Password (optional)" />
-
-      <label>Profile Picture (optional)</label>
-      <input id="dpFile" type="file" accept="image/*" />
-
-      <button type="submit">Start Chat</button>
+  <div class="login-container">
+    <h1>Welcome to ZHOBCHAT</h1>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit">Login</button>
     </form>
-
-    <p id="startMsg" class="muted"></p>
+    <p id="status"></p>
   </div>
-
-<script type="module" src="app.js"></script>
+  <script type="module" src="login.js"></script>
 </body>
 </html>
