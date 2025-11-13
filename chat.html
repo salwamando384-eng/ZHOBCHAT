@@ -1,24 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>ZHOBCHAT</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <h1>ZHOBCHAT</h1>
-    <button id="logoutBtn">Logout</button>
+    <button id="profileBtn">Profile</button>
   </header>
-  <div class="chat-container">
-    <div class="users-list" id="usersList"></div>
-    <div class="chat-box" id="chatBox">
-      <div id="messages"></div>
-      <input type="text" id="msgInput" placeholder="Type a message...">
-      <button id="sendBtn">Send</button>
-    </div>
+  <main id="chatContainer">
+    <h2>Welcome to ZHOBCHAT</h2>
+    <div id="messages"></div>
+  </main>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" style="display:none;position:fixed;top:10%;left:50%;transform:translateX(-50%);background:white;padding:20px;border-radius:10px;box-shadow:0px 0px 15px rgba(0,0,0,0.3);">
+    <h3>Profile</h3>
+    <input id="name" placeholder="Name"><br>
+    <input id="age" placeholder="Age"><br>
+    <input id="gender" placeholder="Gender"><br>
+    <input id="city" placeholder="City"><br>
+    <input id="dp" placeholder="Profile Pic URL"><br>
+    <button id="saveProfile">Save</button>
+    <button id="closeProfile">Close</button>
   </div>
-  <script type="module" src="chat.js"></script>
+
+<script type="module" src="chat.js"></script>
 </body>
 </html>
