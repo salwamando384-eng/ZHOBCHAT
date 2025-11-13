@@ -1,47 +1,27 @@
-// === login.js ===
-// Import Firebase modules
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  setPersistence,
-  browserLocalPersistence,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { app } from "./firebase_config.js";
+import { auth } from './firebase_config.js';
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-// Initialize Firebase Auth
-const auth = getAuth(app);
+const loginForm = document.getElementById('loginForm');
+const statusDiv = document.getElementById('status');
 
-// Keep user logged in (for GitHub Pages)
-setPersistence(auth, browserLocalPersistence);
+// Check if already logged in
+if (localStorage.getItem('userUid')) {
+  location.href = 'chat.html';
+}
 
-// Login Button Click
-document.getElementById("loginBtn").addEventListener("click", async (e) => {
+loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-
-  if (!email || !password) {
-    alert("براہ کرم ای میل اور پاس ورڈ درج کریں۔");
-    return;
-  }
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
 
   try {
-    // Sign In User
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    alert("Login successful! Redirecting...");
-    window.location.replace("chat.html");
-  } catch (error) {
-    console.error("Login Error:", error.message);
-    alert("Login Error: " + error.message);
-  }
-});
+    const uid = userCredential.user.uid;
 
-// Auto redirect if already logged in
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is already logged in
-    window.location.replace("chat.html");
+    // Save uid in localStorage
+    localStorage.setItem('userUid', uid);
+    location.href = 'chat.html';
+  } catch (err) {
+    statusDiv.textContent = "Login Error: " + err.message;
   }
 });
