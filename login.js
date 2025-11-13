@@ -1,41 +1,37 @@
-// login.js
-import { auth, db } from "./firebase_config.js";
+import { auth, db } from './firebase_config.js';
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { ref, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const loginForm = document.getElementById("loginForm");
-const loginMsg = document.getElementById("loginMsg");
+const form = document.getElementById('loginForm');
 
-loginForm.addEventListener("submit", async (e) => {
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  loginMsg.style.display = "block";
 
-  const email = document.getElementById("li_email").value.trim();
-  const password = document.getElementById("li_password").value.trim();
-
-  if (!email || !password) {
-    loginMsg.textContent = "⚠️ تمام خانے پر کریں۔";
-    loginMsg.style.color = "red";
-    return;
-  }
+  const name = document.getElementById('name').value.trim();
+  const password = document.getElementById('password').value.trim();
 
   try {
-    loginMsg.textContent = "⏳ لاگ ان ہو رہا ہے...";
-    loginMsg.style.color = "black";
+    // Find user by name in database
+    let userUid = null;
+    const snapshot = await get(ref(db, 'users'));
+    snapshot.forEach(child => {
+      if (child.val().name === name) {
+        userUid = child.key;
+      }
+    });
 
-    const uc = await signInWithEmailAndPassword(auth, email, password);
-    const user = uc.user;
+    if (!userUid) throw new Error('User not found');
 
-    // mark online
-    await update(ref(db, `users/${user.uid}`), { status: "online", lastSeen: null });
+    // Use email hack (since signup uses dummy email)
+    const email = name.replace(/\s+/g, '') + Date.now() + '@example.com';
 
-    loginMsg.textContent = "✅ لاگ ان ہوگیا! Chat پر جا رہے ہیں...";
-    loginMsg.style.color = "green";
-    setTimeout(()=>window.location.href="chat.html",900);
+    await signInWithEmailAndPassword(auth, email, password);
 
-  } catch (err) {
-    console.error(err);
-    loginMsg.textContent = "❌ " + err.message;
-    loginMsg.style.color = "red";
+    localStorage.setItem('userUid', userUid);
+
+    window.location.href = "chat.html";
+
+  } catch (error) {
+    alert(error.message);
   }
 });
