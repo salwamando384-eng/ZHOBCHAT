@@ -1,56 +1,48 @@
-// private_chat.js
-import { auth, db } from "./firebase_config.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { ref, push, onChildAdded, get, query, orderByChild } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { auth, db } from './firebase_config.js';
+import { ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const privateMessagesArea = document.getElementById("privateMessagesArea");
-const privateSendForm = document.getElementById("privateSendForm");
-const privateMessageInput = document.getElementById("privateMessageInput");
-const backBtn = document.getElementById("backBtn");
+const messagesDiv = document.getElementById('messages');
+const msgInput = document.getElementById('msgInput');
+const sendBtn = document.getElementById('sendBtn');
+const backBtn = document.getElementById('backBtn');
 
-const chatWith = localStorage.getItem("chatWith");
-let currentUser = null;
+const userUid = localStorage.getItem('userUid');
+const chatWithUid = localStorage.getItem('chatWith');
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) { window.location.href = "login.html"; return; }
-  currentUser = user;
+if (!userUid || !chatWithUid) location.href = 'chat.html';
 
-  if (!chatWith) {
-    privateMessagesArea.innerHTML = "<p class='muted'>کوئی یوزر منتخب نہیں۔</p>";
-    return;
-  }
+auth.onAuthStateChanged(user => {
+  if (!user) location.href = 'login.html';
 
-  // load existing private messages between the two users (both directions)
-  privateMessagesArea.innerHTML = "";
-  const msgsRef = ref(db, "privateMessages");
-  // We'll listen to all and filter client-side for simplicity (could be optimized)
-  onChildAdded(msgsRef, (snap) => {
-    const m = snap.val();
-    if ((m.fromUid === currentUser.uid && m.toUid === chatWith) || (m.fromUid === chatWith && m.toUid === currentUser.uid)) {
-      const div = document.createElement("div");
-      div.className = "messageItem";
-      div.innerHTML = `<strong>${escapeHtml(m.fromName||m.fromEmail)}</strong>: ${escapeHtml(m.text)} <span class="mTime">${escapeHtml(m.time)}</span>`;
-      privateMessagesArea.appendChild(div);
-      privateMessagesArea.scrollTop = privateMessagesArea.scrollHeight;
-    }
+  const privateRef = ref(db, `privateMessages/${userUid}_${chatWithUid}`);
+  onChildAdded(privateRef, snap => {
+    const msg = snap.val();
+    const div = document.createElement('div');
+    div.innerHTML = `<b>${msg.senderName}</b>: ${msg.text}`;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
 });
 
-privateSendForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const txt = privateMessageInput.value.trim();
-  if (!txt || !currentUser) return;
-  await push(ref(db, "privateMessages"), {
-    fromUid: currentUser.uid,
-    fromName: currentUser.displayName || currentUser.email,
-    fromEmail: currentUser.email,
-    toUid: chatWith,
-    text: txt,
-    time: new Date().toLocaleTimeString()
-  });
-  privateMessageInput.value = "";
+sendBtn.addEventListener('click', () => {
+  const text = msgInput.value.trim();
+  if (!text) return;
+
+  const messageObj = {
+    sender: userUid,
+    receiver: chatWithUid,
+    senderName: userUid, // we can change to actual name
+    text,
+    timestamp: Date.now()
+  };
+
+  // Store in both user's private chat node
+  push(ref(db, `privateMessages/${userUid}_${chatWithUid}`), messageObj);
+  push(ref(db, `privateMessages/${chatWithUid}_${userUid}`), messageObj);
+
+  msgInput.value = '';
 });
 
-backBtn.addEventListener("click", ()=> { window.location.href = "chat.html"; });
-
-function escapeHtml(s=""){ return (s+"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+backBtn.addEventListener('click', () => {
+  location.href = 'chat.html';
+});
