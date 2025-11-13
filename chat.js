@@ -6,7 +6,6 @@ const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 const messagesDiv = document.getElementById('messages');
 const logoutBtn = document.getElementById('logoutBtn');
-const profileBtn = document.getElementById('profileBtn');
 
 let currentUser = null;
 let userName = "User";
@@ -68,9 +67,4 @@ onChildAdded(ref(db, 'messages'), (snapshot) => {
 logoutBtn.addEventListener('click', () => {
   signOut(auth);
   location.href = 'index.html';
-});
-
-// Go to Profile
-profileBtn.addEventListener('click', () => {
-  location.href = 'profile.html';
 });
