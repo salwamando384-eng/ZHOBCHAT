@@ -1,56 +1,49 @@
-// Firebase imports
-import { getDatabase, ref, push, onChildAdded } from "firebase/database";
+import { auth, db } from './firebase_config.js';
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// Firebase app already initialized in firebase_config.js
-const db = getDatabase();
-
-// DOM elements
 const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 const messagesDiv = document.getElementById('messages');
+const logoutBtn = document.getElementById('logoutBtn');
 
-// Replace 'group1' with your actual chat room ID or user IDs for private chat
-const chatRoomId = 'group1';
-const messagesRef = ref(db, 'chats/' + chatRoomId);
+let userName = "User";
 
-// Send message
-sendBtn.addEventListener('click', () => {
-  const text = messageInput.value.trim();
-  if (text !== '') {
-    const newMessageRef = push(messagesRef);
-    newMessageRef.set({
-      text: text,
-      sender: 'YourUsername', // replace with actual username
-      timestamp: Date.now()
-    });
-    messageInput.value = '';
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    userName = user.email.split('@')[0];
+    sendBtn.disabled = false;
+  } else {
+    location.href = 'index.html';
   }
 });
 
-// Listen for new messages
-onChildAdded(messagesRef, (snapshot) => {
-  const msg = snapshot.val();
-  displayMessage(msg);
+sendBtn.addEventListener('click', async () => {
+  const text = messageInput.value.trim();
+  if (!text) return;
+
+  try {
+    await push(ref(db, 'messages'), {
+      name: userName,
+      text: text,
+      time: Date.now()
+    });
+    messageInput.value = '';
+  } catch (err) {
+    console.error("Error sending message:", err);
+  }
 });
 
-// Function to display messages in the UI
-function displayMessage(msg) {
-  const msgDiv = document.createElement('div');
-  msgDiv.classList.add('message');
-
-  const senderSpan = document.createElement('span');
-  senderSpan.classList.add('sender');
-  senderSpan.textContent = msg.sender + ': ';
-
-  const textSpan = document.createElement('span');
-  textSpan.classList.add('text');
-  textSpan.textContent = msg.text;
-
-  msgDiv.appendChild(senderSpan);
-  msgDiv.appendChild(textSpan);
-
-  messagesDiv.appendChild(msgDiv);
-
-  // Scroll to bottom automatically
+onChildAdded(ref(db, 'messages'), (snapshot) => {
+  const msg = snapshot.val();
+  const div = document.createElement('div');
+  div.classList.add('message');
+  div.innerHTML = `<strong>${msg.name}:</strong> ${msg.text}`;
+  messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
+});
+
+logoutBtn.addEventListener('click', () => {
+  signOut(auth);
+  location.href = 'index.html';
+});
