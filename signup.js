@@ -7,24 +7,27 @@ const statusDiv = document.getElementById('status');
 
 signupForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-
   const name = document.getElementById('name').value.trim();
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const uid = userCredential.user.uid;
+    const user = userCredential.user;
 
-    await set(ref(db, 'users/' + uid), {
-      name,
-      email,
-      dp: ''
+    // Save user info in DB
+    await set(ref(db, 'users/' + user.uid), {
+      name: name,
+      email: email,
+      dp: "default_dp.png"
     });
 
-    localStorage.setItem('userUid', uid);
-    location.href = 'chat.html';
+    statusDiv.textContent = "✅ Account created successfully!";
+    setTimeout(() => {
+      location.href = 'index.html';
+    }, 1500);
+
   } catch (err) {
-    statusDiv.textContent = "Error: " + err.message;
+    statusDiv.textContent = "⚠️ " + err.message;
   }
 });
