@@ -1,27 +1,21 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Private Chat - ZHOBCHAT</title>
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Private Chat</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="topbar">
-    <div class="brand">Private Chat</div>
-    <div><button id="backBtn">Back</button></div>
+  <header>
+    <h1>Private Chat</h1>
+    <button id="backBtn">Back</button>
+  </header>
+  <div class="chat-box" id="chatBox">
+    <div id="messages"></div>
+    <input type="text" id="msgInput" placeholder="Type a private message...">
+    <button id="sendBtn">Send</button>
   </div>
-
-  <div class="main privateMain">
-    <section class="chatSection">
-      <div id="privateMessagesArea" class="messagesArea">لوڈ ہو رہا ہے...</div>
-      <form id="privateSendForm" class="sendForm">
-        <input id="privateMessageInput" placeholder="پیغام لکھیں..." autocomplete="off" />
-        <button type="submit">Send</button>
-      </form>
-    </section>
-  </div>
-
-<script type="module" src="private_chat.js"></script>
+  <script type="module" src="private_chat.js"></script>
 </body>
 </html>
