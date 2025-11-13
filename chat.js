@@ -1,76 +1,42 @@
-<!DOCTYPE html>
-<html lang="ur">
-<head>
-  <meta charset="UTF-8">
-  <title>ZhobChat - Chat Room</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background-color: #121212;
-      color: #fff;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    header {
-      background-color: #1e1e1e;
-      padding: 10px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-      border-bottom: 1px solid #333;
-    }
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-    }
-    .msg {
-      background: #2a2a2a;
-      margin: 5px 0;
-      padding: 8px 10px;
-      border-radius: 8px;
-    }
-    .sender {
-      font-weight: bold;
-      color: #1db954;
-    }
-    footer {
-      display: flex;
-      padding: 10px;
-      background-color: #1e1e1e;
-      border-top: 1px solid #333;
-    }
-    input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 5px;
-      border: none;
-      outline: none;
-      background: #2a2a2a;
-      color: white;
-    }
-    button {
-      background: #1db954;
-      border: none;
-      color: white;
-      padding: 10px 15px;
-      margin-left: 5px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <header>ZHOBCHAT 💬</header>
-  <div id="messages"></div>
-  <footer>
-    <input type="text" id="messageInput" placeholder="اپنا پیغام لکھیں...">
-    <button id="sendBtn">Send</button>
-  </footer>
+import { auth, db } from './firebase_config.js';
+import { ref, push, onChildAdded, update, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-  <script type="module" src="chat.js"></script>
-</body>
-</html>
+const messagesDiv = document.getElementById('messages');
+const msgInput = document.getElementById('msgInput');
+const sendBtn = document.getElementById('sendBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+
+const userUid = localStorage.getItem('userUid');
+
+auth.onAuthStateChanged(user => {
+  if (!user) location.href = 'login.html';
+
+  const messagesRef = ref(db, 'messages');
+  onChildAdded(messagesRef, snap => {
+    const msg = snap.val();
+    const div = document.createElement('div');
+    div.style.color = msg.textColor || '#000';
+    div.innerHTML = `<b style="color:${msg.nameColor||'#000'}">${msg.name}</b>: ${msg.text}`;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
+});
+
+sendBtn.addEventListener('click', () => {
+  const text = msgInput.value.trim();
+  if (!text) return;
+  push(ref(db, 'messages'), {
+    name: userUid, // we can change to real name
+    text,
+    nameColor: '#000000',
+    textColor: '#000000',
+    timestamp: Date.now()
+  });
+  msgInput.value = '';
+});
+
+logoutBtn.addEventListener('click', () => {
+  auth.signOut();
+  localStorage.removeItem('userUid');
+  location.href = 'login.html';
+});
