@@ -1,25 +1,35 @@
-import { db } from './firebase_config.js';
-import { ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { auth, db } from './firebase_config.js';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref, get, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const userUid = localStorage.getItem('userUid');
-if (!userUid) {
-  // Redirect if not logged in
-  location.href = 'login.html';
-}
+const loginForm = document.getElementById('loginForm');
+const statusDiv = document.getElementById('status');
 
-// Fetch user info from DB
-const userRef = ref(db, 'users/' + userUid);
-get(userRef).then(snapshot => {
-  if (snapshot.exists()) {
-    const user = snapshot.val();
-    document.getElementById('welcomeMsg').textContent = `Welcome, ${user.name}!`;
-    document.getElementById('chatContainer').style.color = user.textColor || '#000';
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  try {
+    // Try to sign in
+    const userCredential = await signInWithEmailAndPassword(auth, username + "@zhobchat.com", password);
+    localStorage.setItem('userUid', userCredential.user.uid);
+    location.href = 'chat.html';
+  } catch (err) {
+    if(err.code === "auth/user-not-found"){
+      // Auto-register new user
+      const newUser = await createUserWithEmailAndPassword(auth, username + "@zhobchat.com", password);
+      await set(ref(db, 'users/' + newUser.user.uid), {
+        name: username,
+        age: "",
+        gender: "",
+        city: "",
+        dp: ""
+      });
+      localStorage.setItem('userUid', newUser.user.uid);
+      location.href = 'chat.html';
+    } else {
+      statusDiv.textContent = "Error: " + err.message;
+    }
   }
-});
-
-// Logout button
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  localStorage.removeItem('userUid');
-  localStorage.removeItem('userName');
-  location.href = 'login.html';
 });
