@@ -6,20 +6,16 @@ const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 const messagesDiv = document.getElementById('messages');
 const logoutBtn = document.getElementById('logoutBtn');
+const profileBtn = document.getElementById('profileBtn');
 
 let currentUser = null;
 let userName = "User";
 let userDP = "default_dp.png";
 
-// Load current user data
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    location.href = 'index.html';
-    return;
-  }
+  if (!user) location.href = 'index.html';
   currentUser = user;
 
-  // Get user info from database
   const snapshot = await get(ref(db, 'users/' + user.uid));
   if (snapshot.exists()) {
     const data = snapshot.val();
@@ -28,7 +24,6 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// Send Message
 sendBtn.addEventListener('click', async () => {
   const text = messageInput.value.trim();
   if (!text) return;
@@ -42,7 +37,6 @@ sendBtn.addEventListener('click', async () => {
   messageInput.value = '';
 });
 
-// Receive messages
 onChildAdded(ref(db, 'messages'), (snapshot) => {
   const msg = snapshot.val();
   const div = document.createElement('div');
@@ -63,8 +57,11 @@ onChildAdded(ref(db, 'messages'), (snapshot) => {
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
 
-// Logout
 logoutBtn.addEventListener('click', () => {
   signOut(auth);
   location.href = 'index.html';
+});
+
+profileBtn.addEventListener('click', () => {
+  location.href = 'profile.html';
 });
