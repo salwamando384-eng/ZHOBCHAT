@@ -1,73 +1,57 @@
 import { auth, db } from './firebase_config.js';
-import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const uid = localStorage.getItem('userUid');
-if (!uid) {
-  location.href = 'login.html';
-}
-
-const chatBox = document.getElementById('chatBox');
-const messageForm = document.getElementById('messageForm');
 const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+const messagesDiv = document.getElementById('messages');
 const logoutBtn = document.getElementById('logoutBtn');
 
-const profileBtn = document.getElementById('profileBtn');
-const profileModal = document.getElementById('profileModal');
-const closeModal = document.getElementById('closeModal');
-const saveProfile = document.getElementById('saveProfile');
-const profileName = document.getElementById('profileName');
-const profileCity = document.getElementById('profileCity');
+let userName = "User";
 
-// Logout
-logoutBtn.addEventListener('click', async () => {
-  await signOut(auth);
-  localStorage.removeItem('userUid');
-  location.href = 'login.html';
+// ✅ Login ہونے کے بعد user کا نام Firebase سے حاصل کرو
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const uid = user.uid;
+    const userRef = ref(db, 'users/' + uid);
+    const snapshot = await get(userRef);
+    if (snapshot.exists()) {
+      const userData = snapshot.val();
+      userName = userData.name || "User";
+    }
+  } else {
+    // اگر login نہیں ہوا تو واپس login صفحے پر بھیج دو
+    location.href = "index.html";
+  }
 });
 
-// Profile modal
-profileBtn.addEventListener('click', () => {
-  profileModal.style.display = 'block';
-});
+// ✅ جب "Send" دبایا جائے
+sendBtn.addEventListener('click', async () => {
+  const text = messageInput.value.trim();
+  if (!text) return;
 
-closeModal.addEventListener('click', () => {
-  profileModal.style.display = 'none';
-});
-
-// Save profile
-saveProfile.addEventListener('click', async () => {
-  await update(ref(db, 'users/' + uid), {
-    name: profileName.value,
-    city: profileCity.value
+  await push(ref(db, 'messages'), {
+    name: userName,
+    text: text,
+    time: Date.now()
   });
-  profileModal.style.display = 'none';
-});
 
-// Chat messages listener (simple)
-onValue(ref(db, 'messages/'), (snapshot) => {
-  chatBox.innerHTML = '';
-  snapshot.forEach(msgSnap => {
-    const msg = msgSnap.val();
-    const div = document.createElement('div');
-    div.textContent = `${msg.name}: ${msg.text}`;
-    chatBox.appendChild(div);
-  });
-});
-
-// Send message
-messageForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const msgText = messageInput.value.trim();
-  if (!msgText) return;
-  const userSnap = await ref(db, 'users/' + uid);
-  onValue(userSnap, (snapshot) => {
-    const user = snapshot.val();
-    const newMsgRef = ref(db, 'messages/' + Date.now());
-    set(newMsgRef, {
-      name: user.name,
-      text: msgText
-    });
-  }, { once: true });
   messageInput.value = '';
+});
+
+// ✅ Messages کو Firebase سے live دکھاؤ
+onChildAdded(ref(db, 'messages'), (snapshot) => {
+  const msg = snapshot.val();
+  const div = document.createElement('div');
+  div.classList.add('message');
+  div.innerHTML = `<strong>${msg.name}:</strong> ${msg.text}`;
+  messagesDiv.appendChild(div);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight; // خودکار scroll نیچے
+});
+
+// ✅ Logout
+logoutBtn.addEventListener('click', () => {
+  auth.signOut();
+  localStorage.removeItem('userUid');
+  location.href = 'index.html';
 });
