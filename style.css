@@ -1,28 +1,101 @@
-/* 💬 Chat Page */
-.chat-page {
-  background: linear-gradient(120deg, #89f7fe, #66a6ff);
+/* Reset default margin & padding */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Global body */
+body {
+  font-family: 'Poppins', sans-serif;
   height: 100vh;
   width: 100vw;
+  overflow: hidden;
+}
+
+/* 🌈 Login / Signup Page */
+.login-page {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0;
-  margin: 0;
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.login-box {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  width: 90%;
+  max-width: 400px;
+}
+
+.login-box input {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+}
+
+.login-box button {
+  width: 100%;
+  background-color: #4e54c8;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.login-box button:hover {
+  background-color: #5a60d1;
+}
+
+/* 💬 Chat Page */
+.chat-page {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(120deg, #89f7fe, #66a6ff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .chat-container {
   background: white;
-  width: 100%;       /* Full width */
-  height: 100%;      /* Full height */
-  max-width: 500px;  /* Optional: for larger screens, limit width */
-  border-radius: 0;  /* Remove rounded corners for fullscreen */
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  box-shadow: none;  /* Remove shadow for fullscreen */
 }
 
-/* Messages Box takes all remaining space */
+/* Chat Header */
+.chat-header {
+  background: #4e54c8;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.chat-header button {
+  margin-left: 5px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  background-color: #fff;
+  color: #4e54c8;
+}
+
+/* Messages Box */
 .messages-box {
   flex: 1;
   padding: 10px;
@@ -30,7 +103,7 @@
   background: #f5f7fa;
 }
 
-/* Input Area fixed at bottom */
+/* Input Area */
 .input-area {
   display: flex;
   padding: 10px;
@@ -75,22 +148,45 @@
   flex: 1;
 }
 
-/* Chat Header adjustments */
-.chat-header {
-  background: #4e54c8;
-  color: white;
+/* Profile Page */
+.profile-form {
+  padding: 20px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  padding: 10px;
 }
 
-.chat-header button {
-  margin-left: 5px;
-  padding: 5px 10px;
-  border-radius: 5px;
+.profile-form input {
+  width: 90%;
+  max-width: 400px;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.profile-form .dp {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.profile-form button {
+  padding: 10px 15px;
+  margin-top: 10px;
   border: none;
+  border-radius: 8px;
+  background-color: #4e54c8;
+  color: white;
   cursor: pointer;
-  background-color: #fff;
-  color: #4e54c8;
+}
+
+/* Responsive Fix: ensure chat container scrolls if needed */
+@media screen and (max-width: 500px) {
+  .chat-container, .login-box, .profile-form {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
 }
