@@ -2,25 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZHOBCHAT - Profile</title>
+  <title>ZHOBCHAT Profile</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <h1>Edit Profile</h1>
-  <form id="profileForm">
-    <input type="text" id="name" placeholder="Name" required>
-    <input type="number" id="age" placeholder="Age">
-    <select id="gender">
-      <option value="">Select Gender</option>
-      <option value="Male">Male</option>
-      <option value="Female">Female</option>
-    </select>
-    <input type="text" id="city" placeholder="City">
-    <input type="file" id="dp">
-    <button type="submit">Save</button>
-  </form>
-  <p id="status"></p>
+<body class="chat-page">
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>My Profile</h2>
+      <button id="backBtn">Back to Chat</button>
+    </div>
+
+    <div class="profile-form">
+      <img id="dpPreview" src="default_dp.png" class="dp" alt="Profile Picture">
+      <input type="file" id="dpInput" accept="image/*" />
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="text" id="city" placeholder="City" />
+      <input type="number" id="age" placeholder="Age" />
+      <button id="saveBtn">Save Profile</button>
+      <div id="status"></div>
+    </div>
+  </div>
+
   <script type="module" src="profile.js"></script>
 </body>
 </html>
