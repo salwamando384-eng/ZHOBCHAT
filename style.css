@@ -1,20 +1,19 @@
-/* Chat Header DP */
+/* Chat Header DP (چھوٹی تصویر) */
 .header-dp {
-  width: 45px;
-  height: 45px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid white;
 }
 
-
-/* Profile Page DP */
+/* Profile Page DP (درمیانی تصویر) */
 .profile-dp {
-  width: 130px;
-  height: 130px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #4a3ddf;
   display: block;
-  margin: 10px auto;
+  margin: 15px auto;
 }
