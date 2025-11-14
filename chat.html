@@ -1,25 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ZHOBCHAT</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="chat-page">
-  <div class="chat-container">
-    <div class="chat-header">
-      <h2>ZHOBCHAT</h2>
-      <div>
-        <button id="profileBtn">Profile</button>
-        <button id="logoutBtn">Logout</button>
-      </div>
+<body class="page-chat">
+
+  <header class="chat-header" id="chatHeader">
+    <div class="left">
+      <h2 class="brand">ZHOBCHAT</h2>
     </div>
-    <div id="messages" class="messages-box"></div>
-    <div class="input-area">
-      <input type="text" id="messageInput" placeholder="Type your message..." />
-      <button id="sendBtn">Send</button>
+    <div class="right">
+      <button id="profileBtn" class="btn small">Profile</button>
+      <button id="logoutBtn" class="btn small">Logout</button>
     </div>
+  </header>
+
+  <section id="messages" class="messages" aria-live="polite"></section>
+
+  <div class="chat-input" id="chatInput">
+    <input id="messageInput" type="text" placeholder="Type your message..." />
+    <button id="sendBtn" class="btn">Send</button>
   </div>
+
   <script type="module" src="chat.js"></script>
 </body>
 </html>
