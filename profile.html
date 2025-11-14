@@ -1,35 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="style.css">
-  <title>Profile</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profile - ZHOBCHAT</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="profile-page">
+<body class="page-profile">
 
-  <div class="profile-container">
-    
-    <div class="profile-header">
-      <button id="backBtn">← Back</button>
-      <h2>Your Profile</h2>
+  <header class="profile-header">
+    <button id="backBtn" class="btn small">← Back</button>
+    <h2>Your Profile</h2>
+    <div></div>
+  </header>
+
+  <main class="profile-main">
+    <div class="profile-dp">
+      <img id="dpImg" src="default_dp.png" alt="DP" />
+      <input id="dpUpload" type="file" accept="image/*" />
     </div>
 
-    <div class="profile-dp-section">
-      <img id="profileImage" src="default_dp.png" alt="DP">
-      <input type="file" id="dpUpload" accept="image/*" />
-    </div>
-
-    <div class="profile-info">
+    <div class="profile-form">
       <label>Name</label>
-      <input type="text" id="nameInput" placeholder="Your Name">
+      <input id="name" type="text" placeholder="Your name" />
 
       <label>About</label>
-      <textarea id="aboutInput" placeholder="Write something..."></textarea>
+      <textarea id="about" placeholder="A short bio"></textarea>
 
-      <button id="saveBtn">Save Profile</button>
+      <button id="saveProfileBtn" class="btn">Save Profile</button>
+      <div id="status" class="status"></div>
     </div>
-
-  </div>
+  </main>
 
   <script type="module" src="profile.js"></script>
 </body>
