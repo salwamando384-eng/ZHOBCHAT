@@ -1,19 +1,40 @@
-/* Chat Header DP (چھوٹی تصویر) */
-.header-dp {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid white;
+/* =======================
+   GLOBAL RESET FOR IMAGES
+   ======================= */
+img {
+  max-width: none !important;
+  height: auto;
 }
 
-/* Profile Page DP (درمیانی تصویر) */
+/* =======================
+   CHAT HEADER DP (SMALL)
+   ======================= */
+.header-dp {
+  width: 32px !important;
+  height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 2px solid white !important;
+  display: inline-block !important;
+}
+
+/* =======================
+   PROFILE PAGE DP (BIG)
+   ======================= */
 .profile-dp {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid #4a3ddf;
-  display: block;
-  margin: 15px auto;
+  width: 90px !important;
+  height: 90px !important;
+  max-width: 90px !important;
+  max-height: 90px !important;
+  min-width: 90px !important;
+  min-height: 90px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 3px solid #4a3ddf !important;
+  display: block !important;
+  margin: 15px auto !important;
 }
