@@ -1,36 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Profile - ZHOBCHAT</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Profile</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="page-profile">
+<body>
 
-  <header class="profile-header">
-    <button id="backBtn" class="btn small">← Back</button>
-    <h2>Your Profile</h2>
-    <div></div>
-  </header>
+  <div class="profile-page">
 
-  <main class="profile-main">
-    <div class="profile-dp">
-      <img id="dpImg" src="default_dp.png" alt="DP" />
-      <input id="dpUpload" type="file" accept="image/*" />
+    <div class="profile-card">
+      <h2>Your Profile</h2>
+
+      <img id="profilePicPreview" class="profile-dp" src="default-dp.png">
+
+      <input type="file" id="profilePicInput" accept="image/*" />
+
+      <input type="text" id="nameInput" placeholder="Name">
+      <input type="number" id="ageInput" placeholder="Age">
+
+      <select id="genderInput">
+        <option value="">Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+
+      <input type="text" id="cityInput" placeholder="City">
+
+      <textarea id="aboutInput" placeholder="About yourself..."></textarea>
+
+      <button id="saveProfileBtn">Save Profile</button>
+      <button id="backBtn">Back to Chat</button>
     </div>
 
-    <div class="profile-form">
-      <label>Name</label>
-      <input id="name" type="text" placeholder="Your name" />
-
-      <label>About</label>
-      <textarea id="about" placeholder="A short bio"></textarea>
-
-      <button id="saveProfileBtn" class="btn">Save Profile</button>
-      <div id="status" class="status"></div>
-    </div>
-  </main>
+  </div>
 
   <script type="module" src="profile.js"></script>
 </body>
