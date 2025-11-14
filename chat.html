@@ -1,34 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>ZHOBCHAT</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZHOBCHAT</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="chat-page">
-    <div class="chat-container">
+<div id="chatContainer">
 
-      <div class="chat-header">
-        <img id="chatDp" class="header-dp" src="default-dp.png">
-        <h2>ZHOBCHAT</h2>
-
-        <div class="header-buttons">
-          <button id="profileBtn">Profile</button>
-          <button id="logoutBtn">Logout</button>
-        </div>
-      </div>
-
-      <div id="messages" class="messages-box"></div>
-
-      <div class="input-area">
-        <input type="text" id="messageInput" placeholder="Type your message..." />
-        <button id="sendBtn">Send</button>
-      </div>
+    <!-- Profile Area -->
+    <div id="profileArea">
+        <img id="userDp" src="default_dp.png" alt="Profile Picture">
+        <span id="userName">Anonymous</span>
     </div>
-  </div>
 
-  <script type="module" src="chat.js"></script>
+    <!-- Messages Area -->
+    <div id="messages"></div>
+
+    <!-- Input Area -->
+    <div id="inputArea">
+        <input type="text" id="messageInput" placeholder="Type a message...">
+        <button id="sendBtn">Send</button>
+    </div>
+
+</div>
+
+<script type="module" src="chat.js"></script>
 </body>
 </html>
