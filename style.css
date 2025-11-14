@@ -1,110 +1,20 @@
-body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
+/* Chat Header DP */
+.header-dp {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
 }
 
-/* 🌈 Login Page */
-.login-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-}
 
-.login-box {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 30px;
-  border-radius: 15px;
-  text-align: center;
-  backdrop-filter: blur(8px);
-}
-
-.login-box input {
+/* Profile Page DP */
+.profile-dp {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #4a3ddf;
   display: block;
-  width: 250px;
   margin: 10px auto;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-}
-
-.login-box button {
-  background-color: #4e54c8;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.login-box button:hover {
-  background-color: #5a60d1;
-}
-
-/* 💬 Chat Page */
-.chat-page {
-  background: linear-gradient(120deg, #89f7fe, #66a6ff);
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.chat-container {
-  background: white;
-  width: 90%;
-  max-width: 500px;
-  height: 85vh;
-  border-radius: 15px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-}
-
-.chat-header {
-  background: #4e54c8;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  padding: 15px;
-}
-
-.messages-box {
-  flex: 1;
-  padding: 15px;
-  overflow-y: auto;
-  background: #f5f7fa;
-}
-
-.input-area {
-  display: flex;
-  padding: 10px;
-  background: #eee;
-}
-
-.input-area input {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-}
-
-.input-area button {
-  margin-left: 8px;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 8px;
-  background: #4e54c8;
-  color: white;
-  cursor: pointer;
-}
-
-.message {
-  margin-bottom: 10px;
-  background: #dfe9f3;
-  padding: 8px 12px;
-  border-radius: 10px;
 }
