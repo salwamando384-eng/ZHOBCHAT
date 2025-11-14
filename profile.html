@@ -2,21 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Profile - ZHOBCHAT</title>
   <link rel="stylesheet" href="style.css">
+  <title>Profile</title>
 </head>
-<body class="login-page">
-  <div class="login-box profile-form">
-    <h1>Your Profile</h1>
-    <img src="default_dp.png" class="dp" id="dpImg" />
-    <input type="file" id="dpUpload" accept="image/*" />
-    <input type="text" id="name" placeholder="Name" />
-    <input type="text" id="city" placeholder="City" />
-    <input type="number" id="age" placeholder="Age" />
-    <button id="saveProfileBtn">Save</button>
-    <button onclick="location.href='chat.html'">Back to Chat</button>
-    <div id="status"></div>
+<body class="profile-page">
+
+  <div class="profile-container">
+    
+    <div class="profile-header">
+      <button id="backBtn">← Back</button>
+      <h2>Your Profile</h2>
+    </div>
+
+    <div class="profile-dp-section">
+      <img id="profileImage" src="default_dp.png" alt="DP">
+      <input type="file" id="dpUpload" accept="image/*" />
+    </div>
+
+    <div class="profile-info">
+      <label>Name</label>
+      <input type="text" id="nameInput" placeholder="Your Name">
+
+      <label>About</label>
+      <textarea id="aboutInput" placeholder="Write something..."></textarea>
+
+      <button id="saveBtn">Save Profile</button>
+    </div>
+
   </div>
+
   <script type="module" src="profile.js"></script>
 </body>
 </html>
