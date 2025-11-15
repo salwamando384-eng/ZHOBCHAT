@@ -1,5 +1,5 @@
-// chat.js
 import { auth, db } from "./firebase_config.js";
+
 import {
   ref,
   push,
@@ -7,40 +7,61 @@ import {
   onValue
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const uid = auth.currentUser.uid;
+import {
+  signOut
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-const userRef = ref(db, "users/" + uid);
+const msgInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+const messages = document.getElementById("messages");
+const chatDp = document.getElementById("chatDp");
 
-// Load own dp in header
-onValue(userRef, snap => {
-  let data = snap.val();
-  if (data && data.dp) {
-    document.getElementById("chatDp").src = data.dp;
+auth.onAuthStateChanged((user) => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
   }
+
+  // Load DP
+  onValue(ref(db, "users/" + user.uid), (snap) => {
+    const data = snap.val();
+    chatDp.src = data.dp;
+  });
+
+  // Load messages
+  const msgRef = ref(db, "messages");
+
+  onChildAdded(msgRef, (snap) => {
+    const m = snap.val();
+
+    onValue(ref(db, "users/" + m.uid), (uSnap) => {
+      let dp = uSnap.val().dp;
+
+      messages.innerHTML += `
+        <div class="msg">
+          <img src="${dp}" class="msg-dp">
+          <span>${m.text}</span>
+        </div>
+      `;
+    });
+  });
+
+  // Send message
+  sendBtn.onclick = () => {
+    if (msgInput.value === "") return;
+
+    push(ref(db, "messages"), {
+      uid: user.uid,
+      text: msgInput.value
+    });
+
+    msgInput.value = "";
+  };
 });
 
-// Send Message
-sendBtn.onclick = () => {
-  push(ref(db, "messages"), {
-    uid: uid,
-    text: messageInput.value
+// Logout
+logoutBtn.onclick = () => {
+  signOut(auth).then(() => {
+    window.location.href = "login.html";
   });
-  messageInput.value = "";
 };
-
-// Load messages (with dp)
-onChildAdded(ref(db, "messages"), snap => {
-  let msg = snap.val();
-
-  onValue(ref(db, "users/" + msg.uid), userSnap => {
-    let user = userSnap.val();
-
-    let dp = user && user.dp ? user.dp : "default_dp.png";
-
-    messages.innerHTML += `
-      <div class="message">
-        <img src="${dp}" class="msg-dp">
-        <div>${msg.text}</div>
-      </div>`;
-  });
-});
