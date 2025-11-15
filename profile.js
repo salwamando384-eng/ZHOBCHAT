@@ -1,12 +1,8 @@
 import { auth, db, storage } from "./firebase_config.js";
 
 import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-import {
   ref,
-  update,
+  set,
   get
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
@@ -16,95 +12,74 @@ import {
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// --- UI Elements ---
-const profilePicPreview = document.getElementById("profilePicPreview");
+// Inputs
 const profilePicInput = document.getElementById("profilePicInput");
-
+const profilePicPreview = document.getElementById("profilePicPreview");
 const nameInput = document.getElementById("nameInput");
 const ageInput = document.getElementById("ageInput");
 const genderInput = document.getElementById("genderInput");
 const cityInput = document.getElementById("cityInput");
 const aboutInput = document.getElementById("aboutInput");
-
-const saveBtn = document.getElementById("saveProfileBtn");
+const saveProfileBtn = document.getElementById("saveProfileBtn");
 const backBtn = document.getElementById("backBtn");
 
-let currentUID = "";
-let currentDP = "default-dp.png";
-
-
-// ==================================================
-//  Load Logged In User Data
-// ==================================================
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    location.href = "login.html";
-    return;
+// Show selected image preview
+profilePicInput.onchange = () => {
+  const file = profilePicInput.files[0];
+  if (file) {
+    profilePicPreview.src = URL.createObjectURL(file);
   }
+};
 
-  currentUID = user.uid;
+// Load user profile data
+auth.onAuthStateChanged(async (user) => {
+  if (!user) return;
 
-  const userRef = ref(db, "users/" + currentUID);
+  const userRef = ref(db, "users/" + user.uid);
   const snap = await get(userRef);
 
   if (snap.exists()) {
     const data = snap.val();
 
-    currentDP = data.dp || "default-dp.png";
-    profilePicPreview.src = currentDP;
-
-    nameInput.value = data.name || "";
-    ageInput.value = data.age || "";
-    genderInput.value = data.gender || "";
-    cityInput.value = data.city || "";
-    aboutInput.value = data.about || "";
+    if (data.dp) profilePicPreview.src = data.dp;
+    if (data.name) nameInput.value = data.name;
+    if (data.age) ageInput.value = data.age;
+    if (data.gender) genderInput.value = data.gender;
+    if (data.city) cityInput.value = data.city;
+    if (data.about) aboutInput.value = data.about;
   }
 });
 
+// SAVE PROFILE
+saveProfileBtn.onclick = async () => {
+  const user = auth.currentUser;
+  if (!user) return;
 
-// ==================================================
-//  Upload DP if changed
-// ==================================================
-async function uploadDP() {
-  if (profilePicInput.files.length === 0) {
-    return currentDP; // No new DP selected
+  let dpURL = profilePicPreview.src; // default old dp
+
+  // If new DP selected → upload
+  if (profilePicInput.files[0]) {
+    const file = profilePicInput.files[0];
+    const storageRef = sRef(storage, "dp/" + user.uid);
+
+    await uploadBytes(storageRef, file);
+    dpURL = await getDownloadURL(storageRef);
   }
 
-  const file = profilePicInput.files[0];
-  const dpRef = sRef(storage, "dp/" + currentUID);
-
-  await uploadBytes(dpRef, file);
-  return await getDownloadURL(dpRef);
-}
-
-
-// ==================================================
-//  SAVE PROFILE BUTTON
-// ==================================================
-saveBtn.onclick = async () => {
-  if (!currentUID) return;
-
-  const dpURL = await uploadDP();
-
-  const userData = {
+  // Save data to database
+  await set(ref(db, "users/" + user.uid), {
     dp: dpURL,
     name: nameInput.value,
     age: ageInput.value,
     gender: genderInput.value,
     city: cityInput.value,
     about: aboutInput.value
-  };
+  });
 
-  await update(ref(db, "users/" + currentUID), userData);
-
-  alert("Profile Saved!");
+  alert("Profile Updated Successfully!");
 };
 
-
-
-// ==================================================
-//  BACK BUTTON
-// ==================================================
+// Back Button
 backBtn.onclick = () => {
-  location.href = "chat.html";
+  window.location.href = "chat.html";
 };
