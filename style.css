@@ -1,93 +1,45 @@
-/* ===== Chat Container ===== */
-#chatContainer {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    padding: 10px;
-    box-sizing: border-box;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: #fff;
-    font-family: Arial, sans-serif;
+/* ------------ CHAT HEADER DP ------------ */
+.header-dp {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
 }
 
-/* ===== Profile Area ===== */
-#profileArea {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+
+/* ------------ PROFILE PAGE DP ------------ */
+.profile-dp {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #4a3ddf;
+  display: block;
+  margin: 15px auto;
 }
 
-#userDp {
-    width: 60px;
-    height: 60px;
-    max-width: 15vw;
-    max-height: 15vw;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #fff;
-    margin-right: 10px;
+
+/* ------------ Prevent Any Image From Stretching ------------ */
+img {
+  max-width: 100%;
+  height: auto;
 }
 
-#userName {
-    font-weight: bold;
+
+/* ------------ FIX Chat Header Layout ------------ */
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #4a3ddf;
+  color: white;
 }
 
-/* ===== Messages Area ===== */
-#messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 10px;
-    margin-bottom: 10px;
-}
 
-/* ===== Input Area ===== */
-#inputArea {
-    display: flex;
-    gap: 5px;
-}
-
-#messageInput {
-    flex: 1;
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-    outline: none;
-    font-size: 14px;
-}
-
-#sendBtn {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 10px;
-    background-color: #fff;
-    color: #2575fc;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-/* ===== Messages Styling ===== */
-#messages div {
-    margin-bottom: 8px;
-    word-break: break-word;
-}
-
-/* ===== Mobile Specific ===== */
-@media screen and (max-width: 768px) {
-    #userDp {
-        width: 50px;
-        height: 50px;
-        max-width: 50px;
-        max-height: 50px;
-    }
-
-    #messageInput, #sendBtn {
-        font-size: 14px;
-        padding: 8px;
-    }
-
-    #chatContainer {
-        padding: 5px;
-    }
+/* Buttons area stays aligned */
+.header-buttons {
+  display: flex;
+  gap: 8px;
 }
