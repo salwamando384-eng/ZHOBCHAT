@@ -1,73 +1,67 @@
-// profile.js
 import { auth, db, storage } from "./firebase_config.js";
 import {
   ref,
-  set,
   update,
   onValue
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 import {
+  ref as sRef,
   uploadBytes,
-  getDownloadURL,
-  ref as storageRef
+  getDownloadURL
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 const uid = auth.currentUser.uid;
 const userRef = ref(db, "users/" + uid);
 
-const profilePicInput = document.getElementById("profilePicInput");
-const profilePicPreview = document.getElementById("profilePicPreview");
-
-let dpFile = null;
-
-// Preview DP
-profilePicInput.onchange = (e) => {
-  dpFile = e.target.files[0];
-
-  let reader = new FileReader();
-  reader.onload = () => {
-    profilePicPreview.src = reader.result;
-  };
-  reader.readAsDataURL(dpFile);
-};
-
-// Load old data
+// Load old profile data
 onValue(userRef, snap => {
   let data = snap.val();
   if (!data) return;
 
-  if (data.dp) profilePicPreview.src = data.dp;
-  if (data.name) nameInput.value = data.name;
-  if (data.age) ageInput.value = data.age;
-  if (data.gender) genderInput.value = data.gender;
-  if (data.city) cityInput.value = data.city;
-  if (data.about) aboutInput.value = data.about;
+  document.getElementById("profilePicPreview").src = data.dp;
+  document.getElementById("nameInput").value = data.name || "";
+  document.getElementById("ageInput").value = data.age || "";
+  document.getElementById("genderInput").value = data.gender || "";
+  document.getElementById("cityInput").value = data.city || "";
+  document.getElementById("aboutInput").value = data.about || "";
 });
 
-// Save
-saveProfileBtn.onclick = async () => {
-  let dpURL = null;
+// Image preview
+const profilePicInput = document.getElementById("profilePicInput");
+profilePicInput.onchange = () => {
+  const file = profilePicInput.files[0];
+  if (!file) return;
 
-  if (dpFile) {
-    const dpRef = storageRef(storage, "dp/" + uid + ".jpg");
-    await uploadBytes(dpRef, dpFile);
-    dpURL = await getDownloadURL(dpRef);
+  document.getElementById("profilePicPreview").src = URL.createObjectURL(file);
+};
+
+// Save Profile
+document.getElementById("saveProfileBtn").onclick = async () => {
+  const file = profilePicInput.files[0];
+
+  let dpURL;
+
+  if (file) {
+    const imgRef = sRef(storage, "dp/" + uid + ".jpg");
+
+    await uploadBytes(imgRef, file);
+    dpURL = await getDownloadURL(imgRef);
   }
 
   update(userRef, {
-    name: nameInput.value,
-    age: ageInput.value,
-    gender: genderInput.value,
-    city: cityInput.value,
-    about: aboutInput.value,
-    dp: dpURL || profilePicPreview.src
+    dp: dpURL || document.getElementById("profilePicPreview").src,
+    name: document.getElementById("nameInput").value,
+    age: document.getElementById("ageInput").value,
+    gender: document.getElementById("genderInput").value,
+    city: document.getElementById("cityInput").value,
+    about: document.getElementById("aboutInput").value
   });
 
-  alert("Profile saved!");
+  alert("Profile Updated!");
 };
 
-// Back
-backBtn.onclick = () => {
+// Back Button
+document.getElementById("backBtn").onclick = () => {
   location.href = "chat.html";
 };
