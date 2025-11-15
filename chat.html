@@ -1,31 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ZHOBCHAT</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
   <div class="chat-page">
     <div class="chat-container">
 
+      <!-- HEADER -->
       <div class="chat-header">
+
         <img id="chatDp" class="header-dp" src="default-dp.png">
+
         <h2>ZHOBCHAT</h2>
 
         <div class="header-buttons">
           <button id="profileBtn">Profile</button>
           <button id="logoutBtn">Logout</button>
         </div>
+
       </div>
 
+      <!-- MESSAGES -->
       <div id="messages" class="messages-box"></div>
 
+      <!-- INPUT AREA -->
       <div class="input-area">
-        <input type="text" id="messageInput" placeholder="Type your message..." />
+        <input type="text" id="messageInput" placeholder="Write message..." />
         <button id="sendBtn">Send</button>
       </div>
+
     </div>
   </div>
 
