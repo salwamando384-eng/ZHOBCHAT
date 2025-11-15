@@ -3,13 +3,15 @@ import {
   signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-loginBtn.onclick = () => {
-  const email = email.value;
-  const pass = password.value;
+const loginBtn = document.getElementById("loginBtn");
 
-  signInWithEmailAndPassword(auth, email, pass)
+loginBtn.onclick = () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  signInWithEmailAndPassword(auth, email, password)
     .then(() => {
-      window.location.href = "chat.html";
+      location.href = "chat.html";
     })
-    .catch((e) => alert(e.message));
+    .catch(err => alert(err.message));
 };
