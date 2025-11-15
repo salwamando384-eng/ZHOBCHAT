@@ -13,15 +13,16 @@
     <h2>Your Profile</h2>
 
     <img id="profilePicPreview" class="profile-dp" src="default_dp.png">
-    <input type="file" id="profilePicInput">
+
+    <input type="file" id="profilePicInput" accept="image/*">
 
     <input type="text" id="nameInput" placeholder="Name">
     <input type="number" id="ageInput" placeholder="Age">
 
     <select id="genderInput">
       <option value="">Gender</option>
-      <option>Male</option>
-      <option>Female</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
     </select>
 
     <input type="text" id="cityInput" placeholder="City">
@@ -29,12 +30,11 @@
     <textarea id="aboutInput" placeholder="About yourself..."></textarea>
 
     <button id="saveProfileBtn">Save Profile</button>
-    <button id="backBtn">Back</button>
+    <button id="backBtn">Back to Chat</button>
 
   </div>
 </div>
 
 <script type="module" src="profile.js"></script>
-
 </body>
 </html>
