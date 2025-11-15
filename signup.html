@@ -1,17 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Signup</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>Create Account</h2>
+  <div class="login-box">
+    <h2>Create Account</h2>
 
-<input id="email" type="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button id="signupBtn">Signup</button>
+    <input type="text" id="nameInput" placeholder="Full Name">
+    <input type="email" id="emailInput" placeholder="Email">
+    <input type="password" id="passwordInput" placeholder="Password">
 
-<script type="module" src="signup.js"></script>
+    <button id="signupBtn">Signup</button>
+
+    <p>Already have an account?  
+      <a href="login.html">Login</a>
+    </p>
+  </div>
+
+  <script type="module" src="signup.js"></script>
 </body>
 </html>
