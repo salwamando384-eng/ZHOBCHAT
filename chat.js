@@ -1,47 +1,43 @@
-import { auth, db } from './firebase_config.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { auth, db } from "./firebase_config.js";
+import {
+  ref,
+  push,
+  set,
+  onChildAdded,
+  onValue
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const messageInput = document.getElementById('messageInput');
-const sendBtn = document.getElementById('sendBtn');
-const messagesDiv = document.getElementById('messages');
-const userNameSpan = document.getElementById('userName');
-const userDpImg = document.getElementById('userDp');
+const uid = auth.currentUser.uid;
+const userRef = ref(db, "users/" + uid);
 
-let userName = "Anonymous";
-let userDp = "default_dp.png";
-
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        const uid = user.uid;
-        const snapshot = await get(ref(db, 'users/' + uid));
-        if (snapshot.exists()) {
-            const userData = snapshot.val();
-            userName = userData.name || "User";
-            userDp = userData.dp || "default_dp.png";
-            userNameSpan.textContent = userName;
-            userDpImg.src = userDp;
-        }
-    }
+// Load DP in header
+onValue(userRef, snap => {
+  let data = snap.val();
+  document.getElementById("chatDp").src = data.dp;
 });
 
-sendBtn.addEventListener('click', async () => {
-    const text = messageInput.value.trim();
-    if (!text) return;
+const msgRef = ref(db, "messages");
 
-    await push(ref(db, 'messages'), {
-        name: userName,
-        text
-    });
+// send message
+sendBtn.onclick = () => {
+  push(msgRef, {
+    uid: uid,
+    text: messageInput.value
+  });
+  messageInput.value = "";
+};
 
-    messageInput.value = '';
-});
+// load all messages
+onChildAdded(msgRef, snap => {
+  let msg = snap.val();
 
-// Display messages
-onChildAdded(ref(db, 'messages'), (data) => {
-    const msg = data.val();
-    const div = document.createElement('div');
-    div.textContent = `${msg.name}: ${msg.text}`;
-    messagesDiv.appendChild(div);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight; // scroll to bottom
+  onValue(ref(db, "users/" + msg.uid), u => {
+    let dp = u.val().dp;
+
+    messages.innerHTML += `
+      <div class="message">
+        <img src="${dp}" class="msg-dp">
+        <div>${msg.text}</div>
+      </div>`;
+  });
 });
