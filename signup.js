@@ -1,5 +1,4 @@
-import { auth, db, storage } from "./firebase_config.js";
-
+import { auth, db } from "./firebase_config.js";
 import {
   createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
@@ -9,50 +8,24 @@ import {
   set
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-import {
-  ref as sRef,
-  uploadBytes,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+signupBtn.onclick = () => {
+  const email = email.value;
+  const pass = password.value;
 
+  createUserWithEmailAndPassword(auth, email, pass)
+    .then((userCred) => {
+      const uid = userCred.user.uid;
 
-// ===============================
-//        SIGNUP BUTTON
-// ===============================
-document.getElementById("signupBtn").onclick = async () => {
+      set(ref(db, "users/" + uid), {
+        dp: "default_dp.png",
+        name: "",
+        age: "",
+        gender: "",
+        city: "",
+        about: ""
+      });
 
-  const name = document.getElementById("nameInput").value.trim();
-  const email = document.getElementById("emailInput").value.trim();
-  const pass = document.getElementById("passwordInput").value.trim();
-
-  if (name === "" || email === "" || pass === "") {
-    alert("Please fill all fields!");
-    return;
-  }
-
-  try {
-    // Make Account
-    const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-    const uid = userCred.user.uid;
-
-    // Default DP
-    const defaultDP = "default-dp.png";
-
-    // Save user data in DB
-    await set(ref(db, "users/" + uid), {
-      name: name,
-      email: email,
-      dp: defaultDP,
-      age: "",
-      gender: "",
-      city: "",
-      about: ""
-    });
-
-    alert("Signup Successful!");
-    location.href = "chat.html";
-
-  } catch (err) {
-    alert(err.message);
-  }
+      window.location.href = "chat.html";
+    })
+    .catch((e) => alert(e.message));
 };
