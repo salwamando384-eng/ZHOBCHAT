@@ -1,85 +1,73 @@
+// profile.js
 import { auth, db, storage } from "./firebase_config.js";
-
 import {
   ref,
   set,
-  get
+  update,
+  onValue
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 import {
-  ref as sRef,
   uploadBytes,
-  getDownloadURL
+  getDownloadURL,
+  ref as storageRef
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// Inputs
+const uid = auth.currentUser.uid;
+const userRef = ref(db, "users/" + uid);
+
 const profilePicInput = document.getElementById("profilePicInput");
 const profilePicPreview = document.getElementById("profilePicPreview");
-const nameInput = document.getElementById("nameInput");
-const ageInput = document.getElementById("ageInput");
-const genderInput = document.getElementById("genderInput");
-const cityInput = document.getElementById("cityInput");
-const aboutInput = document.getElementById("aboutInput");
-const saveProfileBtn = document.getElementById("saveProfileBtn");
-const backBtn = document.getElementById("backBtn");
 
-// Show selected image preview
-profilePicInput.onchange = () => {
-  const file = profilePicInput.files[0];
-  if (file) {
-    profilePicPreview.src = URL.createObjectURL(file);
-  }
+let dpFile = null;
+
+// Preview DP
+profilePicInput.onchange = (e) => {
+  dpFile = e.target.files[0];
+
+  let reader = new FileReader();
+  reader.onload = () => {
+    profilePicPreview.src = reader.result;
+  };
+  reader.readAsDataURL(dpFile);
 };
 
-// Load user profile data
-auth.onAuthStateChanged(async (user) => {
-  if (!user) return;
+// Load old data
+onValue(userRef, snap => {
+  let data = snap.val();
+  if (!data) return;
 
-  const userRef = ref(db, "users/" + user.uid);
-  const snap = await get(userRef);
-
-  if (snap.exists()) {
-    const data = snap.val();
-
-    if (data.dp) profilePicPreview.src = data.dp;
-    if (data.name) nameInput.value = data.name;
-    if (data.age) ageInput.value = data.age;
-    if (data.gender) genderInput.value = data.gender;
-    if (data.city) cityInput.value = data.city;
-    if (data.about) aboutInput.value = data.about;
-  }
+  if (data.dp) profilePicPreview.src = data.dp;
+  if (data.name) nameInput.value = data.name;
+  if (data.age) ageInput.value = data.age;
+  if (data.gender) genderInput.value = data.gender;
+  if (data.city) cityInput.value = data.city;
+  if (data.about) aboutInput.value = data.about;
 });
 
-// SAVE PROFILE
+// Save
 saveProfileBtn.onclick = async () => {
-  const user = auth.currentUser;
-  if (!user) return;
+  let dpURL = null;
 
-  let dpURL = profilePicPreview.src; // default old dp
-
-  // If new DP selected → upload
-  if (profilePicInput.files[0]) {
-    const file = profilePicInput.files[0];
-    const storageRef = sRef(storage, "dp/" + user.uid);
-
-    await uploadBytes(storageRef, file);
-    dpURL = await getDownloadURL(storageRef);
+  if (dpFile) {
+    const dpRef = storageRef(storage, "dp/" + uid + ".jpg");
+    await uploadBytes(dpRef, dpFile);
+    dpURL = await getDownloadURL(dpRef);
   }
 
-  // Save data to database
-  await set(ref(db, "users/" + user.uid), {
-    dp: dpURL,
+  update(userRef, {
     name: nameInput.value,
     age: ageInput.value,
     gender: genderInput.value,
     city: cityInput.value,
-    about: aboutInput.value
+    about: aboutInput.value,
+    dp: dpURL || profilePicPreview.src
   });
 
-  alert("Profile Updated Successfully!");
+  alert("Profile saved!");
 };
 
-// Back Button
+// Back
 backBtn.onclick = () => {
-  window.location.href = "chat.html";
+  location.href = "chat.html";
 };
