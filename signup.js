@@ -8,24 +8,23 @@ import {
   set
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-signupBtn.onclick = () => {
-  const email = email.value;
-  const pass = password.value;
+const signupBtn = document.getElementById("signupBtn");
 
-  createUserWithEmailAndPassword(auth, email, pass)
-    .then((userCred) => {
-      const uid = userCred.user.uid;
+signupBtn.onclick = () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(user => {
+      const uid = user.user.uid;
 
       set(ref(db, "users/" + uid), {
-        dp: "default_dp.png",
-        name: "",
-        age: "",
-        gender: "",
-        city: "",
-        about: ""
+        name: "New User",
+        dp: "default_dp.png"
       });
 
-      window.location.href = "chat.html";
+      alert("Signup successful!");
+      location.href = "profile.html";
     })
-    .catch((e) => alert(e.message));
+    .catch(err => alert(err.message));
 };
