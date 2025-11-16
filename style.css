@@ -1,46 +1,165 @@
-/* ==== AUTH PAGES (LOGIN + SIGNUP) ==== */
+/* ================================
+   GLOBAL PAGE FIX
+================================ */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: #f2f2f2;
+}
 
-.auth-container {
+/* Center all page containers */
+.container {
+  width: 90%;
+  margin: auto;
+  margin-top: 40px;
+}
+
+/* Large input fields */
+input, button {
   width: 100%;
-  max-width: 380px;
-  margin: 60px auto;
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+}
+
+/* Buttons */
+button {
+  background: #007bff;
+  color: white;
+  border: none;
+}
+button:hover {
+  opacity: 0.8;
+}
+
+/* ================================
+   LOGIN & SIGNUP PAGE
+================================ */
+.login-box, .signup-box {
   background: white;
   padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.15);
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.auth-container h2 {
+.page-title {
+  font-size: 30px;
+  font-weight: bold;
   text-align: center;
   margin-bottom: 20px;
-  color: #4a3ddf;
-  font-size: 26px;
-  font-weight: bold;
 }
 
-.auth-container input {
-  width: 100%;
-  padding: 14px;
-  margin: 8px 0;
-  font-size: 18px;
-  border-radius: 8px;
-  border: 1px solid #bbb;
+/* ================================
+   PROFILE PAGE FIX
+================================ */
+.profile-container {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
 }
 
-.auth-container button {
-  width: 100%;
-  padding: 14px;
-  font-size: 18px;
-  font-weight: bold;
+.profile-dp {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin: auto;
+  border: 3px solid #007bff;
+}
+
+.save-message {
   margin-top: 10px;
-  background: #4a3ddf;
-  border: none;
-  border-radius: 8px;
-  color: white;
+  text-align: center;
+  font-size: 18px;
+  color: green;
 }
 
-.switch-text {
-  text-align: center;
-  margin-top: 12px;
-  font-size: 16px;
+/* ================================
+   CHAT LIST PAGE
+================================ */
+.user-card {
+  width: 100%;
+  background: white;
+  padding: 10px;
+  border-radius: 15px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.user-card img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 12px;
+}
+
+/* ================================
+   MAIN CHAT PAGE
+================================ */
+.chat-box {
+  width: 100%;
+  height: 80vh;
+  background: white;
+  padding: 15px;
+  border-radius: 15px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+}
+
+.message {
+  background: #e7f0ff;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 10px;
+  width: fit-content;
+  max-width: 80%;
+}
+
+/* Input bar */
+.message-input {
+  position: fixed;
+  bottom: 10px;
+  width: 90%;
+  left: 5%;
+  display: flex;
+}
+
+.message-input input {
+  flex: 1;
+  font-size: 18px;
+  padding: 10px;
+}
+
+.message-input button {
+  width: 80px;
+  margin-left: 5px;
+}
+
+/* ================================
+   MOBILE FIXES
+================================ */
+@media (max-width: 600px) {
+  .page-title {
+    font-size: 26px;
+  }
+
+  input, button {
+    font-size: 16px;
+  }
+
+  .profile-dp {
+    width: 100px;
+    height: 100px;
+  }
+
+  .user-card img {
+    width: 50px;
+    height: 50px;
+  }
 }
