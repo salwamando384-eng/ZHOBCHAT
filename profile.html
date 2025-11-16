@@ -1,38 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Profile</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile</title>
+<link rel="stylesheet" href="style.css">
 </head>
-<body>
 
-<div class="profile-page">
-  <div class="profile-card">
+<body class="profile-page">
 
-    <h2>Your Profile</h2>
+<div class="profile-card">
 
-    <img id="profilePicPreview" class="profile-dp" src="default_dp.png">
+  <img id="profilePicPreview" class="profile-dp" src="default-dp.png">
 
-    <input type="file" id="profilePicInput" accept="image/*">
+  <input type="file" id="profilePicInput" accept="image/*">
 
-    <input type="text" id="nameInput" placeholder="Name">
-    <input type="number" id="ageInput" placeholder="Age">
+  <input type="text" id="nameInput" placeholder="Full Name">
+  <input type="number" id="ageInput" placeholder="Age">
 
-    <select id="genderInput">
-      <option value="">Gender</option>
-      <option value="Male">Male</option>
-      <option value="Female">Female</option>
-    </select>
+  <select id="genderInput">
+    <option value="">Select Gender</option>
+    <option>Male</option>
+    <option>Female</option>
+  </select>
 
-    <input type="text" id="cityInput" placeholder="City">
+  <input type="text" id="cityInput" placeholder="City">
 
-    <textarea id="aboutInput" placeholder="About yourself..."></textarea>
+  <textarea id="aboutInput" rows="3" placeholder="About yourself"></textarea>
 
-    <button id="saveProfileBtn">Save Profile</button>
-    <button id="backBtn">Back to Chat</button>
+  <button id="saveProfileBtn">Save Profile</button>
+  <button id="backBtn" style="background:#777;">Back</button>
 
-  </div>
 </div>
 
 <script type="module" src="profile.js"></script>
