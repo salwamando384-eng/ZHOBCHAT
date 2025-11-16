@@ -1,234 +1,46 @@
-/* ==== GENERAL RESET ==== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
-}
+/* ==== AUTH PAGES (LOGIN + SIGNUP) ==== */
 
-body {
-  background: #f2f2f2;
-}
-
-/* ==== START PAGE ⁠==== */
-.center-box {
+.auth-container {
   width: 100%;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-}
-
-.center-box h1 {
-  font-size: 40px;
-  color: #4a3ddf;
-}
-
-.center-box button {
-  padding: 12px 30px;
-  font-size: 20px;
-  border: none;
-  border-radius: 10px;
-  background: #4a3ddf;
-  color: white;
-  font-weight: bold;
-}
-
-/* ==== FORM PAGES (login/signup) ==== */
-.form-box {
-  width: 90%;
-  max-width: 400px;
+  max-width: 380px;
+  margin: 60px auto;
   background: white;
-  margin: 40px auto;
   padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.15);
 }
 
-.form-box h2 {
+.auth-container h2 {
   text-align: center;
   margin-bottom: 20px;
   color: #4a3ddf;
-}
-
-.form-box input {
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 6px;
-  border: 1px solid #999;
-}
-
-.form-box button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 6px;
-  background: #4a3ddf;
-  color: white;
-  font-size: 18px;
-}
-
-/* ==== CHAT PAGE ==== */
-.chat-page {
-  height: 100vh;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.chat-container {
-  width: 100%;
-  max-width: 480px;
-  height: 100vh;
-  background: white;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Header */
-.chat-header {
-  width: 100%;
-  padding: 12px;
-  background: #4a3ddf;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-dp {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 2px solid white;
-  object-fit: cover;
-}
-
-.header-buttons {
-  margin-left: auto;
-  display: flex;
-  gap: 10px;
-}
-
-.header-buttons button {
-  padding: 6px 12px;
-  background: white;
-  border: none;
-  border-radius: 5px;
-  color: #4a3ddf;
+  font-size: 26px;
   font-weight: bold;
 }
 
-/* Messages */
-.messages-box {
-  flex: 1;
-  padding: 10px;
-  overflow-y: auto;
-  background: #f3f3f3;
-}
-
-.message-row {
-  display: flex;
-  margin-bottom: 12px;
-  gap: 8px;
-}
-
-.my-msg {
-  justify-content: flex-end;
-}
-
-.other-msg {
-  justify-content: flex-start;
-}
-
-.msg-dp {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.msg-bubble {
-  max-width: 65%;
-  padding: 10px;
-  border-radius: 10px;
-  background: #dedcff;
-}
-
-.my-msg .msg-bubble {
-  background: #c8ffe0;
-}
-
-/* Chat input area */
-.input-area {
-  padding: 10px;
-  background: #e0e0e0;
-  display: flex;
-  gap: 10px;
-}
-
-#messageInput {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-}
-
-#sendBtn {
-  padding: 12px 18px;
-  background: #4a3ddf;
-  border: none;
-  color: white;
-  border-radius: 8px;
-}
-
-/* ==== PROFILE PAGE ==== */
-.profile-page {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.profile-card {
-  width: 90%;
-  max-width: 420px;
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.15);
-  text-align: center;
-}
-
-.profile-dp {
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  border: 4px solid #4a3ddf;
-  object-fit: cover;
-  margin-bottom: 15px;
-}
-
-.profile-card input,
-.profile-card select,
-.profile-card textarea {
+.auth-container input {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   margin: 8px 0;
+  font-size: 18px;
   border-radius: 8px;
-  border: 1px solid #888;
+  border: 1px solid #bbb;
 }
 
-.profile-card button {
+.auth-container button {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
+  font-size: 18px;
+  font-weight: bold;
   margin-top: 10px;
   background: #4a3ddf;
-  color: white;
+  border: none;
   border-radius: 8px;
-  font-size: 18px;
+  color: white;
+}
+
+.switch-text {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 16px;
 }
