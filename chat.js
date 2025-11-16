@@ -1,15 +1,12 @@
 import { auth, db } from "./firebase_config.js";
-
 import {
   ref,
   push,
   onChildAdded,
-  onValue,
   get
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 
-// ---------------- CHECK LOGIN ----------------
 auth.onAuthStateChanged(async (user) => {
   if (!user) {
     window.location.href = "login.html";
@@ -18,7 +15,7 @@ auth.onAuthStateChanged(async (user) => {
 
   const uid = user.uid;
 
-  // Load Profile DP in header
+  // Load DP
   const userRef = ref(db, "users/" + uid);
   const snap = await get(userRef);
 
@@ -30,25 +27,20 @@ auth.onAuthStateChanged(async (user) => {
 });
 
 
-// ---------------- ELEMENTS ----------------
 const sendBtn = document.getElementById("sendBtn");
 const messageInput = document.getElementById("messageInput");
 const messagesBox = document.getElementById("messages");
 
 
-// ---------------- SEND MESSAGE ----------------
 sendBtn.onclick = async () => {
-  const text = messageInput.value.trim();
-  if (text === "") return;
+  const msg = messageInput.value.trim();
+  if (msg === "") return;
 
   const user = auth.currentUser;
-  const uid = user.uid;
 
-  const msgRef = ref(db, "messages");
-
-  await push(msgRef, {
-    uid: uid,
-    text: text,
+  await push(ref(db, "messages"), {
+    uid: user.uid,
+    text: msg,
     time: Date.now()
   });
 
@@ -56,32 +48,29 @@ sendBtn.onclick = async () => {
 };
 
 
-
-// ---------------- LOAD MESSAGES ----------------
 function loadMessages(currentUid) {
   const msgRef = ref(db, "messages");
 
   onChildAdded(msgRef, async (snap) => {
-    const msg = snap.val();
+    const m = snap.val();
 
-    // fetch sender info
-    const userRef = ref(db, "users/" + msg.uid);
+    const userRef = ref(db, "users/" + m.uid);
     const userSnap = await get(userRef);
 
-    let dp = "default-dp.png";
-    if (userSnap.exists() && userSnap.val().dp) dp = userSnap.val().dp;
+    let dp = "default_dp.png";
+    let name = "User";
 
-    let name = userSnap.exists() && userSnap.val().name
-      ? userSnap.val().name
-      : "User";
+    if (userSnap.exists()) {
+      if (userSnap.val().dp) dp = userSnap.val().dp;
+      if (userSnap.val().name) name = userSnap.val().name;
+    }
 
-    // message display
     messagesBox.innerHTML += `
-      <div class="message-row ${msg.uid === currentUid ? "my-msg" : "other-msg"}">
+      <div class="message-row ${m.uid === currentUid ? "my-msg" : "other-msg"}">
         <img src="${dp}" class="msg-dp">
         <div class="msg-bubble">
           <strong>${name}</strong><br>
-          ${msg.text}
+          ${m.text}
         </div>
       </div>
     `;
@@ -91,15 +80,6 @@ function loadMessages(currentUid) {
 }
 
 
-
-// ---------------- PROFILE BUTTON ----------------
-document.getElementById("profileBtn").onclick = () => {
-  window.location.href = "profile.html";
-};
-
-
-
-// ---------------- LOGOUT BUTTON ----------------
 document.getElementById("logoutBtn").onclick = () => {
   auth.signOut();
   window.location.href = "login.html";
