@@ -26,7 +26,8 @@ auth.onAuthStateChanged(user => {
     const data = snapshot.val();
     if (!data) return;
 
-    profileImg.src = data.dp || "default_dp.png";
+    // Add timestamp to prevent cache
+    profileImg.src = (data.dp || "default_dp.png") + "?t=" + new Date().getTime();
     nameInput.value = data.name || "";
     ageInput.value = data.age || "";
     genderInput.value = data.gender || "";
@@ -44,7 +45,9 @@ auth.onAuthStateChanged(user => {
       const downloadURL = await getDownloadURL(dpStorePath);
 
       await update(userRef, { dp: downloadURL });
-      profileImg.src = downloadURL;
+
+      // Force reload to prevent cached image
+      profileImg.src = downloadURL + "?t=" + new Date().getTime();
 
       showSaveMessage("Profile picture updated!");
     } catch (err) {
