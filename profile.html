@@ -5,81 +5,72 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profile</title>
 <style>
-  /* Page container similar to WhatsApp */
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f0f0;
-  }
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #e5ddd5;
+}
 
-  .container {
-    max-width: 400px; /* WhatsApp style width */
-    margin: 0 auto;
-    background-color: #fff;
-    min-height: 100vh;
-    padding: 20px;
-    box-sizing: border-box;
-  }
+.container {
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: #fff;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
 
-  h2 {
-    text-align: center;
-    font-size: 20px; /* WhatsApp style */
-    margin-bottom: 15px;
-  }
+h2 {
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 15px;
+}
 
-  #profileImg {
-    display: block;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin: 0 auto 15px;
-    border: 2px solid #007bff;
-  }
+#profileImg {
+  display: block;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 15px;
+  border: 2px solid #007bff;
+}
 
-  input, select, button {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    font-size: 16px; /* WhatsApp style */
-    border-radius: 8px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-  }
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  font-size: 16px;
+  border-radius: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+}
 
-  button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    font-weight: bold;
-  }
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  font-weight: bold;
+}
 
-  button:hover {
-    background-color: #0056b3;
-    cursor: pointer;
-  }
+button:hover {
+  background-color: #0056b3;
+  cursor: pointer;
+}
 
-  #saveMsg {
-    display: none;
-    text-align: center;
-    color: green;
-    font-size: 14px;
-    margin-top: 10px;
-  }
+#saveMsg {
+  display: none;
+  text-align: center;
+  color: green;
+  font-size: 14px;
+  margin-top: 10px;
+}
 
-  /* Make inputs and buttons a little taller for mobile */
-  @media (max-width: 450px) {
-    input, select, button {
-      padding: 12px;
-      font-size: 16px;
-    }
-
-    #profileImg {
-      width: 90px;
-      height: 90px;
-    }
-  }
+@media (max-width: 450px) {
+  input, select, button { padding: 12px; font-size: 16px; }
+  #profileImg { width: 90px; height: 90px; }
+}
 </style>
 </head>
 <body>
