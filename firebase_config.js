@@ -1,4 +1,4 @@
-// Import Firebase SDKs (Web version)
+// Import Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
@@ -18,8 +18,11 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// ----------------------------------
 const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
+// ----------------------------------
 
 export { auth, db, storage };
