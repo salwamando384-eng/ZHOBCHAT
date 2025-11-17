@@ -17,12 +17,11 @@ const logoutBtn = document.getElementById("logoutBtn");
 const chatDp = document.getElementById("chatDp");
 const profileBtn = document.getElementById("profileBtn");
 
-// ✔ Go to Profile Page
 profileBtn.onclick = () => {
   window.location.href = "profile.html";
 };
 
-// Load user DP
+// Load DP
 onAuthStateChanged(auth, (user) => {
   if (!user) return;
 
