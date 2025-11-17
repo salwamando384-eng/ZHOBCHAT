@@ -5,43 +5,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profile</title>
 <style>
+  /* Page container similar to WhatsApp */
   body {
     font-family: Arial, sans-serif;
     margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+  }
+
+  .container {
+    max-width: 400px; /* WhatsApp style width */
+    margin: 0 auto;
+    background-color: #fff;
+    min-height: 100vh;
     padding: 20px;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+    box-sizing: border-box;
   }
 
   h2 {
     text-align: center;
-    font-size: 24px;
-    margin-bottom: 20px;
+    font-size: 20px; /* WhatsApp style */
+    margin-bottom: 15px;
   }
 
   #profileImg {
     display: block;
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-    margin: 0 auto 15px;
     object-fit: cover;
+    margin: 0 auto 15px;
+    border: 2px solid #007bff;
   }
 
   input, select, button {
     width: 100%;
-    padding: 12px;
+    padding: 10px;
     margin: 8px 0;
-    font-size: 16px;
+    font-size: 16px; /* WhatsApp style */
+    border-radius: 8px;
     box-sizing: border-box;
+    border: 1px solid #ccc;
   }
 
   button {
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 8px;
+    font-weight: bold;
   }
 
   button:hover {
@@ -51,36 +62,51 @@
 
   #saveMsg {
     display: none;
-    color: green;
     text-align: center;
+    color: green;
+    font-size: 14px;
     margin-top: 10px;
-    font-size: 16px;
+  }
+
+  /* Make inputs and buttons a little taller for mobile */
+  @media (max-width: 450px) {
+    input, select, button {
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    #profileImg {
+      width: 90px;
+      height: 90px;
+    }
   }
 </style>
 </head>
 <body>
 
-<h2>My Profile</h2>
+<div class="container">
+  <h2>My Profile</h2>
 
-<img id="profileImg" src="default_dp.png" alt="Profile Picture">
-<input type="file" id="dpInput">
-<button id="saveDpBtn">Change Picture</button>
+  <img id="profileImg" src="default_dp.png" alt="Profile Picture">
+  <input type="file" id="dpInput">
+  <button id="saveDpBtn">Change Picture</button>
 
-<input type="text" id="name" placeholder="Name">
-<input type="number" id="age" placeholder="Age">
+  <input type="text" id="name" placeholder="Name">
+  <input type="number" id="age" placeholder="Age">
 
-<select id="gender">
-  <option value="">Select Gender</option>
-  <option value="Male">Male</option>
-  <option value="Female">Female</option>
-</select>
+  <select id="gender">
+    <option value="">Select Gender</option>
+    <option value="Male">Male</option>
+    <option value="Female">Female</option>
+  </select>
 
-<input type="text" id="city" placeholder="City">
+  <input type="text" id="city" placeholder="City">
 
-<button id="saveProfileBtn">Save Profile</button>
-<button id="backBtn">Back to Chatroom</button>
+  <button id="saveProfileBtn">Save Profile</button>
+  <button id="backBtn">Back to Chatroom</button>
 
-<div id="saveMsg"></div>
+  <div id="saveMsg"></div>
+</div>
 
 <script type="module" src="profile.js"></script>
 </body>
