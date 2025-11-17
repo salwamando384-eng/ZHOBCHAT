@@ -14,7 +14,6 @@ const ageInput = document.getElementById("age");
 const genderInput = document.getElementById("gender");
 const cityInput = document.getElementById("city");
 
-// Back to chatroom
 backBtn.onclick = () => window.location.href = "chat.html";
 
 auth.onAuthStateChanged(user => {
@@ -22,7 +21,6 @@ auth.onAuthStateChanged(user => {
   const uid = user.uid;
   const userRef = dbRef(db, "users/" + uid);
 
-  // Load profile data in real-time
   onValue(userRef, snapshot => {
     const data = snapshot.val();
     if (!data) return;
@@ -33,7 +31,6 @@ auth.onAuthStateChanged(user => {
     cityInput.value = data.city || "";
   });
 
-  // Change DP
   saveDpBtn.onclick = async () => {
     const file = dpInput.files[0];
     if (!file) return alert("Please select an image.");
@@ -50,7 +47,6 @@ auth.onAuthStateChanged(user => {
     }
   };
 
-  // Save profile info
   saveProfileBtn.onclick = async () => {
     const name = nameInput.value.trim();
     const age = ageInput.value.trim();
