@@ -1,14 +1,6 @@
 import { auth, db } from "./firebase_config.js";
-import {
-  ref,
-  push,
-  onValue
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-
-import {
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 const messagesBox = document.getElementById("messages");
 const messageInput = document.getElementById("messageInput");
@@ -17,11 +9,12 @@ const logoutBtn = document.getElementById("logoutBtn");
 const chatDp = document.getElementById("chatDp");
 const profileBtn = document.getElementById("profileBtn");
 
+// Go to Profile Page
 profileBtn.onclick = () => {
   window.location.href = "profile.html";
 };
 
-// Load DP
+// Load user DP
 onAuthStateChanged(auth, (user) => {
   if (!user) return;
 
@@ -30,7 +23,7 @@ onAuthStateChanged(auth, (user) => {
   onValue(userRef, (snapshot) => {
     const data = snapshot.val();
     if (data && data.dp) {
-      chatDp.src = data.dp + "?t=" + Date.now();
+      chatDp.src = data.dp + "?t=" + Date.now(); // Force reload DP
     }
   });
 });
@@ -70,6 +63,6 @@ sendBtn.onclick = () => {
 // Logout
 logoutBtn.onclick = () => {
   signOut(auth).then(() => {
-    location.href = "login.html";
+    window.location.href = "login.html";
   });
 };
