@@ -1,91 +1,81 @@
 import { auth, db, storage } from "./firebase_config.js";
-
 import {
   ref,
-  get,
-  update
+  set,
+  update,
+  onValue
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 import {
-  ref as sRef,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+import {
   uploadBytes,
-  getDownloadURL
+  getDownloadURL,
+  ref as sRef
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-
-// WAIT FOR USER (GitHub needs delay)
-function waitForUser() {
-  return new Promise(resolve => {
-    const check = setInterval(() => {
-      if (auth.currentUser) {
-        clearInterval(check);
-        resolve(auth.currentUser);
-      }
-    }, 300);
-  });
-}
-
-(async () => {
-
-const user = await waitForUser();
-const uid = user.uid;
-
-const name = document.getElementById("name");
-const age = document.getElementById("age");
-const gender = document.getElementById("gender");
-const city = document.getElementById("city");
 const profileImg = document.getElementById("profileImg");
 const dpInput = document.getElementById("dpInput");
+const nameInput = document.getElementById("name");
+const ageInput = document.getElementById("age");
+const genderInput = document.getElementById("gender");
+const cityInput = document.getElementById("city");
 
-const userRef = ref(db, "users/" + uid);
+const saveBtn = document.getElementById("saveBtn");
+const backBtn = document.getElementById("backBtn");
 
+let currentUser;
 
-// Load profile
-const snap = await get(userRef);
-if (snap.exists()) {
-  const d = snap.val();
-  name.value = d.name || "";
-  age.value = d.age || "";
-  gender.value = d.gender || "";
-  city.value = d.city || "";
-  profileImg.src = d.dp || "default_dp.png";
-}
+// Load existing profile
+onAuthStateChanged(auth, (user) => {
+  if (!user) return;
 
+  currentUser = user;
 
-// Save Profile (Text only)
-document.getElementById("saveBtn").onclick = async () => {
+  const userRef = ref(db, "users/" + user.uid);
+
+  onValue(userRef, (snap) => {
+    const data = snap.val();
+    if (!data) return;
+
+    if (data.dp) profileImg.src = data.dp + "?t=" + Date.now();
+    if (data.name) nameInput.value = data.name;
+    if (data.age) ageInput.value = data.age;
+    if (data.gender) genderInput.value = data.gender;
+    if (data.city) cityInput.value = data.city;
+  });
+});
+
+// Save Profile
+saveBtn.onclick = async () => {
+  if (!currentUser) return;
+
+  const userRef = ref(db, "users/" + currentUser.uid);
+
+  let dpURL = null;
+
+  if (dpInput.files.length > 0) {
+    const file = dpInput.files[0];
+    const storageRef = sRef(storage, "dp/" + currentUser.uid);
+
+    await uploadBytes(storageRef, file);
+    dpURL = await getDownloadURL(storageRef);
+  }
+
   await update(userRef, {
-    name: name.value,
-    age: age.value,
-    gender: gender.value,
-    city: city.value
+    dp: dpURL || profileImg.src,
+    name: nameInput.value,
+    age: ageInput.value,
+    gender: genderInput.value,
+    city: cityInput.value
   });
 
-  alert("Saved Profile");
+  alert("Profile Saved!");
 };
 
-
-// BACK
-document.getElementById("backBtn").onclick = () => {
+// Back to chat
+backBtn.onclick = () => {
   window.location.href = "chat.html";
 };
-
-
-// Change DP
-dpInput.onchange = async () => {
-  const file = dpInput.files[0];
-  if (!file) return alert("Choose image");
-
-  const dpRef = sRef(storage, "dp/" + uid + ".jpg");
-
-  await uploadBytes(dpRef, file);
-  const url = await getDownloadURL(dpRef);
-
-  await update(userRef, { dp: url });
-
-  profileImg.src = url;
-
-  alert("Profile photo updated");
-};
-
-})();
