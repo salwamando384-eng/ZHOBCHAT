@@ -38,25 +38,33 @@ auth.onAuthStateChanged(user => {
     const file = dpInput.files[0];
     if (!file) return alert("Please select an image.");
 
-    const dpStorePath = storageRef(storage, "dp/" + uid + ".jpg");
-    await uploadBytes(dpStorePath, file);
-    const downloadURL = await getDownloadURL(dpStorePath);
+    try {
+      const dpStorePath = storageRef(storage, "dp/" + uid + ".jpg");
+      await uploadBytes(dpStorePath, file);
+      const downloadURL = await getDownloadURL(dpStorePath);
 
-    await update(userRef, { dp: downloadURL });
-    profileImg.src = downloadURL;
+      await update(userRef, { dp: downloadURL });
+      profileImg.src = downloadURL;
 
-    showSaveMessage("Profile picture updated!");
+      showSaveMessage("Profile picture updated!");
+    } catch (err) {
+      alert("Error updating profile picture: " + err.message);
+    }
   };
 
-  // Save profile info (name, age, gender, city)
+  // Save profile info
   saveProfileBtn.onclick = async () => {
     const name = nameInput.value.trim();
     const age = ageInput.value.trim();
     const gender = genderInput.value.trim();
     const city = cityInput.value.trim();
 
-    await update(userRef, { name, age, gender, city });
-    showSaveMessage("Profile information updated!");
+    try {
+      await update(userRef, { name, age, gender, city });
+      showSaveMessage("Profile information updated!");
+    } catch (err) {
+      alert("Error updating profile: " + err.message);
+    }
   };
 });
 
