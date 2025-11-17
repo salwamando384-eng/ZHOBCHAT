@@ -1,4 +1,3 @@
-// profile.js
 import { auth, db, storage } from "./firebase_config.js";
 import { ref as dbRef, onValue, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
