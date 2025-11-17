@@ -8,12 +8,18 @@ const profileImg = document.getElementById("profileImg");
 const dpInput = document.getElementById("dpInput");
 const saveDpBtn = document.getElementById("saveDpBtn");
 const saveProfileBtn = document.getElementById("saveProfileBtn");
+const backBtn = document.getElementById("backBtn");
 const saveMsg = document.getElementById("saveMsg");
 
 const nameInput = document.getElementById("name");
 const ageInput = document.getElementById("age");
 const genderInput = document.getElementById("gender");
 const cityInput = document.getElementById("city");
+
+// Back to chatroom button
+backBtn.onclick = () => {
+  window.location.href = "chat.html";
+};
 
 // Auth state
 auth.onAuthStateChanged(user => {
