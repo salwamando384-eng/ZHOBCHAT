@@ -2,19 +2,17 @@ import { auth, db } from "./firebase_config.js";
 import { ref as dbRef, push, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-// DOM Elements
 const privateMessagesBox = document.getElementById("privateMessages");
 const privateMessageInput = document.getElementById("privateMessageInput");
 const privateSendBtn = document.getElementById("privateSendBtn");
 
-// Assuming you have selectedChatUserId to chat with
-let selectedChatUserId = ""; // set this dynamically based on chat selection
+// Set dynamically when a user is selected
+let selectedChatUserId = ""; // assign dynamically
 
 onAuthStateChanged(auth, (user) => {
   if (!user) return window.location.href = "login.html";
   const currentUserId = user.uid;
 
-  // Load private messages real-time
   const privateMsgRef = dbRef(db, "private_messages/" + currentUserId + "/" + selectedChatUserId);
 
   onValue(privateMsgRef, (snapshot) => {
@@ -26,12 +24,10 @@ onAuthStateChanged(auth, (user) => {
       const div = document.createElement("div");
       div.className = msg.senderId === currentUserId ? "msg-sent" : "msg-received";
 
-      // Get sender DP
       const senderRef = dbRef(db, "users/" + msg.senderId);
       onValue(senderRef, (senderSnap) => {
         const senderData = senderSnap.val();
-        let dpURL = senderData?.dp || "default_dp.png";
-
+        const dpURL = (senderData?.dp || "default_dp.png") + "?t=" + new Date().getTime();
         div.innerHTML = `<img src="${dpURL}" class="msg-dp"><span>${msg.text}</span>`;
       });
 
@@ -47,14 +43,13 @@ onAuthStateChanged(auth, (user) => {
     if (!text) return;
 
     push(dbRef(db, "private_messages/" + currentUserId + "/" + selectedChatUserId), {
-      text: text,
+      text,
       time: Date.now(),
       senderId: currentUserId
     });
 
-    // Mirror message in recipient's node
     push(dbRef(db, "private_messages/" + selectedChatUserId + "/" + currentUserId), {
-      text: text,
+      text,
       time: Date.now(),
       senderId: currentUserId
     });
