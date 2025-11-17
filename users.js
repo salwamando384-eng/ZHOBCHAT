@@ -1,36 +1,42 @@
-// users.js
 import { auth, db } from "./firebase_config.js";
-import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import {
+  ref,
+  onValue
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-auth.onAuthStateChanged(user => {
-  if (!user) location.href = "login.html";
-  else loadUsers(user.uid);
-});
+const usersList = document.getElementById("usersList");
 
-function loadUsers(currentUid) {
-  const userList = document.getElementById("userList");
+// Load all users from database
+function loadUsers() {
   const usersRef = ref(db, "users");
 
-  onValue(usersRef, snap => {
-    userList.innerHTML = "";
-    snap.forEach(child => {
+  onValue(usersRef, (snapshot) => {
+    usersList.innerHTML = ""; // clear list
+
+    snapshot.forEach((child) => {
+      const user = child.val();
       const uid = child.key;
-      const data = child.val();
-      if (!uid || uid === currentUid) return;
-      const dp = data.dp ? data.dp : "default_dp.png";
-      const name = data.name ? data.name : "Unknown";
 
       const card = document.createElement("div");
       card.className = "user-card";
+
       card.innerHTML = `
-        <img src="${dp}" alt="dp">
+        <img src="${user.dp ? user.dp : 'default_dp.png'}" alt="DP">
         <div class="user-info">
-          <h3>${name}</h3>
-          <p>Tap to chat</p>
+          <h3>${user.name || "Unknown"}</h3>
+          <p>${user.city || ""}</p>
         </div>
       `;
-      card.onclick = () => { location.href = `private_chat.html?uid=${uid}`; };
-      userList.appendChild(card);
+
+      // Click user → open chat
+      card.onclick = () => {
+        localStorage.setItem("chatUser", uid);
+        window.location.href = "private_chat.html";
+      };
+
+      usersList.appendChild(card);
     });
   });
 }
+
+loadUsers();
