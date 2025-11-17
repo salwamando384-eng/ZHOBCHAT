@@ -1,119 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profile</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile</title>
 
-        .profile-container {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            max-width: 350px;
-            margin: auto;
-        }
+  <link rel="stylesheet" href="style.css" />
 
-        img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #4CAF50;
-        }
+  <style>
+    .profile-page {
+      width: 90%;
+      margin: auto;
+      text-align: center;
+      margin-top: 30px;
+    }
 
-        #saveMsg {
-            color: green;
-            font-weight: bold;
-            margin-top: 10px;
-            display: none;
-        }
+    .profile-pic {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #4CAF50;
+    }
 
-        button {
-            padding: 10px 15px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 16px;
-        }
+    .save-msg {
+      background: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      margin-top: 15px;
+      border-radius: 8px;
+      display: none;
+      font-size: 16px;
+    }
 
-        #backBtn {
-            background: #333;
-            margin-top: 20px;
-        }
-    </style>
+    .back-btn {
+      background: #333;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 8px;
+      display: inline-block;
+      text-decoration: none;
+      margin-bottom: 20px;
+    }
+
+    #saveBtn {
+      background: #4CAF50;
+      border: none;
+      padding: 12px 20px;
+      color: #fff;
+      margin-top: 20px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
+
 <body>
 
-    <div class="profile-container">
-        <h2>Your Profile</h2>
+  <div class="profile-page">
+    
+    <a href="users.html" class="back-btn">⬅ Back</a>
 
-        <img id="profileImg" src="default.jpg" alt="Profile Picture">
+    <h2>Your Profile</h2>
 
-        <br><br>
-        <input type="file" id="fileInput" accept="image/*">
+    <img id="profileImg" class="profile-pic" src="default_dp.png" alt="DP" />
 
-        <br>
-        <button id="saveBtn">Save</button>
+    <input type="file" id="dpInput" accept="image/*" style="margin-top:15px;" />
 
-        <div id="saveMsg">Profile saved!</div>
+    <button id="saveBtn">Save Profile</button>
 
-        <button id="backBtn">Back</button>
-    </div>
+    <div id="saveMsg" class="save-msg">✔ Profile Saved!</div>
 
-    <script type="module">
-        import { auth, db, storage } from "./firebaseConfig.js";
-        import { ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-        import { ref, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+  </div>
 
-        const fileInput = document.getElementById("fileInput");
-        const profileImg = document.getElementById("profileImg");
-        const saveBtn = document.getElementById("saveBtn");
-        const saveMsg = document.getElementById("saveMsg");
-        const backBtn = document.getElementById("backBtn");
-
-        let selectedFile = null;
-
-        fileInput.addEventListener("change", function() {
-            selectedFile = fileInput.files[0];
-
-            if (selectedFile) {
-                profileImg.src = URL.createObjectURL(selectedFile);
-            }
-        });
-
-        saveBtn.addEventListener("click", async function () {
-            const user = auth.currentUser;
-            if (!user || !selectedFile) return;
-
-            const imgRef = sRef(storage, "profiles/" + user.uid + ".jpg");
-
-            await uploadBytes(imgRef, selectedFile);
-            const url = await getDownloadURL(imgRef);
-
-            await update(ref(db, "users/" + user.uid), {
-                profile: url
-            });
-
-            saveMsg.style.display = "block";  // Show “Profile saved”
-            setTimeout(() => saveMsg.style.display = "none", 2000);
-        });
-
-        backBtn.addEventListener("click", () => {
-            window.location.href = "chat.html";
-        });
-
-    </script>
+  <script type="module" src="profile.js"></script>
 
 </body>
 </html>
