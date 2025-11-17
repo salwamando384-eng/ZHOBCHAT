@@ -7,74 +7,33 @@
 <style>
 body {
   margin: 0;
-  padding: 0;
   font-family: Arial, sans-serif;
   background-color: #e5ddd5;
 }
-
 .container {
   max-width: 400px;
   margin: 0 auto;
-  background-color: #fff;
+  background: #fff;
   min-height: 100vh;
   padding: 20px;
   box-sizing: border-box;
 }
-
-h2 {
-  text-align: center;
-  font-size: 20px;
-  margin-bottom: 15px;
-}
-
+h2 { text-align:center; font-size:20px; margin-bottom:15px; }
 #profileImg {
-  display: block;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin: 0 auto 15px;
-  border: 2px solid #007bff;
+  display:block; width:100px; height:100px; border-radius:50%;
+  object-fit:cover; margin:0 auto 15px; border:2px solid #007bff;
 }
-
 input, select, button {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  font-size: 16px;
-  border-radius: 8px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
+  width:100%; padding:10px; margin:8px 0;
+  font-size:16px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box;
 }
-
-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  font-weight: bold;
-}
-
-button:hover {
-  background-color: #0056b3;
-  cursor: pointer;
-}
-
-#saveMsg {
-  display: none;
-  text-align: center;
-  color: green;
-  font-size: 14px;
-  margin-top: 10px;
-}
-
-@media (max-width: 450px) {
-  input, select, button { padding: 12px; font-size: 16px; }
-  #profileImg { width: 90px; height: 90px; }
-}
+button { background:#007bff; color:white; font-weight:bold; border:none; }
+button:hover { background:#0056b3; cursor:pointer; }
+#saveMsg { display:none; text-align:center; color:green; font-size:14px; margin-top:10px; }
+@media(max-width:450px){ input, select, button{ padding:12px; font-size:16px;} #profileImg{width:90px; height:90px;} }
 </style>
 </head>
 <body>
-
 <div class="container">
   <h2>My Profile</h2>
 
@@ -84,18 +43,15 @@ button:hover {
 
   <input type="text" id="name" placeholder="Name">
   <input type="number" id="age" placeholder="Age">
-
   <select id="gender">
     <option value="">Select Gender</option>
     <option value="Male">Male</option>
     <option value="Female">Female</option>
   </select>
-
   <input type="text" id="city" placeholder="City">
 
   <button id="saveProfileBtn">Save Profile</button>
   <button id="backBtn">Back to Chatroom</button>
-
   <div id="saveMsg"></div>
 </div>
 
