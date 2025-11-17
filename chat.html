@@ -1,38 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>ZHOBCHAT</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZHOBCHAT</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #e5ddd5;
+  }
 
+  .container {
+    max-width: 400px; /* WhatsApp style width */
+    margin: 0 auto;
+    background-color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .header {
+    padding: 10px;
+    background-color: #075e54;
+    color: white;
+    display: flex;
+    align-items: center;
+  }
+
+  .header img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+  }
+
+  .header h2 {
+    font-size: 18px;
+    margin: 0;
+  }
+
+  #messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #e5ddd5;
+  }
+
+  .msg {
+    padding: 8px 12px;
+    margin: 5px 0;
+    border-radius: 10px;
+    max-width: 80%;
+    font-size: 14px;
+    word-wrap: break-word;
+  }
+
+  .msg-sent {
+    background-color: #dcf8c6;
+    margin-left: auto;
+  }
+
+  .msg-received {
+    background-color: #fff;
+    margin-right: auto;
+  }
+
+  .msg-dp {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    vertical-align: middle;
+    margin-right: 5px;
+  }
+
+  .input-box {
+    display: flex;
+    padding: 10px;
+    background-color: #f0f0f0;
+  }
+
+  #messageInput {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    outline: none;
+  }
+
+  #sendBtn {
+    padding: 0 15px;
+    margin-left: 10px;
+    border-radius: 20px;
+    background-color: #075e54;
+    color: white;
+    border: none;
+    font-weight: bold;
+  }
+
+  #sendBtn:hover {
+    background-color: #064d46;
+    cursor: pointer;
+  }
+
+  @media (max-width: 450px) {
+    .header img { width: 35px; height: 35px; }
+    #messageInput { font-size: 14px; padding: 10px; }
+    #sendBtn { padding: 0 12px; }
+  }
+</style>
+</head>
 <body>
 
-<div class="chat-page">
-
-  <div class="chat-container">
-
-    <div class="chat-header">
-      <img id="chatDp" class="header-dp" src="default_dp.png">
-
-      <h2>ZHOBCHAT</h2>
-
-      <div class="header-buttons">
-        <button onclick="location.href='users.html'">Users</button>
-        <button onclick="location.href='profile.html'">Profile</button>
-        <button id="logoutBtn">Logout</button>
-      </div>
-    </div>
-
-    <div id="messages" class="messages-box"></div>
-
-    <div class="input-area">
-      <input type="text" id="messageInput" placeholder="Type message...">
-      <button id="sendBtn">Send</button>
-    </div>
-
+<div class="container">
+  <div class="header">
+    <img id="chatDp" src="default_dp.png" alt="User DP">
+    <h2>ZHOBCHAT</h2>
   </div>
 
+  <div id="messages"></div>
+
+  <div class="input-box">
+    <input type="text" id="messageInput" placeholder="Type a message...">
+    <button id="sendBtn">Send</button>
+  </div>
 </div>
 
 <script type="module" src="chat.js"></script>
