@@ -6,12 +6,11 @@ import {
 
 const usersList = document.getElementById("usersList");
 
-// Load all users from database
 function loadUsers() {
   const usersRef = ref(db, "users");
 
   onValue(usersRef, (snapshot) => {
-    usersList.innerHTML = ""; // clear list
+    usersList.innerHTML = "";
 
     snapshot.forEach((child) => {
       const user = child.val();
@@ -21,17 +20,16 @@ function loadUsers() {
       card.className = "user-card";
 
       card.innerHTML = `
-        <img src="${user.dp ? user.dp : 'default_dp.png'}" alt="DP">
+        <img src="${user.dp || 'default_dp.png'}" alt="DP">
         <div class="user-info">
-          <h3>${user.name || "Unknown"}</h3>
+          <h3>${user.name || "User"}</h3>
           <p>${user.city || ""}</p>
         </div>
       `;
 
-      // Click user → open chat
       card.onclick = () => {
         localStorage.setItem("chatUser", uid);
-        window.location.href = "private_chat.html";
+        location.href = "private_chat.html";
       };
 
       usersList.appendChild(card);
