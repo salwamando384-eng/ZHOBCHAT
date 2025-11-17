@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Profile</title>
-
+<title>My Profile - ZHOBCHAT</title>
 <style>
   body {
     margin: 0;
     padding: 0;
     background-color: #e5ddd5;
-    font-family: Arial;
+    font-family: Arial, sans-serif;
   }
 
   .container {
@@ -19,6 +18,7 @@
     background: white;
     padding: 20px;
     min-height: 100vh;
+    box-sizing: border-box;
   }
 
   h2 {
@@ -43,6 +43,7 @@
     font-size: 16px;
     border-radius: 8px;
     border: 1px solid #aaa;
+    box-sizing: border-box;
   }
 
   button {
@@ -50,16 +51,27 @@
     color: white;
     font-weight: bold;
     border: none;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #075E54;
+  }
+
+  #saveMsg {
+    display: none;
+    text-align: center;
+    color: green;
+    margin-top: 10px;
   }
 </style>
 </head>
-
 <body>
 
 <div class="container">
   <h2>My Profile</h2>
 
-  <img id="profileImg" src="default_dp.png">
+  <img id="profileImg" src="default_dp.png" alt="Profile Picture">
 
   <input type="file" id="dpInput">
 
@@ -68,8 +80,8 @@
 
   <select id="gender">
     <option value="">Select Gender</option>
-    <option>Male</option>
-    <option>Female</option>
+    <option value="Male">Male</option>
+    <option value="Female">Female</option>
   </select>
 
   <input type="text" id="city" placeholder="City">
@@ -77,6 +89,7 @@
   <button id="saveBtn">Save Profile</button>
   <button id="backBtn">Back to Chatroom</button>
 
+  <div id="saveMsg">Profile information updated!</div>
 </div>
 
 <script type="module" src="profile.js"></script>
