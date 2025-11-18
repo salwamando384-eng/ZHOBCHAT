@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase_config.js";
-import { ref, onChildAdded, push, set, get } 
+import { ref, onChildAdded, push, get } 
 from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { onAuthStateChanged } 
+import { onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 const messagesBox = document.getElementById("messages");
@@ -15,7 +15,7 @@ const myName = document.getElementById("myName");
 let uid;
 let myData = {};
 
-// LOAD CURRENT USER DATA
+// Load current user data
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
   uid = user.uid;
@@ -23,8 +23,6 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await get(ref(db, "users/" + uid));
   if (snap.exists()) {
     myData = snap.val();
-
-    // FORCE NEW IMAGE LOAD
     myDp.src = myData.dp ? myData.dp + "?v=" + Date.now() : "default_dp.png";
     myName.textContent = myData.name || "Unknown";
   }
