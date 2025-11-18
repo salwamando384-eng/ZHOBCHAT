@@ -20,7 +20,7 @@ onAuthStateChanged(auth, (user) => {
   const userRef = ref(db, "users/" + user.uid);
   onValue(userRef, (snapshot) => {
     const data = snapshot.val();
-    if (data && data.dp) chatDp.src = data.dp + "?t=" + Date.now();
+    if (data && data.dp) chatDp.src = data.dp + "?t=" + Date.now(); // Always refresh DP
   });
 });
 
