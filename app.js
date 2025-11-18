@@ -3,7 +3,6 @@ import { signInAnonymously, updateProfile, onAuthStateChanged } from "https://ww
 import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { ref as sref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// Helpers
 function esc(s = "") {
   return String(s).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
@@ -11,7 +10,6 @@ function byId(id) {
   return document.getElementById(id);
 }
 
-// SHA-256 password hash
 async function sha256Hex(str) {
   const enc = new TextEncoder();
   const data = enc.encode(str);
@@ -20,12 +18,11 @@ async function sha256Hex(str) {
   return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-// Start form
 const startForm = byId("startForm");
+
 if (startForm) {
   const msg = byId("startMsg");
 
-  // Auto redirect if logged in
   onAuthStateChanged(auth, (u) => {
     if (u) {
       location.href = "chat.html";
@@ -54,11 +51,9 @@ if (startForm) {
     }
 
     try {
-      // Sign in anonymously
       const cred = await signInAnonymously(auth);
       const user = cred.user;
 
-      // Upload profile picture
       let dpUrl = "default_dp.png";
       if (file) {
         const storageRef = sref(storage, `dps/${user.uid}_${Date.now()}_${file.name}`);
@@ -66,16 +61,13 @@ if (startForm) {
         dpUrl = await getDownloadURL(storageRef);
       }
 
-      // Update Firebase Auth profile
       await updateProfile(user, { displayName: name, photoURL: dpUrl });
 
-      // Hash password if provided
       let passwordHash = null;
       if (password) {
         passwordHash = await sha256Hex(password);
       }
 
-      // Save to Realtime Database
       await set(ref(db, `users/${user.uid}`), {
         uid: user.uid,
         name: esc(name),
