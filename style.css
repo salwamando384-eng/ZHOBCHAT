@@ -1,95 +1,197 @@
+/* -------------------------------------------------
+   GLOBAL
+--------------------------------------------------*/
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
   font-family: Arial, sans-serif;
 }
 
-/* Center Box for Home Page */
+body {
+  background: #e7ebee;
+  color: #000;
+}
+
+/* -------------------------------------------------
+   CENTER BOX (Home Page)
+--------------------------------------------------*/
 .center-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  gap: 15px;
+  width: 90%;
+  max-width: 400px;
+  margin: 100px auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px #0003;
+  text-align: center;
 }
 
 .center-box button {
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: #1565c0;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 17px;
 }
 
-/* Chat Page */
+/* -------------------------------------------------
+   CHAT PAGE
+--------------------------------------------------*/
 .chat-container {
-  max-width: 100%;
   width: 100%;
+  max-width: 550px;
   height: 100vh;
+  margin: 0 auto;
+  background: #fff;
   display: flex;
   flex-direction: column;
-  padding: 5px;
+  border-radius: 0;
 }
 
-.chat-header {
+/* --- Top Bar --- */
+.top-bar {
+  width: 100%;
+  padding: 10px;
+  background: #1565c0;
+  color: #fff;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 5px;
-  border-bottom: 1px solid #ccc;
+  gap: 10px;
 }
 
-.chat-dp {
-  width: 40px;
-  height: 40px;
+.top-dp {
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #1565c0;
+  border: 2px solid #fff;
 }
 
-.messages-box {
+.edit-btn {
+  margin-left: auto;
+  padding: 7px 12px;
+  background: #fff;
+  color: #1565c0;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+/* --- Messages Box --- */
+.messages {
   flex: 1;
+  padding: 10px;
   overflow-y: auto;
-  margin: 5px 0;
-  padding: 5px;
-  background: #f9f9f9;
-  border-radius: 5px;
+  background: #f2f2f2;
 }
 
-.msg {
-  padding: 5px 10px;
-  margin-bottom: 5px;
-  background: #e0e0e0;
-  border-radius: 5px;
-  word-wrap: break-word;
+/* Each Message */
+.msg-box {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12px;
 }
 
+.msg-dp {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  margin-right: 8px;
+  object-fit: cover;
+}
+
+.msg-content {
+  max-width: 75%;
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px #0001;
+}
+
+.msg-content b {
+  display: block;
+  margin-bottom: 3px;
+  color: #1565c0;
+}
+
+/* -------------------------------------------------
+   INPUT AREA
+--------------------------------------------------*/
 .input-area {
   display: flex;
-  gap: 5px;
+  padding: 10px;
+  background: #fff;
+  border-top: 1px solid #ccc;
 }
 
 .input-area input {
   flex: 1;
-  padding: 8px;
+  padding: 10px;
+  border: 1px solid #aaa;
+  border-radius: 8px;
   font-size: 16px;
 }
 
 .input-area button {
-  padding: 8px 12px;
-  font-size: 16px;
-  cursor: pointer;
+  margin-left: 7px;
+  padding: 10px 15px;
+  background: #1565c0;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
 }
 
-/* Responsive */
-@media screen and (max-width: 600px) {
-  .chat-dp {
-    width: 35px;
-    height: 35px;
-  }
+/* -------------------------------------------------
+   PROFILE PAGE
+--------------------------------------------------*/
+.container {
+  width: 90%;
+  max-width: 420px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 10px #0002;
+}
 
-  .input-area input, .input-area button {
-    font-size: 14px;
-    padding: 6px;
-  }
+.profile-pic {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin: 10px auto;
+  border: 3px solid #1565c0;
+}
+
+.container input, .container select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #bbb;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.container button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #1565c0;
+  color: #fff;
+  font-size: 18px;
+}
+
+/* Success message */
+#saveMsg {
+  text-align: center;
+  margin-top: 15px;
+  color: green;
+  font-weight: bold;
 }
