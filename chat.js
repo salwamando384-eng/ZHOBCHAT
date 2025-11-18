@@ -1,52 +1,71 @@
 import { auth, db } from "./firebase_config.js";
-import { ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref, onChildAdded, push, set, get } 
+from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 const messagesBox = document.getElementById("messages");
-const messageInput = document.getElementById("messageInput");
+const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const chatDp = document.getElementById("chatDp");
+
 const profileBtn = document.getElementById("profileBtn");
+const myDp = document.getElementById("myDp");
+const myName = document.getElementById("myName");
 
-// Go to Profile
-profileBtn.onclick = () => {
-  window.location.href = "profile.html";
-};
+let uid;
+let myData = {};
 
-// Load user DP
-onAuthStateChanged(auth, (user) => {
+// LOAD CURRENT USER DATA
+onAuthStateChanged(auth, async (user) => {
   if (!user) return;
-  const userRef = ref(db, "users/" + user.uid);
-  onValue(userRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data && data.dp) chatDp.src = data.dp + "?t=" + Date.now(); // Always refresh DP
-  });
+  uid = user.uid;
+
+  const snap = await get(ref(db, "users/" + uid));
+  if (snap.exists()) {
+    myData = snap.val();
+
+    // FORCE NEW IMAGE LOAD
+    myDp.src = myData.dp ? myData.dp + "?v=" + Date.now() : "default_dp.png";
+    myName.textContent = myData.name || "Unknown";
+  }
 });
 
-// Load messages
-const msgRef = ref(db, "messages");
-onValue(msgRef, (snapshot) => {
-  messagesBox.innerHTML = "";
-  snapshot.forEach((child) => {
-    const msg = child.val();
-    const div = document.createElement("div");
-    div.className = "msg";
-    div.textContent = msg.text;
-    messagesBox.appendChild(div);
+// Send Message
+sendBtn.onclick = async () => {
+  const text = msgInput.value.trim();
+  if (text === "") return;
+
+  await push(ref(db, "messages"), {
+    uid: uid,
+    name: myData.name,
+    dp: myData.dp + "?v=" + Date.now(),
+    text: text,
+    time: Date.now()
   });
+
+  msgInput.value = "";
+};
+
+// Load Messages Live
+onChildAdded(ref(db, "messages"), (snapshot) => {
+  const msg = snapshot.val();
+
+  const div = document.createElement("div");
+  div.classList.add("msg-box");
+
+  div.innerHTML = `
+    <img class="msg-dp" src="${msg.dp}">
+    <div class="msg-content">
+      <b>${msg.name}</b>
+      <p>${msg.text}</p>
+    </div>
+  `;
+
+  messagesBox.appendChild(div);
   messagesBox.scrollTop = messagesBox.scrollHeight;
 });
 
-// Send message
-sendBtn.onclick = () => {
-  const text = messageInput.value.trim();
-  if (!text) return;
-  push(msgRef, { text, time: Date.now() });
-  messageInput.value = "";
-};
-
-// Logout
-logoutBtn.onclick = () => {
-  signOut(auth).then(() => location.href = "login.html");
+// Go to Profile Page
+profileBtn.onclick = () => {
+  window.location.href = "profile.html";
 };
