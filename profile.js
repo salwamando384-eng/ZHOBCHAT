@@ -1,7 +1,7 @@
 import { auth, db, storage } from "./firebase_config.js";
-import { ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { ref as dbRef, update, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 const profileImg = document.getElementById("profileImg");
 const dpInput = document.getElementById("dpInput");
@@ -11,22 +11,20 @@ const genderInput = document.getElementById("gender");
 const cityInput = document.getElementById("city");
 const saveBtn = document.getElementById("saveBtn");
 const backBtn = document.getElementById("backBtn");
-const saveMsg = document.getElementById("saveMsg");
 
-let currentUser;
+let currentUser = null;
 
-// Load profile data when user is logged in
-onAuthStateChanged(auth, async (user) => {
+// Load current profile
+onAuthStateChanged(auth, (user) => {
   if (!user) return;
-
   currentUser = user;
-  const userRef = ref(db, "users/" + user.uid);
+  const userRef = dbRef(db, "users/" + user.uid);
 
-  onValue(userRef, (snap) => {
-    const data = snap.val();
+  get(userRef).then((snapshot) => {
+    const data = snapshot.val();
     if (!data) return;
 
-    profileImg.src = data.dp ? data.dp + "?t=" + Date.now() : "default_dp.png";
+    profileImg.src = data.dp || "default_dp.png";
     nameInput.value = data.name || "";
     ageInput.value = data.age || "";
     genderInput.value = data.gender || "";
@@ -34,35 +32,33 @@ onAuthStateChanged(auth, async (user) => {
   });
 });
 
-// Save profile info
+// Save profile
 saveBtn.onclick = async () => {
   if (!currentUser) return;
 
-  const userRef = ref(db, "users/" + currentUser.uid);
-  let dpURL = null;
+  let dpUrl = profileImg.src;
 
   if (dpInput.files.length > 0) {
     const file = dpInput.files[0];
-    const storageRef = sRef(storage, "dp/" + currentUser.uid + ".jpg");
-
-    await uploadBytes(storageRef, file);
-    dpURL = await getDownloadURL(storageRef);
+    const storageReference = storageRef(storage, "users/" + currentUser.uid + "/dp.jpg");
+    await uploadBytes(storageReference, file);
+    dpUrl = await getDownloadURL(storageReference);
   }
 
-  await update(userRef, {
-    dp: dpURL || profileImg.src,
+  const userRef = dbRef(db, "users/" + currentUser.uid);
+  update(userRef, {
     name: nameInput.value,
     age: ageInput.value,
     gender: genderInput.value,
-    city: cityInput.value
-  });
-
-  if (dpURL) profileImg.src = dpURL + "?t=" + Date.now();
-  saveMsg.style.display = "block";
-  setTimeout(() => saveMsg.style.display = "none", 2500);
+    city: cityInput.value,
+    dp: dpUrl
+  }).then(() => {
+    alert("Profile updated!");
+    profileImg.src = dpUrl + "?t=" + Date.now(); // Force reload
+  }).catch((err) => console.log(err));
 };
 
-// Back to Chatroom
+// Back button
 backBtn.onclick = () => {
   window.location.href = "chat.html";
 };
