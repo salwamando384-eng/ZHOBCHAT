@@ -1,60 +1,59 @@
 import { auth, db, storage } from "./firebase_config.js";
-import { ref as dbRef, get, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-const profileImg = document.getElementById("profileImg");
-const dpInput = document.getElementById("dpInput");
-const nameInput = document.getElementById("name");
-const ageInput = document.getElementById("age");
-const genderSelect = document.getElementById("gender");
-const cityInput = document.getElementById("city");
-const saveBtn = document.getElementById("saveProfileBtn");
-const backBtn = document.getElementById("backBtn");
-const saveMsg = document.getElementById("saveMsg");
+import {
+  ref as dbRef,
+  set,
+  get
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-let uid;
-let userData = {};
+// ------------ Load Current User Data ------------
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) return;
-  uid = user.uid;
-  const snap = await get(dbRef(db, "users/" + uid));
+  const userRef = dbRef(db, "users/" + user.uid);
+  const snap = await get(userRef);
+
   if (snap.exists()) {
-    userData = snap.val();
-    profileImg.src = userData.dp ? userData.dp + "?v=" + Date.now() : "default_dp.png";
-    nameInput.value = userData.name || "";
-    ageInput.value = userData.age || "";
-    genderSelect.value = userData.gender || "";
-    cityInput.value = userData.city || "";
+    const data = snap.val();
+
+    document.getElementById("name").value = data.name || "";
+    document.getElementById("dp-preview").src =
+      data.dp || "default_dp.png";
   }
 });
 
-saveBtn.addEventListener("click", async () => {
-  if (!uid) return;
+// ------------ Save Profile Button ------------
+document.getElementById("saveProfile").addEventListener("click", async () => {
+  const user = auth.currentUser;
+  if (!user) return;
 
-  let dpURL = profileImg.src;
+  const name = document.getElementById("name").value;
+  const file = document.getElementById("dp").files[0];
 
-  if (dpInput.files.length > 0) {
-    const file = dpInput.files[0];
-    const sRef = storageRef(storage, `dps/${uid}_${Date.now()}_${file.name}`);
-    await uploadBytes(sRef, file);
-    dpURL = await getDownloadURL(sRef) + "?v=" + Date.now();
-    profileImg.src = dpURL;
+  let dpURL = null;
+
+  // ---------- Upload DP if selected ----------
+  if (file) {
+    const storageRef = ref(storage, "profileImages/" + user.uid);
+    await uploadBytes(storageRef, file);
+    dpURL = await getDownloadURL(storageRef);
   }
 
-  await update(dbRef(db, `users/${uid}`), {
-    name: nameInput.value,
-    age: ageInput.value,
-    gender: genderSelect.value,
-    city: cityInput.value,
-    dp: dpURL
+  // ---------- Save to database ----------
+  const userRef = dbRef(db, "users/" + user.uid);
+
+  await set(userRef, {
+    name: name,
+    dp: dpURL || document.getElementById("dp-preview").src
   });
 
-  saveMsg.style.display = "block";
-  setTimeout(() => saveMsg.style.display = "none", 2000);
-});
-
-backBtn.addEventListener("click", () => {
-  window.location.href = "chat.html";
+  alert("Profile Saved Successfully!");
 });
