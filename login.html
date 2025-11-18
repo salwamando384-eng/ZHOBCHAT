@@ -1,21 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f2f2f2;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .box {
+        width: 90%;
+        max-width: 380px;
+        background: #fff;
+        margin: auto;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0px 0px 10px #bbb;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        margin-top: 12px;
+        border-radius: 8px;
+        border: 1px solid #888;
+        font-size: 16px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 18px;
+        background: #2979FF;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background: #155FCC;
+    }
+
+    .profile-link {
+        margin-bottom: 15px;
+        display: block;
+        font-size: 15px;
+        color: #2979FF;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+</style>
 </head>
 <body>
-  <div class="center-box">
-    <h2>Login</h2>
-    <form id="startForm">
-      <button type="submit">Login Anonymously</button>
-    </form>
-    <p id="startMsg" style="margin-top:10px;"></p>
-    <p style="margin-top:10px;">Don't have an account? <a href="signup.html">Signup</a></p>
-  </div>
 
-  <script type="module" src="app.js"></script>
+<!-- 🔵 Change Profile (Top Small Link) -->
+<a href="profile.html" class="profile-link">Change Profile?</a>
+
+<div class="box">
+    <h2>Login</h2>
+
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+
+    <button id="loginBtn">Login</button>
+</div>
+
+<script type="module" src="login.js"></script>
+
 </body>
 </html>
