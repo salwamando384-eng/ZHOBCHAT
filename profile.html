@@ -3,93 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Profile - ZHOBCHAT</title>
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: #e5ddd5;
-    font-family: Arial, sans-serif;
-  }
-
-  .container {
-    max-width: 420px;
-    margin: auto;
-    background: white;
-    padding: 20px;
-    min-height: 100vh;
-    box-sizing: border-box;
-  }
-
-  h2 {
-    text-align: center;
-    margin-bottom: 15px;
-  }
-
-  #profileImg {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    display: block;
-    margin: 10px auto;
-    object-fit: cover;
-    border: 3px solid #128C7E;
-  }
-
-  input, select, button {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    font-size: 16px;
-    border-radius: 8px;
-    border: 1px solid #aaa;
-    box-sizing: border-box;
-  }
-
-  button {
-    background-color: #128C7E;
-    color: white;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-  }
-
-  button:hover {
-    background-color: #075E54;
-  }
-
-  #saveMsg {
-    display: none;
-    text-align: center;
-    color: green;
-    margin-top: 10px;
-  }
-</style>
+<title>Profile</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
   <h2>My Profile</h2>
-
-  <img id="profileImg" src="default_dp.png" alt="Profile Picture">
-
+  <img id="profileImg" src="default_dp.png" class="profile-pic">
   <input type="file" id="dpInput">
 
   <input type="text" id="name" placeholder="Name">
   <input type="number" id="age" placeholder="Age">
-
   <select id="gender">
     <option value="">Select Gender</option>
     <option value="Male">Male</option>
     <option value="Female">Female</option>
   </select>
-
   <input type="text" id="city" placeholder="City">
 
-  <button id="saveBtn">Save Profile</button>
+  <button id="saveProfileBtn">Save Profile</button>
   <button id="backBtn">Back to Chatroom</button>
-
-  <div id="saveMsg">Profile information updated!</div>
+  <div id="saveMsg"></div>
 </div>
 
 <script type="module" src="profile.js"></script>
