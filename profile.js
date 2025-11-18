@@ -1,5 +1,5 @@
 import { auth, db, storage } from "./firebase_config.js";
-import { ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { ref as dbRef, get, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
@@ -10,50 +10,47 @@ const ageInput = document.getElementById("age");
 const genderSelect = document.getElementById("gender");
 const cityInput = document.getElementById("city");
 const saveMsg = document.getElementById("saveMsg");
+const saveBtn = document.getElementById("saveProfileBtn");
+const backBtn = document.getElementById("backBtn");
 
 let uid;
+let userData = {};
 
-// LOAD CURRENT USER DATA
+// Load current user data
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
   uid = user.uid;
 
   const snap = await get(dbRef(db, "users/" + uid));
   if (snap.exists()) {
-    const data = snap.val();
+    userData = snap.val();
 
-    // FORCE NEW IMAGE REFRESH
-    let dp = data.dp ? data.dp + "?v=" + Date.now() : "default_dp.png";
-    profileImg.src = dp;
-
-    nameInput.value = data.name || "";
-    ageInput.value = data.age || "";
-    genderSelect.value = data.gender || "";
-    cityInput.value = data.city || "";
+    profileImg.src = userData.dp ? userData.dp + "?v=" + Date.now() : "default_dp.png";
+    nameInput.value = userData.name || "";
+    ageInput.value = userData.age || "";
+    genderSelect.value = userData.gender || "";
+    cityInput.value = userData.city || "";
   }
 });
 
-// SAVE PROFILE
-document.getElementById("saveProfileBtn").onclick = async () => {
+// Save profile data
+saveBtn.onclick = async () => {
   if (!uid) return;
 
   let dpURL = profileImg.src;
 
-  // NEW DP SELECTED
+  // Upload new DP if selected
   if (dpInput.files.length > 0) {
     const file = dpInput.files[0];
-    const sRef = storageRef(storage, "users/" + uid + "/dp.jpg");
-
+    const sRef = storageRef(storage, `dps/${uid}_${Date.now()}_${file.name}`);
     await uploadBytes(sRef, file);
     dpURL = await getDownloadURL(sRef);
-
-    // FORCE NEW IMAGE LOAD
-    dpURL += "?v=" + Date.now();
+    dpURL += "?v=" + Date.now(); // Force refresh
     profileImg.src = dpURL;
   }
 
-  // SAVE ALL DATA TO DATABASE
-  await set(dbRef(db, "users/" + uid), {
+  // Update Firebase DB
+  await update(dbRef(db, `users/${uid}`), {
     name: nameInput.value,
     age: ageInput.value,
     gender: genderSelect.value,
@@ -65,7 +62,7 @@ document.getElementById("saveProfileBtn").onclick = async () => {
   setTimeout(() => saveMsg.style.display = "none", 2000);
 };
 
-// BACK BUTTON
-document.getElementById("backBtn").onclick = () => {
-  window.location.href = "chatroom.html";
+// Back to Chat
+backBtn.onclick = () => {
+  window.location.href = "chat.html";
 };
