@@ -1,5 +1,5 @@
 import { auth, db, storage } from "./firebase_config.js";
-import { ref as dbRef, update, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { ref as dbRef, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
@@ -10,11 +10,10 @@ const ageInput = document.getElementById("age");
 const genderSelect = document.getElementById("gender");
 const cityInput = document.getElementById("city");
 const saveMsg = document.getElementById("saveMsg");
-const saveBtn = document.getElementById("saveProfileBtn"); // FIXED
 
 let uid;
 
-// Load Current User Data
+// LOAD CURRENT USER DATA
 onAuthStateChanged(auth, async (user) => {
   if (!user) return;
   uid = user.uid;
@@ -23,6 +22,7 @@ onAuthStateChanged(auth, async (user) => {
   if (snap.exists()) {
     const data = snap.val();
 
+    // FORCE NEW IMAGE REFRESH
     let dp = data.dp ? data.dp + "?v=" + Date.now() : "default_dp.png";
     profileImg.src = dp;
 
@@ -33,26 +33,27 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// Save Profile
-saveBtn.onclick = async () => {
+// SAVE PROFILE
+document.getElementById("saveProfileBtn").onclick = async () => {
   if (!uid) return;
 
   let dpURL = profileImg.src;
 
-  // If new DP selected
+  // NEW DP SELECTED
   if (dpInput.files.length > 0) {
     const file = dpInput.files[0];
-    const sRef = storageRef(storage, `dps/${uid}_${Date.now()}_${file.name}`); // FIXED PATH
+    const sRef = storageRef(storage, "users/" + uid + "/dp.jpg");
 
     await uploadBytes(sRef, file);
     dpURL = await getDownloadURL(sRef);
 
-    dpURL = dpURL + "?v=" + Date.now(); // FORCE UPDATE
+    // FORCE NEW IMAGE LOAD
+    dpURL += "?v=" + Date.now();
     profileImg.src = dpURL;
   }
 
-  // UPDATE instead of REPLACE
-  await update(dbRef(db, "users/" + uid), {
+  // SAVE ALL DATA TO DATABASE
+  await set(dbRef(db, "users/" + uid), {
     name: nameInput.value,
     age: ageInput.value,
     gender: genderSelect.value,
@@ -60,7 +61,11 @@ saveBtn.onclick = async () => {
     dp: dpURL
   });
 
-  saveMsg.innerHTML = "✅ Saved!";
   saveMsg.style.display = "block";
   setTimeout(() => saveMsg.style.display = "none", 2000);
+};
+
+// BACK BUTTON
+document.getElementById("backBtn").onclick = () => {
+  window.location.href = "chatroom.html";
 };
