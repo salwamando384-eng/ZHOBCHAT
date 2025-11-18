@@ -10,21 +10,26 @@
 
 <div class="container">
   <h2>My Profile</h2>
+
   <img id="profileImg" src="default_dp.png" class="profile-pic">
+
   <input type="file" id="dpInput">
 
   <input type="text" id="name" placeholder="Name">
   <input type="number" id="age" placeholder="Age">
+
   <select id="gender">
     <option value="">Select Gender</option>
     <option value="Male">Male</option>
     <option value="Female">Female</option>
   </select>
+
   <input type="text" id="city" placeholder="City">
 
   <button id="saveProfileBtn">Save Profile</button>
   <button id="backBtn">Back to Chatroom</button>
-  <div id="saveMsg"></div>
+
+  <div id="saveMsg" style="display:none; color:green;">Profile Saved!</div>
 </div>
 
 <script type="module" src="profile.js"></script>
