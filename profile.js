@@ -1,78 +1,95 @@
-import { auth, db, storage } from "./firebase_config.js";
-import { ref as dbRef, get, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+// profile.js
+
+import { auth, db, storage } from "./firebase.js";
+import {
+  ref,
+  set,
+  get
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+import {
+  ref as sRef,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 const profileImg = document.getElementById("profileImg");
 const dpInput = document.getElementById("dpInput");
 const nameInput = document.getElementById("name");
 const ageInput = document.getElementById("age");
-const genderSelect = document.getElementById("gender");
+const genderInput = document.getElementById("gender");
 const cityInput = document.getElementById("city");
 const saveBtn = document.getElementById("saveProfileBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const saveMsg = document.getElementById("saveMsg");
 
-let uid = null;
+let uid;
+let currentDP = "";
 
-// Load user data
+// Load old data
 onAuthStateChanged(auth, async (user) => {
-  if (!user) return;
+  if (!user) {
+    alert("Login required");
+    location.href = "index.html";
+    return;
+  }
+
   uid = user.uid;
 
-  const snap = await get(dbRef(db, "users/" + uid));
-
+  const snap = await get(ref(db, "users/" + uid));
   if (snap.exists()) {
     const data = snap.val();
 
-    profileImg.src = (data.dp || "default_dp.png") + "?t=" + Date.now();
     nameInput.value = data.name || "";
     ageInput.value = data.age || "";
-    genderSelect.value = data.gender || "";
+    genderInput.value = data.gender || "";
     cityInput.value = data.city || "";
+    currentDP = data.dp || "default_dp.png";
+
+    profileImg.src = currentDP;
   }
 });
 
-// Save Profile
-saveBtn.onclick = async () => {
-  if (!uid) return;
-
-  saveMsg.style.color = "black";
-  saveMsg.textContent = "Saving...";
-
-  let dpURL = null;
-
-  // Upload DP if selected
+// Preview new DP
+dpInput.onchange = () => {
   if (dpInput.files.length > 0) {
-    const file = dpInput.files[0];
-    const dpRef = sRef(storage, "users/" + uid + "/dp.jpg");
-
-    await uploadBytes(dpRef, file);
-    dpURL = await getDownloadURL(dpRef);
-  }
-
-  const newData = {
-    name: nameInput.value,
-    age: ageInput.value,
-    gender: genderSelect.value,
-    city: cityInput.value
-  };
-
-  if (dpURL) newData.dp = dpURL;
-
-  await update(dbRef(db, "users/" + uid), newData);
-
-  saveMsg.style.color = "green";
-  saveMsg.textContent = "Profile Updated ✔";
-
-  if (dpURL) {
-    profileImg.src = dpURL + "?t=" + Date.now();
+    profileImg.src = URL.createObjectURL(dpInput.files[0]);
   }
 };
 
-// Logout
-logoutBtn.onclick = () => {
-  signOut(auth).then(() => {
-    location.href = "index.html";
+// Save profile
+saveBtn.onclick = async () => {
+  saveMsg.textContent = "Saving...";
+
+  let dpURL = currentDP;
+
+  // Upload new DP
+  if (dpInput.files.length > 0) {
+    const file = dpInput.files[0];
+    const storageRef = sRef(storage, "dp/" + uid + ".jpg");
+    await uploadBytes(storageRef, file);
+    dpURL = await getDownloadURL(storageRef);
+  }
+
+  await set(ref(db, "users/" + uid), {
+    name: nameInput.value,
+    age: ageInput.value,
+    gender: genderInput.value,
+    city: cityInput.value,
+    dp: dpURL
   });
+
+  saveMsg.textContent = "✔ Profile Saved!";
+  setTimeout(() => (saveMsg.textContent = ""), 2000);
+};
+
+// Logout
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+  location.href = "index.html";
 };
