@@ -2,19 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profile</title>
-<link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>My Profile</title>
 
 <style>
-  .profile-box {
+  body {
+    background: #f2f2f2;
+    font-family: Arial;
+  }
+
+  .box {
     width: 90%;
-    max-width: 400px;
-    margin: auto;
+    max-width: 420px;
     background: #fff;
     padding: 20px;
+    margin: auto;
+    margin-top: 20px;
     border-radius: 12px;
-    box-shadow: 0 0 10px #999;
+    box-shadow: 0 0 8px #aaa;
   }
 
   .profile-pic {
@@ -22,9 +27,9 @@
     height: 140px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #2979FF;
     display: block;
     margin: auto;
+    border: 3px solid #2979FF;
   }
 
   input, select, button {
@@ -40,31 +45,31 @@
     background: #2979FF;
     color: #fff;
     border: none;
-    cursor: pointer;
   }
 
-  button:hover {
-    background: #125ACC;
+  #logoutBtn {
+    background: #D32F2F;
   }
 
   #saveMsg {
-    margin-top: 15px;
+    margin-top: 12px;
     font-weight: bold;
     text-align: center;
   }
 </style>
-</head>
 
+</head>
 <body>
 
-<div class="profile-box">
+<div class="box">
 
-  <h2 style="text-align:center;">Edit Profile</h2>
+  <h2 style="text-align:center;">My Profile</h2>
 
   <img id="profileImg" src="default_dp.png" class="profile-pic">
+
   <input type="file" id="dpInput">
 
-  <input type="text" id="name" placeholder="Name">
+  <input type="text" id="name" placeholder="Your Name">
   <input type="number" id="age" placeholder="Age">
 
   <select id="gender">
@@ -76,6 +81,7 @@
   <input type="text" id="city" placeholder="City">
 
   <button id="saveProfileBtn">Save Profile</button>
+  <button id="logoutBtn">Logout</button>
   <button onclick="location.href='chat.html'">Back</button>
 
   <div id="saveMsg"></div>
