@@ -1,25 +1,28 @@
-// Firebase Imports
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Room</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-// Firebase Config
-const firebaseConfig = {
-  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain: "zhobchat-33d8e.firebaseapp.com",
-  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "zhobchat-33d8e",
-  storageBucket: "zhobchat-33d8e.appspot.com",
-  messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-  measurementId: "G-LX9P9LRLV8"
-};
+<div class="chat-container">
+  <div class="chat-header">
+    <img id="chatDp" src="default_dp.png" class="chat-dp">
+    <button id="profileBtn">Profile</button>
+    <button id="logoutBtn">Logout</button>
+  </div>
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-const storage = getStorage(app);
+  <div id="messages" class="messages-box"></div>
 
-export { auth, db, storage };
+  <div class="input-area">
+    <input type="text" id="messageInput" placeholder="Type a message...">
+    <button id="sendBtn">Send</button>
+  </div>
+</div>
+
+<script type="module" src="chat.js"></script>
+</body>
+</html>
