@@ -1,59 +1,69 @@
 import { auth, db, storage } from "./firebase_config.js";
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { ref as dbRef, get, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-import {
-  ref as dbRef,
-  set,
-  get
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+const profileImg = document.getElementById("profileImg");
+const dpInput = document.getElementById("dpInput");
+const nameInput = document.getElementById("name");
+const ageInput = document.getElementById("age");
+const genderSelect = document.getElementById("gender");
+const cityInput = document.getElementById("city");
+const saveMsg = document.getElementById("saveMsg");
+const saveBtn = document.getElementById("saveProfileBtn");
 
-// ------------ Load Current User Data ------------
-auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
+let uid = null;
 
-  const userRef = dbRef(db, "users/" + user.uid);
-  const snap = await get(userRef);
+// Load current user
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
+  uid = user.uid;
 
+  const snap = await get(dbRef(db, "users/" + uid));
   if (snap.exists()) {
     const data = snap.val();
 
-    document.getElementById("name").value = data.name || "";
-    document.getElementById("dp-preview").src =
-      data.dp || "default_dp.png";
+    profileImg.src = (data.dp || "default_dp.png") + "?t=" + Date.now();
+    nameInput.value = data.name || "";
+    ageInput.value = data.age || "";
+    genderSelect.value = data.gender || "";
+    cityInput.value = data.city || "";
   }
 });
 
-// ------------ Save Profile Button ------------
-document.getElementById("saveProfile").addEventListener("click", async () => {
-  const user = auth.currentUser;
-  if (!user) return;
+// Save Profile Handler
+saveBtn.onclick = async () => {
+  if (!uid) return;
 
-  const name = document.getElementById("name").value;
-  const file = document.getElementById("dp").files[0];
+  saveMsg.style.color = "black";
+  saveMsg.textContent = "Saving...";
 
   let dpURL = null;
 
-  // ---------- Upload DP if selected ----------
-  if (file) {
-    const storageRef = ref(storage, "profileImages/" + user.uid);
-    await uploadBytes(storageRef, file);
-    dpURL = await getDownloadURL(storageRef);
+  // If new DP selected
+  if (dpInput.files.length > 0) {
+    const file = dpInput.files[0];
+    const picRef = sRef(storage, "users/" + uid + "/dp.jpg");
+
+    await uploadBytes(picRef, file);
+    dpURL = await getDownloadURL(picRef);
   }
 
-  // ---------- Save to database ----------
-  const userRef = dbRef(db, "users/" + user.uid);
+  const dataToUpdate = {
+    name: nameInput.value,
+    age: ageInput.value,
+    gender: genderSelect.value,
+    city: cityInput.value
+  };
 
-  await set(userRef, {
-    name: name,
-    dp: dpURL || document.getElementById("dp-preview").src
-  });
+  if (dpURL) dataToUpdate.dp = dpURL;
 
-  alert("Profile Saved Successfully!");
-});
+  await update(dbRef(db, "users/" + uid), dataToUpdate);
+
+  saveMsg.style.color = "green";
+  saveMsg.textContent = "Profile Updated ✔";
+
+  if (dpURL) {
+    profileImg.src = dpURL + "?t=" + Date.now(); // force refresh
+  }
+};
