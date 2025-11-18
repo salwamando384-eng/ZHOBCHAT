@@ -1,25 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZHOBCHAT</title>
-<link rel="stylesheet" href="style.css">
-<script type="module">
-  import { auth } from './firebase_config.js';
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZHOBCHAT</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module">
+    import { auth } from './firebase_config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-  // Redirect based on login status
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      window.location.href = 'chat.html';
-    } else {
-      window.location.href = 'login.html';
-    }
-  });
-</script>
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = 'chat.html';
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
+  </script>
 </head>
 <body>
-<p style="text-align:center; margin-top:50px;">⏳ Redirecting...</p>
+  <p style="text-align:center; margin-top:50px;">⏳ Redirecting...</p>
 </body>
 </html>
