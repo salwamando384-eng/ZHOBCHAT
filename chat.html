@@ -1,121 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZHOBCHAT - Chatroom</title>
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #e5ddd5;
-  }
+// Firebase Imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-  .chat-container {
-    max-width: 420px;
-    margin: auto;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background-color: #fff;
-    border: 1px solid #ccc;
-  }
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+  authDomain: "zhobchat-33d8e.firebaseapp.com",
+  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "zhobchat-33d8e",
+  storageBucket: "zhobchat-33d8e.appspot.com",
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218",
+  measurementId: "G-LX9P9LRLV8"
+};
 
-  .chat-header {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    background-color: #128C7E;
-    color: white;
-  }
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const storage = getStorage(app);
 
-  .chat-header img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 10px;
-  }
-
-  .chat-header button {
-    margin-left: auto;
-    background-color: #075E54;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-
-  .chat-messages {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-    background-color: #f0f0f0;
-  }
-
-  .msg {
-    background-color: #dcf8c6;
-    padding: 8px 12px;
-    border-radius: 10px;
-    margin-bottom: 8px;
-    max-width: 80%;
-    word-wrap: break-word;
-  }
-
-  .chat-input {
-    display: flex;
-    padding: 10px;
-    background-color: #fff;
-    border-top: 1px solid #ccc;
-  }
-
-  .chat-input input {
-    flex: 1;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    outline: none;
-  }
-
-  .chat-input button {
-    margin-left: 10px;
-    padding: 10px 16px;
-    border-radius: 20px;
-    border: none;
-    background-color: #128C7E;
-    color: white;
-    cursor: pointer;
-  }
-
-  @media (max-width: 450px) {
-    .chat-container {
-      width: 100%;
-      border: none;
-    }
-  }
-</style>
-</head>
-<body>
-
-<div class="chat-container">
-  <div class="chat-header">
-    <img id="chatDp" src="default_dp.png" alt="Profile Picture">
-    <span>ZHOBCHAT</span>
-    <button id="profileBtn">Profile</button>
-    <button id="logoutBtn">Logout</button>
-  </div>
-
-  <div id="messages" class="chat-messages"></div>
-
-  <div class="chat-input">
-    <input type="text" id="messageInput" placeholder="Type a message">
-    <button id="sendBtn">Send</button>
-  </div>
-</div>
-
-<script type="module" src="chat.js"></script>
-</body>
-</html>
+export { auth, db, storage };
