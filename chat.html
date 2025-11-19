@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ZHOBCHAT — Group</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ZHOBCHAT</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <div class="topbar">
     <div class="left">
       <img id="topDp" src="default_dp.png" class="top-dp">
@@ -17,17 +18,34 @@
     </div>
     <div class="right">
       <button id="toProfile">Profile</button>
-      <button id="logout">Logout</button>
+      <button id="logoutBtn">Logout</button>
     </div>
   </div>
 
-  <div id="messages" class="messages"></div>
+  <div class="app-wrap">
+    <div class="sidebar">
+      <h4>Users</h4>
+      <div id="usersList"></div>
+      <hr>
+      <h4>Group</h4>
+      <div class="user-item" id="groupItem">
+        <img src="default_dp.png" class="user-dp">
+        <div>
+          <div class="user-name">ZHOBCHAT (Group)</div>
+          <div class="user-about">Open group chat</div>
+        </div>
+      </div>
+    </div>
 
-  <div class="composer">
-    <input id="msgInput" placeholder="Type a message" />
-    <input id="attach" type="file" accept="image/*" style="display:none" />
-    <button id="attachBtn">📎</button>
-    <button id="sendBtn">Send</button>
+    <div class="main">
+      <div id="messages" class="messages"></div>
+      <div class="composer">
+        <input id="msgInput" type="text" placeholder="Message">
+        <input id="attach" type="file" accept="image/*" style="display:none">
+        <button id="attachBtn" class="compose-btn">📎</button>
+        <button id="sendBtn" class="compose-btn">Send</button>
+      </div>
+    </div>
   </div>
 
 <script type="module" src="chat.js"></script>
