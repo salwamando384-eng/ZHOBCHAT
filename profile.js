@@ -31,7 +31,7 @@ const saveMsg = document.getElementById("saveMsg");
 let uid;
 let currentDP = "";
 
-// Load old data
+// Load Profile Data
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     alert("Login required");
@@ -51,7 +51,7 @@ onAuthStateChanged(auth, async (user) => {
     cityInput.value = data.city || "";
     currentDP = data.dp || "default_dp.png";
 
-    profileImg.src = currentDP;
+    profileImg.src = currentDP + "?v=" + Date.now();
   }
 });
 
@@ -62,7 +62,7 @@ dpInput.onchange = () => {
   }
 };
 
-// Save profile
+// Save Profile
 saveBtn.onclick = async () => {
   saveMsg.textContent = "Saving...";
 
