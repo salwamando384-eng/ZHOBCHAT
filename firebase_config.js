@@ -1,10 +1,12 @@
+// firebase_config.js
+
 // Firebase Imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// Firebase Configuration
+// Firebase Configuration (Your Own Config)
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -21,4 +23,5 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
+// Export for other files
 export { auth, db, storage };
