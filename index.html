@@ -1,51 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ur">
 <head>
-<meta charset="UTF-8">
-<title>ZhobChat</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-  body { font-family: Arial; margin: 0; padding: 0; }
-
-  #profileImg {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-
-  #chatContainer { display: none; padding: 10px; }
-
-  #loading {
-    display:none;
-    text-align:center;
-    font-size:18px;
-    padding:20px;
-  }
-</style>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZHOBCHAT — Login / Signup</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="center-box">
+    <h1>ZHOBCHAT</h1>
 
-<div id="loading">Loading...</div>
+    <div id="authForms">
+      <div id="signupForm" class="auth-card">
+        <h3>سائن اپ</h3>
+        <input id="suName" placeholder="Full name" />
+        <input id="suEmail" type="email" placeholder="Email" />
+        <input id="suPass" type="password" placeholder="Password (6+)" />
+        <input id="suDp" type="file" accept="image/*" />
+        <button id="signupBtn">Sign Up</button>
+        <p class="muted">Already have account? <a id="toLogin">Login</a></p>
+        <div id="suMsg" class="msg"></div>
+      </div>
 
-<!-- PROFILE SECTION -->
-<div id="profileSection" style="text-align:center; padding:20px;">
-  <img id="profileImg" src="default_dp.png">
-  <br><br>
-  <input type="file" id="dpInput">
-  <br><br>
-  <button id="saveDPBtn">Save DP</button>
-</div>
+      <div id="loginForm" class="auth-card hidden">
+        <h3>لاگ ان</h3>
+        <input id="liEmail" type="email" placeholder="Email" />
+        <input id="liPass" type="password" placeholder="Password" />
+        <button id="loginBtn">Login</button>
+        <p class="muted">No account? <a id="toSignup">Sign up</a></p>
+        <div id="liMsg" class="msg"></div>
+      </div>
+    </div>
+  </div>
 
-<!-- CHAT SECTION -->
-<div id="chatContainer">
-  <div id="messages"></div>
-  <input id="msgBox" placeholder="Type message...">
-  <button id="sendBtn">Send</button>
-</div>
-
-<script type="module" src="./index.js"></script>
+<script type="module" src="auth.js"></script>
 </body>
 </html>
