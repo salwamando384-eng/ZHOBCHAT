@@ -1,52 +1,94 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { auth, db, storage } from "./firebase_config.js";
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-  authDomain: "zhobchat-33d8e.firebaseapp.com",
-  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "zhobchat-33d8e",
-  storageBucket: "zhobchat-33d8e.appspot.com",
-  messagingSenderId: "116466089929",
-  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
+import {
+  ref,
+  set,
+  push,
+  onValue
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+import {
+  uploadBytes,
+  getDownloadURL,
+  ref as sRef
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+
+const loading = document.getElementById("loading");
+const profileImg = document.getElementById("profileImg");
+const dpInput = document.getElementById("dpInput");
+const saveDPBtn = document.getElementById("saveDPBtn");
+const chatContainer = document.getElementById("chatContainer");
+const msgBox = document.getElementById("msgBox");
+const sendBtn = document.getElementById("sendBtn");
+const messagesDiv = document.getElementById("messages");
+
+// USER LOGIN CHECK
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("Login first!");
+    window.location.href = "login.html";
+    return;
+  }
+
+  loading.style.display = "block";
+
+  const dpPath = ref(db, "users/" + user.uid + "/dp");
+
+  onValue(dpPath, (snapshot) => {
+    const dpURL = snapshot.val();
+    profileImg.src = dpURL ? dpURL : "default_dp.png";
+  });
+
+  chatContainer.style.display = "block";
+  loading.style.display = "none";
+});
+
+// SAVE NEW DP
+saveDPBtn.onclick = async () => {
+  const file = dpInput.files[0];
+  if (!file) return alert("Select a picture!");
+
+  loading.style.display = "block";
+
+  const user = auth.currentUser;
+  const storagePath = sRef(storage, "dp/" + user.uid);
+
+  await uploadBytes(storagePath, file);
+
+  const url = await getDownloadURL(storagePath);
+
+  await set(ref(db, "users/" + user.uid + "/dp"), url);
+
+  profileImg.src = url;
+
+  loading.style.display = "none";
+  alert("Profile Picture Updated!");
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+// SEND MESSAGE
+sendBtn.onclick = async () => {
+  const text = msgBox.value.trim();
+  if (!text) return;
 
-window.signupUser = function () {
-  const name = document.getElementById("signupName").value;
-  const email = document.getElementById("signupEmail").value;
-  const password = document.getElementById("signupPassword").value;
+  const user = auth.currentUser;
 
-  createUserWithEmailAndPassword(auth, email, password)
-    .then(userCredential => {
-      const user = userCredential.user;
-      updateProfile(user, { displayName: name });
-      set(ref(db, "users/" + user.uid), {
-        name: name,
-        email: email,
-        profilePic: ""
-      });
-      alert("Signup successful!");
-      window.location.href = "chat.html";
-    })
-    .catch(error => {
-      document.getElementById("message").innerText = error.message;
-    });
+  await push(ref(db, "messages"), {
+    uid: user.uid,
+    text,
+    time: Date.now()
+  });
+
+  msgBox.value = "";
 };
 
-window.loginUser = function () {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
-
-  signInWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      window.location.href = "chat.html";
-    })
-    .catch(error => {
-      document.getElementById("message").innerText = error.message;
-    });
-};
+// LOAD MESSAGES
+onValue(ref(db, "messages"), (snapshot) => {
+  messagesDiv.innerHTML = "";
+  snapshot.forEach((msg) => {
+    const data = msg.val();
+    messagesDiv.innerHTML += `<p><strong>${data.uid}:</strong> ${data.text}</p>`;
+  });
+});
