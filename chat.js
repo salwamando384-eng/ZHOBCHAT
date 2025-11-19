@@ -1,7 +1,7 @@
-import { auth, db } from "./firebase_config.js";
+import { auth, db } from "./firebase.js";
 import { ref, onChildAdded, push, get } 
   from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { onAuthStateChanged, signOut } 
+import { onAuthStateChanged } 
   from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 const messagesBox = document.getElementById("messages");
@@ -21,7 +21,14 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await get(ref(db, "users/" + uid));
   if (snap.exists()) {
     myData = snap.val();
-    myDp.src = myData.dp ? myData.dp + "?v=" + Date.now() : "default_dp.png";
+
+    // Show updated DP
+    if (myData.dp) {
+      myDp.src = myData.dp + "?v=" + Date.now();
+    } else {
+      myDp.src = "default_dp.png";
+    }
+
     myName.textContent = myData.name || "Unknown";
   }
 });
@@ -33,7 +40,7 @@ sendBtn.onclick = async () => {
   await push(ref(db, "messages"), {
     uid: uid,
     name: myData.name,
-    dp: myData.dp + "?v=" + Date.now(),
+    dp: myData.dp ? myData.dp + "?v=" + Date.now() : "default_dp.png",
     text: text,
     time: Date.now()
   });
@@ -44,6 +51,7 @@ sendBtn.onclick = async () => {
 onChildAdded(ref(db, "messages"), (snapshot) => {
   const msg = snapshot.val();
   const div = document.createElement("div");
+
   div.classList.add("msg-box");
   div.innerHTML = `
     <img class="msg-dp" src="${msg.dp}">
@@ -52,6 +60,7 @@ onChildAdded(ref(db, "messages"), (snapshot) => {
       <p>${msg.text}</p>
     </div>
   `;
+
   messagesBox.appendChild(div);
   messagesBox.scrollTop = messagesBox.scrollHeight;
 });
