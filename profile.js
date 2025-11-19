@@ -6,6 +6,10 @@ import { ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.co
 
 const profileImg = document.getElementById("profileImg");
 const nameInput = document.getElementById("nameInput");
+const genderInput = document.getElementById("genderInput");
+const ageInput = document.getElementById("ageInput");
+const cityInput = document.getElementById("cityInput");
+const aboutInput = document.getElementById("aboutInput");
 const dpInput = document.getElementById("dpInput");
 const saveBtn = document.getElementById("saveProfileBtn");
 const logoutBtn = document.getElementById("logoutBtn");
@@ -19,9 +23,13 @@ onAuthStateChanged(auth, async (user) => {
 
   const snap = await get(dbRef(db, `users/${uid}`));
   if (snap.exists()) {
-    const data = snap.val();
-    nameInput.value = data.name || "";
-    profileImg.src = data.dp ? data.dp + "?v=" + Date.now() : "default_dp.png";
+    const d = snap.val();
+    nameInput.value = d.name || "";
+    genderInput.value = d.gender || "";
+    ageInput.value = d.age || "";
+    cityInput.value = d.city || "";
+    aboutInput.value = d.about || "";
+    profileImg.src = d.dp ? d.dp + "?v=" + Date.now() : "default_dp.png";
   }
 });
 
@@ -35,16 +43,19 @@ saveBtn.onclick = async () => {
     await uploadBytes(sref, file);
     dpURL = await getDownloadURL(sref);
   } else {
-    // keep existing
-    const s = await get(dbRef(db, `users/${uid}/dp`));
-    dpURL = s.exists() ? s.val() : "default_dp.png";
+    const snap = await get(dbRef(db, `users/${uid}/dp`));
+    dpURL = snap.exists() ? snap.val() : "default_dp.png";
   }
 
   await set(dbRef(db, `users/${uid}`), {
     name: nameInput.value,
+    gender: genderInput.value,
+    age: ageInput.value,
+    city: cityInput.value,
+    about: aboutInput.value,
     dp: dpURL,
-    lastSeen: Date.now(),
-    online: true
+    online: true,
+    lastSeen: Date.now()
   });
 
   profileMsg.textContent = "Saved!";
@@ -53,7 +64,6 @@ saveBtn.onclick = async () => {
 };
 
 logoutBtn.onclick = async () => {
-  // set offline
   await set(dbRef(db, `users/${auth.currentUser.uid}/online`), false);
   await set(dbRef(db, `users/${auth.currentUser.uid}/lastSeen`), Date.now());
   await signOut(auth);
