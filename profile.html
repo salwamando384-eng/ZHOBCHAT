@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -8,9 +8,18 @@
 </head>
 <body>
   <div class="center-box">
-    <h2>اپنا پروفائل</h2>
+    <h2>Profile</h2>
     <img id="profileImg" src="default_dp.png" class="profile-pic">
     <input id="nameInput" placeholder="Name" />
+    <select id="genderInput">
+      <option value="">Select gender</option>
+      <option>Male</option>
+      <option>Female</option>
+      <option>Other</option>
+    </select>
+    <input id="ageInput" type="number" placeholder="Age" />
+    <input id="cityInput" placeholder="City" />
+    <textarea id="aboutInput" rows="3" placeholder="About me"></textarea>
     <input id="dpInput" type="file" accept="image/*" />
     <button id="saveProfileBtn">Save</button>
     <button id="logoutBtn" class="danger">Logout</button>
