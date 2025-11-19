@@ -1,157 +1,34 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
-}
-body {
-  background: #e7ebee;
-  color: #000;
-}
-.center-box {
-  width: 90%;
-  max-width: 400px;
-  margin: 100px auto;
-  background: #fff;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px #0003;
-  text-align: center;
-}
-.center-box button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  background: #1565c0;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 17px;
-}
-.chat-container {
-  width: 100%;
-  max-width: 550px;
-  height: 100vh;
-  margin: 0 auto;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-}
-.top-bar {
-  width: 100%;
-  padding: 10px;
-  background: #1565c0;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.top-dp {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #fff;
-}
-.edit-btn {
-  margin-left: auto;
-  padding: 7px 12px;
-  background: #fff;
-  color: #1565c0;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-}
-.messages {
-  flex: 1;
-  padding: 10px;
-  overflow-y: auto;
-  background: #f2f2f2;
-}
-.msg-box {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-.msg-dp {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  margin-right: 8px;
-  object-fit: cover;
-}
-.msg-content {
-  max-width: 75%;
-  background: #fff;
-  padding: 8px 12px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px #0001;
-}
-.msg-content b {
-  display: block;
-  margin-bottom: 3px;
-  color: #1565c0;
-}
-.input-area {
-  display: flex;
-  padding: 10px;
-  background: #fff;
-  border-top: 1px solid #ccc;
-}
-.input-area input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #aaa;
-  border-radius: 8px;
-  font-size: 16px;
-}
-.input-area button {
-  margin-left: 7px;
-  padding: 10px 15px;
-  background: #1565c0;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-}
-.container {
-  width: 90%;
-  max-width: 420px;
-  margin: 30px auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 0 10px #0002;
-}
-.profile-pic {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-  margin: 10px auto;
-  border: 3px solid #1565c0;
-}
-.container input, .container select {
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #bbb;
-  margin-top: 10px;
-  font-size: 16px;
-}
-.container button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 12px;
-  border: none;
-  border-radius: 8px;
-  background: #1565c0;
-  color: #fff;
-  font-size: 18px;
-}
-#saveMsg {
-  text-align: center;
-  margin-top: 15px;
-  color: green;
-  font-weight: bold;
-}
+/* style.css - simple, responsive */
+:root{--primary:#075E54;--accent:#25D366;--muted:#888;}
+body{font-family:Inter,Arial,Helvetica,sans-serif;background:#f0f2f5;margin:0;color:#111}
+.center-box{max-width:420px;margin:30px auto;padding:20px;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.06);text-align:center;}
+.auth-card{display:block}
+.hidden{display:none}
+input[type=file]{width:100%}
+input, button{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid #ddd;font-size:15px}
+button{background:var(--primary);color:#fff;border:none;cursor:pointer}
+button.danger{background:#D32F2F}
+.msg{color:green;margin-top:6px}
+
+/* topbar */
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--primary);color:#fff}
+.topbar .left{display:flex;gap:10px;align-items:center}
+.top-dp{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.2)}
+.topbar .right button{margin-left:8px;padding:8px 12px}
+
+/* messages */
+.messages{height:70vh;overflow:auto;padding:12px;background:#e5ddd5}
+.msg{display:flex;gap:8px;margin-bottom:12px;align-items:flex-end}
+.msg-dp{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.bubble{background:#fff;padding:8px;border-radius:10px;max-width:78%}
+.meta{font-size:13px;color:#333;margin-bottom:6px}
+.muted{color:#777;font-size:12px;margin-left:6px}
+.text{font-size:15px;white-space:pre-wrap}
+.msg-img{max-width:220px;border-radius:8px;margin-top:6px}
+.imgwrap{margin-top:6px}
+
+/* composer */
+.composer{display:flex;gap:8px;padding:8px;align-items:center;background:#fff;position:sticky;bottom:0}
+.composer input{flex:1}
+.composer button{width:auto;padding:10px 12px}
+.profile-pic{width:120px;height:120px;border-radius:50%;object-fit:cover}
