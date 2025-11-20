@@ -1,102 +1,136 @@
-import { auth, db, storage } from "./firebaseConfig.js";
-import { ref, onChildAdded, push, get, set, onValue, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+// chat.js (group + private + user list + dp cache-bust)
+import { auth, db, storage } from "./firebase_config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref as dbRef, push, onChildAdded, get, set, query, orderByChild, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-const messagesBox = document.getElementById("messages");
+const topDp = document.getElementById("topDp");
+const topName = document.getElementById("topName");
+const topStatus = document.getElementById("topStatus");
+const toProfile = document.getElementById("toProfile");
+const logoutBtn = document.getElementById("logout");
+
+const usersList = document.getElementById("usersList");
+const groupItem = document.getElementById("groupItem");
+
+const messagesDiv = document.getElementById("messages");
 const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
-const myDp = document.getElementById("myDp");
-const myName = document.getElementById("myName");
-const userListDiv = document.getElementById("userList");
+const attach = document.getElementById("attach");
+const attachBtn = document.getElementById("attachBtn");
 
-let uid, myData = {}, currentChatUser = null;
-let isAdmin = false; // Change to true for owner/admin
+let uid, myProfile = {};
+let currentChat = { type: "group", id: "group" };
 
-// Load user info
-onAuthStateChanged(auth, async (user)=>{
+function chatId(a,b){ return [a,b].sort().join("_"); }
+
+onAuthStateChanged(auth, async user=>{
   if(!user){ location.href="index.html"; return; }
   uid = user.uid;
 
-  const snap = await get(ref(db,"users/"+uid));
-  if(snap.exists()){
-    myData = snap.val();
-    myName.textContent = myData.name || "Unknown";
-    myDp.src = myData.dp || "default_dp.png";
-    isAdmin = myData.isAdmin || false;
+  const snap = await get(dbRef(db, `users/${uid}`));
+  if(snap.exists()) myProfile = snap.val();
 
-    // Set online
-    await set(ref(db,"users/"+uid+"/status"),"online");
-  }
+  topDp.src = myProfile.dp ? myProfile.dp + "?v=" + Date.now() : "default_dp.png";
+  topName.textContent = myProfile.name || "ZHOBCHAT";
+  topStatus.textContent = myProfile.name ? `Logged in as ${myProfile.name}` : "Welcome";
 
-  // Load user list
-  onValue(ref(db,"users/"), snapshot=>{
-    userListDiv.innerHTML="";
-    snapshot.forEach(child=>{
-      const u = child.val();
-      const div = document.createElement("div");
-      div.className="user-item";
-      div.innerHTML=`<span class="status ${u.status==='online'?'online':'offline'}"></span>${u.name}`;
-      div.onclick=()=>{ openUserChat(child.key, u); }
-      userListDiv.appendChild(div);
-    });
-  });
+  await set(dbRef(db, `users/${uid}/online`), true);
+  await set(dbRef(db, `users/${uid}/lastSeen`), Date.now());
 
-  // Load global messages
-  onChildAdded(ref(db,"messages/"), snapshot=>{
-    const msg = snapshot.val();
-    appendMessage(msg);
-  });
+  loadUsers();
+  openGroup();
 });
 
-// Send message
-sendBtn.onclick = async ()=>{
-  if(!msgInput.value.trim()) return;
-  const message = {
-    text: msgInput.value,
-    time: Date.now(),
-    uid: uid,
-    name: myData.name,
-    dp: myData.dp
-  };
+// load users
+async function loadUsers(){
+  const snap = await get(dbRef(db, "users"));
+  usersList.innerHTML = "";
+  if(!snap.exists()) return;
+  const users = snap.val();
+  Object.keys(users).forEach(u=>{
+    if(u === uid) return;
+    const user = users[u];
+    const div = document.createElement("div");
+    div.className = "user-item";
+    div.dataset.uid = u;
+    div.innerHTML = `
+      <img src="${user.dp ? user.dp + '?v=' + Date.now() : 'default_dp.png'}" class="user-dp">
+      <div>
+        <div class="user-name">${user.name || 'Unknown'}</div>
+        <div class="user-about">${user.about || user.city || ''}</div>
+      </div>
+    `;
+    div.onclick = ()=> openPrivate(u, user);
+    usersList.appendChild(div);
+  });
+}
 
-  if(currentChatUser){
-    await push(ref(db,"private/"+uid+"/"+currentChatUser), message);
-    await push(ref(db,"private/"+currentChatUser+"/"+uid), message); // Mirror for receiver
-  } else {
-    await push(ref(db,"messages/"), message);
+// open group
+function openGroup(){
+  currentChat = { type: "group", id: "group" };
+  messagesDiv.innerHTML = "";
+  const q = query(dbRef(db, "messages/group"), orderByChild("time"), limitToLast(200));
+  onChildAdded(q, snap=>{
+    appendMessage(snap.val());
+  });
+}
+
+// open private
+function openPrivate(otherUid, otherUser){
+  currentChat = { type: "private", id: chatId(uid, otherUid), other: otherUid };
+  messagesDiv.innerHTML = "";
+  const q = query(dbRef(db, `messages/private/${currentChat.id}`), orderByChild("time"), limitToLast(200));
+  onChildAdded(q, snap=>{
+    appendMessage(snap.val());
+  });
+}
+
+// send
+sendBtn.onclick = async ()=>{
+  const text = msgInput.value.trim();
+  if(!text && attach.files.length ===0) return;
+  const msgObj = { uid, name: myProfile.name || "Unknown", dp: myProfile.dp || "default_dp.png", time: Date.now() };
+  if(text) msgObj.text = text;
+  if(attach.files.length>0){
+    const file = attach.files[0];
+    const s = sRef(storage, `messages/${Date.now()}_${uid}.jpg`);
+    await uploadBytes(s, file);
+    msgObj.image = await getDownloadURL(s);
   }
-  msgInput.value="";
+  if(currentChat.type === "group"){
+    await push(dbRef(db, "messages/group"), msgObj);
+  } else {
+    await push(dbRef(db, `messages/private/${currentChat.id}`), msgObj);
+  }
+  msgInput.value=""; attach.value="";
 };
 
-// Append message
-function appendMessage(msg){
+attachBtn.onclick = ()=> attach.click();
+
+function appendMessage(m){
   const div = document.createElement("div");
-  div.className="msg "+(msg.uid===uid?"self":"");
-  div.innerHTML=`<img src="${msg.dp||'default_dp.png'}"><div class="msg-content">${msg.name||'Unknown'}<br>${msg.text}<div class="msg-time">${new Date(msg.time).toLocaleTimeString()}</div></div>`;
-  messagesBox.appendChild(div);
-  messagesBox.scrollTop = messagesBox.scrollHeight;
+  div.classList.add("msg-row");
+  const when = new Date(m.time);
+  const timeStr = when.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  div.innerHTML = `
+    <img class="msg-dp" src="${m.dp ? m.dp + '?v=' + Date.now() : 'default_dp.png'}">
+    <div class="bubble">
+      <div class="meta"><b>${escapeHtml(m.name)}</b> <span class="muted">${timeStr}</span></div>
+      ${m.text ? `<div class="text">${escapeHtml(m.text)}</div>` : ""}
+      ${m.image ? `<div class="imgwrap"><img src="${m.image + '?v=' + Date.now()}" class="msg-img"></div>` : ""}
+    </div>
+  `;
+  messagesDiv.appendChild(div);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-// Open private chat with a user
-function openUserChat(otherUid, otherUser){
-  currentChatUser = otherUid;
-  messagesBox.innerHTML="";
-  // Load private messages
-  onChildAdded(ref(db,"private/"+uid+"/"+otherUid), snapshot=>{
-    appendMessage(snapshot.val());
-  });
+function escapeHtml(t){ if(!t) return ""; return t.toString().replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
 
-  // Admin options: delete messages
-  if(isAdmin){
-    // Optionally, add delete message functionality
-    console.log("Admin can delete messages");
-  }
-
-  // Display friend request or private message option (extend as needed)
-  alert(`پرائیوٹ چیٹ کھولی گئی: ${otherUser.name}`);
-}
-
-// Optional: Logout on close
-window.addEventListener("beforeunload", async ()=>{
-  if(uid) await set(ref(db,"users/"+uid+"/status"),"offline");
-});
+toProfile.onclick = ()=> window.location.href = "profile.html";
+logoutBtn.onclick = async ()=> {
+  await set(dbRef(db, `users/${uid}/online`), false);
+  await set(dbRef(db, `users/${uid}/lastSeen`), Date.now());
+  await signOut(auth);
+  location.href = "index.html";
+};
