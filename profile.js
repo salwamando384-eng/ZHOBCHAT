@@ -1,71 +1,95 @@
 // profile.js
-import { auth, db, storage } from "./firebase_config.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { get, ref as dbRef, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+
+import { auth, db, storage } from "./firebase.js";
+import {
+  ref,
+  set,
+  get
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+import {
+  ref as sRef,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 const profileImg = document.getElementById("profileImg");
-const nameInput = document.getElementById("nameInput");
-const genderInput = document.getElementById("genderInput");
-const ageInput = document.getElementById("ageInput");
-const cityInput = document.getElementById("cityInput");
-const aboutInput = document.getElementById("aboutInput");
 const dpInput = document.getElementById("dpInput");
+const nameInput = document.getElementById("name");
+const ageInput = document.getElementById("age");
+const genderInput = document.getElementById("gender");
+const cityInput = document.getElementById("city");
 const saveBtn = document.getElementById("saveProfileBtn");
 const logoutBtn = document.getElementById("logoutBtn");
-const profileMsg = document.getElementById("profileMsg");
+const saveMsg = document.getElementById("saveMsg");
 
 let uid;
+let currentDP = "";
 
+// Load old data
 onAuthStateChanged(auth, async (user) => {
-  if (!user) { location.href = "index.html"; return; }
+  if (!user) {
+    alert("Login required");
+    location.href = "index.html";
+    return;
+  }
+
   uid = user.uid;
 
-  const snap = await get(dbRef(db, `users/${uid}`));
+  const snap = await get(ref(db, "users/" + uid));
   if (snap.exists()) {
-    const d = snap.val();
-    nameInput.value = d.name || "";
-    genderInput.value = d.gender || "";
-    ageInput.value = d.age || "";
-    cityInput.value = d.city || "";
-    aboutInput.value = d.about || "";
-    profileImg.src = d.dp ? d.dp + "?v=" + Date.now() : "default_dp.png";
+    const data = snap.val();
+
+    nameInput.value = data.name || "";
+    ageInput.value = data.age || "";
+    genderInput.value = data.gender || "";
+    cityInput.value = data.city || "";
+    currentDP = data.dp || "default_dp.png";
+
+    profileImg.src = currentDP;
   }
 });
 
-saveBtn.onclick = async () => {
-  profileMsg.textContent = "Saving...";
-  let dpURL;
-
+// Preview new DP
+dpInput.onchange = () => {
   if (dpInput.files.length > 0) {
-    const file = dpInput.files[0];
-    const sref = sRef(storage, `dp/${uid}.jpg`);
-    await uploadBytes(sref, file);
-    dpURL = await getDownloadURL(sref);
-  } else {
-    const snap = await get(dbRef(db, `users/${uid}/dp`));
-    dpURL = snap.exists() ? snap.val() : "default_dp.png";
+    profileImg.src = URL.createObjectURL(dpInput.files[0]);
   }
-
-  await set(dbRef(db, `users/${uid}`), {
-    name: nameInput.value,
-    gender: genderInput.value,
-    age: ageInput.value,
-    city: cityInput.value,
-    about: aboutInput.value,
-    dp: dpURL,
-    online: true,
-    lastSeen: Date.now()
-  });
-
-  profileMsg.textContent = "Saved!";
-  profileImg.src = dpURL + "?v=" + Date.now();
-  setTimeout(()=> profileMsg.textContent = "", 2000);
 };
 
+// Save profile
+saveBtn.onclick = async () => {
+  saveMsg.textContent = "Saving...";
+
+  let dpURL = currentDP;
+
+  // Upload new DP
+  if (dpInput.files.length > 0) {
+    const file = dpInput.files[0];
+    const storageRef = sRef(storage, "dp/" + uid + ".jpg");
+    await uploadBytes(storageRef, file);
+    dpURL = await getDownloadURL(storageRef);
+  }
+
+  await set(ref(db, "users/" + uid), {
+    name: nameInput.value,
+    age: ageInput.value,
+    gender: genderInput.value,
+    city: cityInput.value,
+    dp: dpURL
+  });
+
+  saveMsg.textContent = "✔ Profile Saved!";
+  setTimeout(() => (saveMsg.textContent = ""), 2000);
+};
+
+// Logout
 logoutBtn.onclick = async () => {
-  await set(dbRef(db, `users/${auth.currentUser.uid}/online`), false);
-  await set(dbRef(db, `users/${auth.currentUser.uid}/lastSeen`), Date.now());
   await signOut(auth);
   location.href = "index.html";
 };
