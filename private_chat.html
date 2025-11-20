@@ -1,26 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Private Chat</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Private Chat</title><link rel="stylesheet" href="style.css"></head>
 <body>
-  <div class="chat-container">
-    <div id="privateHeader" class="private-header">
-      <img id="privateDp" class="private-dp" src="default_dp.png" alt="dp">
-      <div id="privateName" style="font-weight:600;color:#1f2aa6;"></div>
+  <div class="topbar">
+    <div class="left">
+      <img id="pcDp" class="top-dp" src="default_dp.png">
+      <div>
+        <div id="pcName">Private</div>
+        <div id="pcStatus" class="muted">—</div>
+      </div>
     </div>
+    <div><button onclick="location.href='chat.html'" class="secondary">Back</button></div>
+  </div>
 
-    <div id="privateMessages" class="messages-box"></div>
-
-    <div class="input-area">
-      <input id="privateMessageInput" type="text" placeholder="Type a message...">
-      <button id="privateSendBtn">Send</button>
+  <div class="main">
+    <div id="messages" class="messages"></div>
+    <div class="composer">
+      <input id="msgInput" type="text" placeholder="Type a message" />
+      <button id="sendBtn" class="compose-btn">Send</button>
     </div>
   </div>
 
-  <script type="module" src="private_chat.js"></script>
+<script type="module" src="private_chat.js"></script>
 </body>
 </html>
