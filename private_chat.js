@@ -1,59 +1,56 @@
+// private_chat.js
 import { auth, db } from "./firebase_config.js";
-import { ref as dbRef, push, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref as dbRef, onChildAdded, push, query, orderByChild } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const privateMessagesBox = document.getElementById("privateMessages");
-const privateMessageInput = document.getElementById("privateMessageInput");
-const privateSendBtn = document.getElementById("privateSendBtn");
+const messagesDiv = document.getElementById("messages");
+const msgInput = document.getElementById("msgInput");
+const sendBtn = document.getElementById("sendBtn");
+const pcDp = document.getElementById("pcDp");
+const pcName = document.getElementById("pcName");
 
-// Set dynamically when a user is selected
-let selectedChatUserId = ""; // assign dynamically
+let uid, otherUid, chatId;
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) return window.location.href = "login.html";
-  const currentUserId = user.uid;
+// get otherUid from query param ?uid=OTHER_UID
+const params = new URLSearchParams(location.search);
+otherUid = params.get("uid");
 
-  const privateMsgRef = dbRef(db, "private_messages/" + currentUserId + "/" + selectedChatUserId);
+function makeChatId(a,b){ return [a,b].sort().join("_"); }
 
-  onValue(privateMsgRef, (snapshot) => {
-    privateMessagesBox.innerHTML = "";
+onAuthStateChanged(auth, async user=>{
+  if(!user){ location.href="index.html"; return; }
+  uid = user.uid;
+  if(!otherUid){ pcName.textContent = "No user"; return; }
+  chatId = makeChatId(uid, otherUid);
 
-    snapshot.forEach((child) => {
-      const msg = child.val();
+  // load other user info
+  const snap = await (await fetch(`/users.json`)).json().catch(()=>null);
+  // fallback: attempt to listen in DB (simpler: load dp/name from DB)
+  const otherSnap = await (await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js")).get(dbRef(db, `users/${otherUid}`)).catch(()=>null);
+  if(otherSnap && otherSnap.exists()){
+    const u = otherSnap.val();
+    pcName.textContent = u.name || 'User';
+    pcDp.src = u.dp || 'default_dp.png';
+  }
 
-      const div = document.createElement("div");
-      div.className = msg.senderId === currentUserId ? "msg-sent" : "msg-received";
-
-      const senderRef = dbRef(db, "users/" + msg.senderId);
-      onValue(senderRef, (senderSnap) => {
-        const senderData = senderSnap.val();
-        const dpURL = (senderData?.dp || "default_dp.png") + "?t=" + new Date().getTime();
-        div.innerHTML = `<img src="${dpURL}" class="msg-dp"><span>${msg.text}</span>`;
-      });
-
-      privateMessagesBox.appendChild(div);
-    });
-
-    privateMessagesBox.scrollTop = privateMessagesBox.scrollHeight;
+  const q = query(dbRef(db, `messages/private/${chatId}`), orderByChild("time"));
+  onChildAdded(q, snap=>{
+    const m = snap.val();
+    appendMessage(m);
   });
-
-  // Send private message
-  privateSendBtn.onclick = () => {
-    const text = privateMessageInput.value.trim();
-    if (!text) return;
-
-    push(dbRef(db, "private_messages/" + currentUserId + "/" + selectedChatUserId), {
-      text,
-      time: Date.now(),
-      senderId: currentUserId
-    });
-
-    push(dbRef(db, "private_messages/" + selectedChatUserId + "/" + currentUserId), {
-      text,
-      time: Date.now(),
-      senderId: currentUserId
-    });
-
-    privateMessageInput.value = "";
-  };
 });
+
+sendBtn.onclick = async ()=>{
+  const text = msgInput.value.trim();
+  if(!text) return;
+  await push(dbRef(db, `messages/private/${chatId}`), { uid, name: "You", text, time: Date.now() });
+  msgInput.value="";
+};
+
+function appendMessage(m){
+  const div = document.createElement("div");
+  div.className = "msg-row";
+  div.innerHTML = `<img class="msg-dp" src="${m.dp || 'default_dp.png'}"><div class="bubble"><div class="meta"><b>${m.name||'User'}</b> <span class="muted">${new Date(m.time).toLocaleTimeString()}</span></div>${m.text?`<div class="text">${m.text}</div>`:""}</div>`;
+  messagesDiv.appendChild(div);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
