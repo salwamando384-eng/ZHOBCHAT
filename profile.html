@@ -1,31 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Profile — ZHOBCHAT</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZHOBCHAT Profile</title>
+<style>
+body{margin:0;font-family:Arial;background:#e5ddd5;display:flex;justify-content:center;align-items:flex-start;padding-top:20px;}
+.box{background:#fff;padding:20px;border-radius:10px;width:350px;box-shadow:0 0 10px #aaa;}
+.box h2{text-align:center;margin-bottom:20px;}
+.profile-pic{width:120px;height:120px;border-radius:50%;object-fit:cover;display:block;margin:auto;margin-bottom:10px;border:3px solid #25D366;}
+input, select, textarea{width:100%;padding:10px;margin:8px 0;border-radius:5px;border:1px solid #ccc;}
+button{width:100%;padding:10px;margin-top:10px;border:none;border-radius:5px;background:#25D366;color:white;font-weight:bold;cursor:pointer;}
+button.logout{background:#D32F2F;}
+</style>
 </head>
 <body>
-  <div class="center-box">
-    <h2>Profile</h2>
-    <img id="profileImg" src="default_dp.png" class="profile-pic">
-    <input id="nameInput" placeholder="Name" />
-    <select id="genderInput">
-      <option value="">Select gender</option>
-      <option>Male</option>
-      <option>Female</option>
-      <option>Other</option>
-    </select>
-    <input id="ageInput" type="number" placeholder="Age" />
-    <input id="cityInput" placeholder="City" />
-    <textarea id="aboutInput" rows="3" placeholder="About me"></textarea>
-    <input id="dpInput" type="file" accept="image/*" />
-    <button id="saveProfileBtn">Save</button>
-    <button id="logoutBtn" class="danger">Logout</button>
-    <div id="profileMsg" class="msg"></div>
-    <p><a href="chat.html">Back to Chat</a></p>
-  </div>
+
+<div class="box">
+<h2>میرا پروفائل</h2>
+
+<img id="profileImg" src="default_dp.png" class="profile-pic">
+<input type="file" id="dpInput">
+<input type="text" id="name" placeholder="Full Name">
+<input type="number" id="age" placeholder="Age">
+<select id="gender">
+  <option value="">Select Gender</option>
+  <option>Male</option>
+  <option>Female</option>
+</select>
+<input type="text" id="city" placeholder="City">
+<textarea id="about" placeholder="About Me"></textarea>
+
+<button id="saveProfileBtn">Save Profile</button>
+<button class="logout" id="logoutBtn">Logout</button>
+<button onclick="location.href='chat.html'">Back to Chat</button>
+
+<div id="saveMsg" style="text-align:center;margin-top:10px;color:green;"></div>
+</div>
 
 <script type="module" src="profile.js"></script>
 </body>
