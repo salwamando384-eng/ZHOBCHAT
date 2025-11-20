@@ -1,38 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZHOBCHAT</title>
-<style>
-body { font-family: Arial; background: #e5ddd5; display:flex; justify-content:center; align-items:center; height:100vh; }
-.container { background:#fff; padding:20px; border-radius:10px; width:350px; box-shadow:0 0 10px #aaa; }
-input, select { width:100%; padding:10px; margin:8px 0; border-radius:5px; border:1px solid #ccc; }
-button { width:100%; padding:10px; margin:10px 0; border:none; border-radius:5px; background:#25D366; color:white; font-weight:bold; cursor:pointer; }
-button.login { background:#075E54; }
-h2{text-align:center;}
-</style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ZHOBCHAT — Sign Up / Login</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-  <h2>ZHOBCHAT</h2>
+  <div class="center-box">
+    <h1>ZHOBCHAT</h1>
 
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <input type="text" id="name" placeholder="Full Name">
-  <input type="number" id="age" placeholder="Age">
-  <select id="gender">
-    <option value="">Select Gender</option>
-    <option>Male</option>
-    <option>Female</option>
-  </select>
-  <input type="text" id="city" placeholder="City">
-  <input type="text" id="about" placeholder="About Me">
+    <div id="signupForm" class="auth-card">
+      <h3>Sign Up</h3>
+      <input id="suName" placeholder="Full name" />
+      <select id="suGender">
+        <option value="">Select gender</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+      </select>
+      <input id="suAge" type="number" placeholder="Age" />
+      <input id="suCity" placeholder="City" />
+      <textarea id="suAbout" rows="3" placeholder="About me"></textarea>
+      <input id="suEmail" type="email" placeholder="Email" />
+      <input id="suPass" type="password" placeholder="Password (6+)" />
+      <input id="suDp" type="file" accept="image/*" />
+      <button id="signupBtn">Sign Up</button>
+      <p class="muted">Already have account? <a id="toLogin" href="#">Login</a></p>
+      <div id="suMsg" class="msg"></div>
+    </div>
 
-  <button id="signupBtn">Sign Up</button>
-  <button id="loginBtn" class="login">Login</button>
-  <div id="msg" style="text-align:center; color:red;"></div>
-</div>
+    <div id="loginForm" class="auth-card hidden">
+      <h3>Login</h3>
+      <input id="liEmail" type="email" placeholder="Email" />
+      <input id="liPass" type="password" placeholder="Password" />
+      <button id="loginBtn">Login</button>
+      <p class="muted">No account? <a id="toSignup" href="#">Sign up</a></p>
+      <div id="liMsg" class="msg"></div>
+    </div>
+  </div>
 
 <script type="module" src="index.js"></script>
 </body>
