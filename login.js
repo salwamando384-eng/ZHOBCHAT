@@ -1,16 +1,24 @@
-// login.js
-import { auth } from "./firebase_config.js";
+import { auth, db } from "./firebase_config.js";
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-document.getElementById("loginBtn").onclick = async () => {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  if (!email || !password) return alert("Enter email & password");
+const liEmail = document.getElementById("liEmail");
+const liPass = document.getElementById("liPass");
+const loginBtn = document.getElementById("loginBtn");
+const liMsg = document.getElementById("liMsg");
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
+loginBtn.onclick = async ()=>{
+  liMsg.textContent = "";
+  const email = liEmail.value.trim();
+  const pass = liPass.value;
+  if(!email || !pass){ liMsg.textContent="Enter email & password"; return; }
+  try{
+    const userCred = await signInWithEmailAndPassword(auth, email, pass);
+    const uid = userCred.user.uid;
+    await set(ref(db, `users/${uid}/online`), true);
+    await set(ref(db, `users/${uid}/lastSeen`), Date.now());
     window.location.href = "chat.html";
-  } catch (err) {
-    alert("Login failed: " + err.message);
+  }catch(e){
+    liMsg.textContent = e.message;
   }
-};
+}
