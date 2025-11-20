@@ -1,45 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ZHOBCHAT — Login / Signup</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ZHOBCHAT</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="center-box">
-    <h1>ZHOBCHAT</h1>
 
-    <div id="signupForm" class="auth-card">
-      <h3>Sign Up</h3>
-      <input id="suName" placeholder="Full name" />
-      <select id="suGender">
-        <option value="">Select gender</option>
-        <option>Male</option>
-        <option>Female</option>
-        <option>Other</option>
-      </select>
-      <input id="suAge" type="number" placeholder="Age" />
-      <input id="suCity" placeholder="City" />
-      <textarea id="suAbout" rows="3" placeholder="About me"></textarea>
-      <input id="suEmail" type="email" placeholder="Email" />
-      <input id="suPass" type="password" placeholder="Password (6+)" />
-      <input id="suDp" type="file" accept="image/*" />
-      <button id="signupBtn">Sign Up</button>
-      <p class="muted">Already have account? <a id="toLogin" href="#">Login</a></p>
-      <div id="suMsg" class="msg"></div>
-    </div>
+<div class="center-box">
+  <h1>ZHOBCHAT</h1>
+  <button onclick="location.href='login.html'">Login</button>
+  <button onclick="location.href='signup.html'">Signup</button>
+  <button onclick="location.href='chat.html'">Users</button>
+</div>
 
-    <div id="loginForm" class="auth-card hidden">
-      <h3>Login</h3>
-      <input id="liEmail" type="email" placeholder="Email" />
-      <input id="liPass" type="password" placeholder="Password" />
-      <button id="loginBtn">Login</button>
-      <p class="muted">No account? <a id="toSignup" href="#">Sign up</a></p>
-      <div id="liMsg" class="msg"></div>
-    </div>
-  </div>
-
-<script type="module" src="auth.js"></script>
 </body>
 </html>
