@@ -1,94 +1,69 @@
-import { auth, db, storage } from "./firebase_config.js";
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { auth, db } from "./firebaseConfig.js";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-import {
-  ref,
-  set,
-  push,
-  onValue
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const nameInput = document.getElementById("name");
+const ageInput = document.getElementById("age");
+const genderInput = document.getElementById("gender");
+const cityInput = document.getElementById("city");
+const aboutInput = document.getElementById("about");
 
-import {
-  uploadBytes,
-  getDownloadURL,
-  ref as sRef
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+const signupBtn = document.getElementById("signupBtn");
+const loginBtn = document.getElementById("loginBtn");
+const msg = document.getElementById("msg");
 
-const loading = document.getElementById("loading");
-const profileImg = document.getElementById("profileImg");
-const dpInput = document.getElementById("dpInput");
-const saveDPBtn = document.getElementById("saveDPBtn");
-const chatContainer = document.getElementById("chatContainer");
-const msgBox = document.getElementById("msgBox");
-const sendBtn = document.getElementById("sendBtn");
-const messagesDiv = document.getElementById("messages");
+// Signup
+signupBtn.onclick = async () => {
+  const email = emailInput.value;
+  const password = passwordInput.value;
 
-// USER LOGIN CHECK
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    alert("Login first!");
-    window.location.href = "login.html";
+  if(!email || !password || !nameInput.value) {
+    msg.textContent = "تمام فیلڈز پر کریں!";
     return;
   }
 
-  loading.style.display = "block";
+  try{
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = userCredential.user.uid;
 
-  const dpPath = ref(db, "users/" + user.uid + "/dp");
+    await set(ref(db, "users/" + uid), {
+      name: nameInput.value,
+      age: ageInput.value,
+      gender: genderInput.value,
+      city: cityInput.value,
+      about: aboutInput.value,
+      dp: "default_dp.png",
+      status: "online",
+      isAdmin: false
+    });
 
-  onValue(dpPath, (snapshot) => {
-    const dpURL = snapshot.val();
-    profileImg.src = dpURL ? dpURL : "default_dp.png";
-  });
-
-  chatContainer.style.display = "block";
-  loading.style.display = "none";
-});
-
-// SAVE NEW DP
-saveDPBtn.onclick = async () => {
-  const file = dpInput.files[0];
-  if (!file) return alert("Select a picture!");
-
-  loading.style.display = "block";
-
-  const user = auth.currentUser;
-  const storagePath = sRef(storage, "dp/" + user.uid);
-
-  await uploadBytes(storagePath, file);
-
-  const url = await getDownloadURL(storagePath);
-
-  await set(ref(db, "users/" + user.uid + "/dp"), url);
-
-  profileImg.src = url;
-
-  loading.style.display = "none";
-  alert("Profile Picture Updated!");
+    msg.style.color="green";
+    msg.textContent = "Signup Successful! Redirecting...";
+    setTimeout(()=>{ location.href="chat.html"; }, 1000);
+  }catch(err){
+    msg.textContent = err.message;
+  }
 };
 
-// SEND MESSAGE
-sendBtn.onclick = async () => {
-  const text = msgBox.value.trim();
-  if (!text) return;
+// Login
+loginBtn.onclick = async ()=>{
+  const email = emailInput.value;
+  const password = passwordInput.value;
+  if(!email || !password){
+    msg.textContent="ایمیل اور پاسورڈ درج کریں";
+    return;
+  }
 
-  const user = auth.currentUser;
-
-  await push(ref(db, "messages"), {
-    uid: user.uid,
-    text,
-    time: Date.now()
-  });
-
-  msgBox.value = "";
+  try{
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const uid = userCredential.user.uid;
+    await set(ref(db, "users/" + uid + "/status"), "online");
+    msg.style.color="green";
+    msg.textContent="Login Successful! Redirecting...";
+    setTimeout(()=>{ location.href="chat.html"; }, 1000);
+  }catch(err){
+    msg.textContent=err.message;
+  }
 };
-
-// LOAD MESSAGES
-onValue(ref(db, "messages"), (snapshot) => {
-  messagesDiv.innerHTML = "";
-  snapshot.forEach((msg) => {
-    const data = msg.val();
-    messagesDiv.innerHTML += `<p><strong>${data.uid}:</strong> ${data.text}</p>`;
-  });
-});
