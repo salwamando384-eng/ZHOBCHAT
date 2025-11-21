@@ -1,10 +1,10 @@
-// firebase_config.js
+// Firebase Imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-// Replace these values ONLY if you have different config in Firebase console
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
   authDomain: "zhobchat-33d8e.firebaseapp.com",
@@ -16,9 +16,10 @@ const firebaseConfig = {
   measurementId: "G-LX9P9LRLV8"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-export { app, auth, db, storage };
+export { auth, db, storage };
