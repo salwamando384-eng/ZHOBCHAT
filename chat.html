@@ -1,54 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZHOBCHAT</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="topbar">
-    <div class="left">
-      <img id="topDp" class="top-dp" src="default_dp.png">
+<div class="top-bar">
+  <div class="top-left">
+      <img id="myDp" class="top-dp" src="default_dp.png">
       <div>
-        <div id="topName">ZHOBCHAT</div>
-        <div id="topStatus" class="muted">Loading...</div>
+        <h3>ZHOBCHAT</h3>
+        <span>Welcome</span>
       </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <button id="toProfile" class="secondary">Profile</button>
-      <button id="logout" class="secondary">Logout</button>
-    </div>
   </div>
 
-  <div class="app-wrap">
-    <div class="sidebar" id="sidebar">
-      <h4>Users</h4>
-      <div id="usersList"></div>
-      <hr>
-      <h4>Group</h4>
-      <div class="user-item" id="groupItem">
-        <img src="default_dp.png" class="user-dp">
-        <div>
-          <div class="user-name">ZHOBCHAT (Group)</div>
-          <div class="user-about">Open group chat</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="main">
-      <div id="messages" class="messages"></div>
-
-      <div class="composer">
-        <input id="msgInput" type="text" placeholder="Type a message" />
-        <input id="attach" type="file" accept="image/*" style="display:none">
-        <button id="attachBtn" class="compose-btn">📎</button>
-        <button id="sendBtn" class="compose-btn">Send</button>
-      </div>
-    </div>
+  <div class="top-right">
+     <button onclick="location.href='users.html'" class="top-btn">Users</button>
+     <button onclick="location.href='profile.html'" class="top-btn">Profile</button>
+     <button id="logoutBtn" class="top-btn">Logout</button>
   </div>
+</div>
+
+<!-- Chat Messages -->
+<div id="chatBox" class="chat-box"></div>
+
+<!-- Bottom Send Bar -->
+<div class="send-bar">
+  <input id="msgInput" type="text" placeholder="Type message...">
+  <button id="sendBtn" class="send-btn">Send</button>
+</div>
 
 <script type="module" src="chat.js"></script>
+
 </body>
 </html>
