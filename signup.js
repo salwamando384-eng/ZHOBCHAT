@@ -1,9 +1,9 @@
-import { auth, db, storage } from "./firebase.js";
+import { auth, db, storage } from "./firebase_config.js";
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { set, ref } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { uploadBytes, getDownloadURL, ref as sRef } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
-document.getElementById("signupBtn").addEventListener("click", async () => {
+document.getElementById("signupBtn").onclick = async () => {
     let name = document.getElementById("name").value.trim();
     let age = document.getElementById("age").value.trim();
     let gender = document.getElementById("gender").value;
@@ -36,7 +36,7 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
             dp: dpUrl
         });
 
-        msg.innerText = "Signup Successful! Redirecting...";
+        msg.innerText = "Signup Successful!";
         setTimeout(() => {
             window.location.href = "login.html";
         }, 1500);
@@ -44,4 +44,4 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
     } catch (error) {
         msg.innerText = error.message;
     }
-});
+};
