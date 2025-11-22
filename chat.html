@@ -3,37 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZHOBCHAT</title>
+<title>ZhobChat</title>
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div class="top-bar">
-  <div class="top-left">
-      <img id="myDp" class="top-dp" src="default_dp.png">
-      <div>
-        <h3>ZHOBCHAT</h3>
-        <span>Welcome</span>
-      </div>
-  </div>
+  <img id="myDp" class="top-dp" src="default_dp.png">
+  <span id="myName" class="top-name">Loading...</span>
 
-  <div class="top-right">
-     <button onclick="location.href='users.html'" class="top-btn">Users</button>
-     <button onclick="location.href='profile.html'" class="top-btn">Profile</button>
-     <button id="logoutBtn" class="top-btn">Logout</button>
-  </div>
+  <button id="profileBtn" class="profile-btn">Profile</button>
 </div>
 
-<!-- Chat Messages -->
-<div id="chatBox" class="chat-box"></div>
+<div id="messages" class="messages"></div>
 
-<!-- Bottom Send Bar -->
-<div class="send-bar">
-  <input id="msgInput" type="text" placeholder="Type message...">
-  <button id="sendBtn" class="send-btn">Send</button>
+<div class="send-box">
+  <input type="text" id="msgInput" placeholder="Type your message...">
+  <button id="sendBtn">Send</button>
 </div>
 
 <script type="module" src="chat.js"></script>
-
 </body>
 </html>
