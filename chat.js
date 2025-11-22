@@ -1,25 +1,69 @@
-import { auth, db } from "./firebase_config.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { ref, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { auth, db } from "./firebase.js";
+import { ref, onChildAdded, push, get } 
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { onAuthStateChanged } 
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-const chatBox = document.getElementById("chatBox");
+const messagesBox = document.getElementById("messages");
 const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
-const logoutBtn = document.getElementById("logoutBtn");
+const profileBtn = document.getElementById("profileBtn");
 const myDp = document.getElementById("myDp");
+const myName = document.getElementById("myName");
 
-onAuthStateChanged(auth, (user)=>{
-  if(!user) location.href = "login.html";
+let uid;
+let myData = {};
 
-  // Load user's DP
-  fetchUserDp(user.uid);
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  uid = user.uid;
+
+  const snap = await get(ref(db, "users/" + uid));
+  if (snap.exists()) {
+    myData = snap.val();
+
+    myDp.src = myData.dp ? myData.dp : "default_dp.png";
+    myName.textContent = myData.name || "Unknown";
+  }
 });
 
-async function fetchUserDp(uid){
-  const dpRef = ref(db, "users/" + uid + "/dp");
-  onChildAdded(dpRef, ()=>{}); // placeholder
-}
+sendBtn.onclick = async () => {
+  const text = msgInput.value.trim();
+  if (!text) return;
 
-/* Send Message */
-sendBtn.onclick = ()=>{};
-logoutBtn.onclick = ()=> signOut(auth);
+  await push(ref(db, "messages"), {
+    uid: uid,
+    name: myData.name,
+    dp: myData.dp || "default_dp.png",
+    text: text,
+    time: Date.now()
+  });
+
+  msgInput.value = "";
+};
+
+onChildAdded(ref(db, "messages"), (snapshot) => {
+  const msg = snapshot.val();
+
+  const div = document.createElement("div");
+  div.classList.add("msg-row");
+
+  div.innerHTML = `
+    <img class="msg-dp" src="${msg.dp}">
+    <div class="msg-bubble">
+      <b>${msg.name}</b>
+      <p>${msg.text}</p>
+    </div>
+  `;
+
+  messagesBox.appendChild(div);
+  messagesBox.scrollTop = messagesBox.scrollHeight;
+});
+
+profileBtn.onclick = () => {
+  window.location.href = "profile.html";
+};
