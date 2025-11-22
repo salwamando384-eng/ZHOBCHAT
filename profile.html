@@ -1,21 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Profile</title><link rel="stylesheet" href="style.css"></head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
 <body>
-  <div class="center-box">
-    <h2>Profile</h2>
-    <img id="profileImg" src="default_dp.png" class="profile-pic" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid #25D366;display:block;margin:auto;">
-    <input id="dpInput" type="file" accept="image/*">
-    <input id="nameInput" placeholder="Name">
-    <select id="genderInput"><option value="">Select gender</option><option>Male</option><option>Female</option></select>
-    <input id="ageInput" type="number" placeholder="Age">
-    <input id="cityInput" placeholder="City">
-    <textarea id="aboutInput" rows="3" placeholder="About me"></textarea>
-    <button id="saveProfileBtn">Save</button>
-    <button id="logoutBtn" class="secondary">Logout</button>
-    <p><a href="chat.html">Back to Chat</a></p>
-    <div id="profileMsg"></div>
-  </div>
+
+<div class="form-container">
+    <h2>Your Profile</h2>
+
+    <img id="dpPreview" src="default_dp.png" class="dp-box">
+
+    <label>Change DP:</label>
+    <input type="file" id="dpFile" accept="image/*">
+
+    <input type="text" id="name" placeholder="Full Name">
+    <input type="number" id="age" placeholder="Age">
+    <select id="gender">
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+    </select>
+    <input type="text" id="city" placeholder="City">
+
+    <button id="saveBtn">Save Profile</button>
+    <button id="logoutBtn" style="background:red;color:white;">Logout</button>
+
+    <p id="msg"></p>
+</div>
+
 <script type="module" src="profile.js"></script>
+
+<style>
+.dp-box {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #555;
+    margin-bottom: 10px;
+}
+</style>
+
 </body>
 </html>
