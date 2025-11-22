@@ -1,15 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Login</title><link rel="stylesheet" href="style.css"></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 <body>
-  <div class="center-box">
-    <h2>Login</h2>
-    <input id="liEmail" type="email" placeholder="Email">
-    <input id="liPass" type="password" placeholder="Password">
-    <button id="loginBtn">Login</button>
-    <p><a href="index.html">Back</a></p>
-    <div id="liMsg"></div>
-  </div>
+
+<div class="form-container">
+  <h2>Login</h2>
+
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+
+  <button id="loginBtn">Login</button>
+
+  <p>Don't have an account? <a href="signup.html">Signup</a></p>
+
+  <p id="msg"></p>
+</div>
+
 <script type="module" src="login.js"></script>
 </body>
 </html>
