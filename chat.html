@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZhobChat</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chat - ZHOBCHAT</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <img id="myDp" class="header-dp" src="default_dp.png" alt="dp" />
+      <div class="header-title">ZHOBCHAT</div>
+      <div class="header-buttons" style="margin-left:auto;">
+        <button onclick="location.href='users.html'">Users</button>
+        <button onclick="location.href='profile.html'">Profile</button>
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </div>
 
-<div class="top-bar">
-  <img id="myDp" class="top-dp" src="default_dp.png">
-  <span id="myName" class="top-name">Loading...</span>
+    <div id="messages" class="messages-box"></div>
 
-  <button id="profileBtn" class="profile-btn">Profile</button>
-</div>
+    <div class="input-area">
+      <input id="msgInput" type="text" placeholder="Type a message..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
 
-<div id="messages" class="messages"></div>
-
-<div class="send-box">
-  <input type="text" id="msgInput" placeholder="Type your message...">
-  <button id="sendBtn">Send</button>
-</div>
-
-<script type="module" src="chat.js"></script>
+  <script type="module" src="chat.js"></script>
 </body>
 </html>
