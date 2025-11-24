@@ -1,38 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Signup</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Signup - ZHOBCHAT</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="form-box">
+    <h2>Create Account</h2>
 
-<div class="form-container">
-  <h2>Create Account</h2>
-
-  <input type="text" id="name" placeholder="Full Name">
-  <input type="number" id="age" placeholder="Age">
-  <select id="gender">
+    <input id="name" type="text" placeholder="Full Name" />
+    <input id="age" type="number" placeholder="Age" />
+    <select id="gender">
       <option value="">Select Gender</option>
       <option value="Male">Male</option>
       <option value="Female">Female</option>
-  </select>
-  <input type="text" id="city" placeholder="City">
+    </select>
+    <input id="city" type="text" placeholder="City" />
 
-  <label>Profile DP:</label>
-  <input type="file" id="dpFile" accept="image/*">
+    <label>Profile DP:</label>
+    <input id="dpFile" type="file" accept="image/*" />
 
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
 
-  <button id="signupBtn">Sign Up</button>
+    <button id="signupBtn">Sign Up</button>
 
-  <p>Already have an account? <a href="login.html">Login</a></p>
+    <p style="text-align:center;margin-top:10px;">Already have an account? <a href="login.html">Login</a></p>
+    <p id="msg" style="text-align:center;color:green;"></p>
+  </div>
 
-  <p id="msg"></p>
-</div>
-
-<script type="module" src="signup.js"></script>
+  <script type="module" src="signup.js"></script>
 </body>
 </html>
