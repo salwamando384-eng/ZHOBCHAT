@@ -1,18 +1,20 @@
+// login.js
 import { auth } from "./firebase_config.js";
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-document.getElementById("loginBtn").onclick = async () => {
-    let email = document.getElementById("email").value.trim();
-    let password = document.getElementById("password").value.trim();
-    let msg = document.getElementById("msg");
+const loginBtn = document.getElementById("loginBtn");
+const loginMsg = document.getElementById("loginMsg");
 
-    msg.innerText = "Logging in...";
+loginBtn.onclick = async () => {
+  loginMsg.textContent = "";
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  if (!email || !password) { loginMsg.textContent = "Enter email & password"; return; }
 
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-        msg.innerText = "Success!";
-        window.location.href = "chat.html"; // ← Main page
-    } catch (error) {
-        msg.innerText = error.message;
-    }
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    window.location.href = "chat.html";
+  } catch (err) {
+    loginMsg.textContent = err.message;
+  }
 };
