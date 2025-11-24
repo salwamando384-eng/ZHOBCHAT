@@ -1,56 +1,47 @@
 // private_chat.js
 import { auth, db } from "./firebase_config.js";
+import { ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { ref as dbRef, onChildAdded, push, query, orderByChild } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-const messagesDiv = document.getElementById("messages");
-const msgInput = document.getElementById("msgInput");
-const sendBtn = document.getElementById("sendBtn");
-const pcDp = document.getElementById("pcDp");
-const pcName = document.getElementById("pcName");
+function param(name) {
+  const p = new URLSearchParams(location.search);
+  return p.get(name);
+}
 
-let uid, otherUid, chatId;
+let me, other, room;
 
-// get otherUid from query param ?uid=OTHER_UID
-const params = new URLSearchParams(location.search);
-otherUid = params.get("uid");
+onAuthStateChanged(auth, async user => {
+  if (!user) { location.href = "login.html"; return; }
+  me = user.uid;
+  other = param("uid");
+  if (!other) { location.href = "users.html"; return; }
+  room = me < other ? `${me}_${other}` : `${other}_${me}`;
 
-function makeChatId(a,b){ return [a,b].sort().join("_"); }
-
-onAuthStateChanged(auth, async user=>{
-  if(!user){ location.href="index.html"; return; }
-  uid = user.uid;
-  if(!otherUid){ pcName.textContent = "No user"; return; }
-  chatId = makeChatId(uid, otherUid);
-
-  // load other user info
-  const snap = await (await fetch(`/users.json`)).json().catch(()=>null);
-  // fallback: attempt to listen in DB (simpler: load dp/name from DB)
-  const otherSnap = await (await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js")).get(dbRef(db, `users/${otherUid}`)).catch(()=>null);
-  if(otherSnap && otherSnap.exists()){
-    const u = otherSnap.val();
-    pcName.textContent = u.name || 'User';
-    pcDp.src = u.dp || 'default_dp.png';
+  // show other info
+  const otherSnap = await get(ref(db, "users/" + other));
+  if (otherSnap.exists()) {
+    const d = otherSnap.val();
+    document.getElementById("privateDp").src = d.dp || "default_dp.png";
+    document.getElementById("privateName").textContent = d.name || "User";
   }
 
-  const q = query(dbRef(db, `messages/private/${chatId}`), orderByChild("time"));
-  onChildAdded(q, snap=>{
+  // load messages
+  onChildAdded(ref(db, "private_messages/" + room), snap => {
     const m = snap.val();
-    appendMessage(m);
+    if (!m) return;
+    const el = document.createElement("div");
+    el.className = "message-row " + (m.uid === me ? "my-msg" : "other-msg");
+    el.innerHTML = `<img src="${m.dp || 'default_dp.png'}" class="msg-dp"><div class="msg-bubble">${m.text}</div>`;
+    document.getElementById("privateMessages").appendChild(el);
+    document.getElementById("privateMessages").scrollTop = document.getElementById("privateMessages").scrollHeight;
   });
 });
 
-sendBtn.onclick = async ()=>{
-  const text = msgInput.value.trim();
-  if(!text) return;
-  await push(dbRef(db, `messages/private/${chatId}`), { uid, name: "You", text, time: Date.now() });
-  msgInput.value="";
+document.getElementById("privateSendBtn").onclick = async () => {
+  const t = document.getElementById("privateMessageInput").value.trim();
+  if (!t) return;
+  const profileSnap = await get(ref(db, "users/" + (await auth.currentUser).uid));
+  const dp = profileSnap.exists() && profileSnap.val().dp ? profileSnap.val().dp : "default_dp.png";
+  await push(ref(db, "private_messages/" + room), { uid: me, text: t, dp, time: Date.now() });
+  document.getElementById("privateMessageInput").value = "";
 };
-
-function appendMessage(m){
-  const div = document.createElement("div");
-  div.className = "msg-row";
-  div.innerHTML = `<img class="msg-dp" src="${m.dp || 'default_dp.png'}"><div class="bubble"><div class="meta"><b>${m.name||'User'}</b> <span class="muted">${new Date(m.time).toLocaleTimeString()}</span></div>${m.text?`<div class="text">${m.text}</div>`:""}</div>`;
-  messagesDiv.appendChild(div);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
