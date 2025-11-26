@@ -7,78 +7,74 @@ const messagesBox = document.getElementById("messages");
 const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 const logoutBtn = document.getElementById("logoutBtn");
-const myDp = document.getElementById("myDp");
+const myDpHeader = document.getElementById("myDpHeader");
 
-let myUid = null;
-let myProfile = {};
+let currentUid = null;
+let myProfile = { name: "User", dp: "default_dp.png" };
 
+// get profile and listen for dp changes
 onAuthStateChanged(auth, async (user) => {
-  if (!user) { window.location.href = "login.html"; return; }
-  myUid = user.uid;
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+  currentUid = user.uid;
 
-  // load my profile (and keep listening for dp change)
-  const meRef = ref(db, "users/" + myUid);
-  onChildAdded; // noop to keep module import used
-  // use get once, but also listen for dp updates using onChildAdded? simpler: onValue
-  import("https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js").then(mod => {
-    // not needed here — we already imported functions
-  });
-
-  // fetch profile
-  const snap = await get(ref(db, "users/" + myUid));
+  // load user data once (dp may be base64 or filename)
+  const snap = await get(ref(db, "users/" + currentUid));
   if (snap.exists()) {
     myProfile = snap.val();
-    myDp.src = myProfile.dp ? myProfile.dp : "default_dp.png";
+    myDpHeader.src = myProfile.dp || "default_dp.png";
   }
 
-  // listen for profile changes (so dp updates reflect immediately)
-  const { onValue } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js");
-  onValue(ref(db, "users/" + myUid), s => {
+  // listen for any changes in user's own data (dp updates will reflect)
+  const userRef = ref(db, "users/" + currentUid);
+  userRef.on('value', (s) => {
     const d = s.val();
-    if (d && d.dp) myDp.src = d.dp;
+    if (d && d.dp) myDpHeader.src = d.dp;
   });
-
-  loadMessages();
 });
 
+// send message — include name + dp so recipients see correct dp
 sendBtn.onclick = async () => {
   const text = msgInput.value.trim();
-  if (!text || !myUid) return;
+  if (!text || !currentUid) return;
+
+  // get latest profile
+  const snap = await get(ref(db, "users/" + currentUid));
+  const profile = snap.exists() ? snap.val() : { name: "User", dp: "default_dp.png" };
+
   await push(ref(db, "messages"), {
-    uid: myUid,
-    name: myProfile.name || "User",
-    dp: myProfile.dp || "default_dp.png",
-    text,
+    uid: currentUid,
+    name: profile.name || "User",
+    dp: profile.dp || "default_dp.png",
+    text: text,
     time: Date.now()
   });
+
   msgInput.value = "";
 };
 
+// load messages
+onChildAdded(ref(db, "messages"), (snap) => {
+  const msg = snap.val();
+  const div = document.createElement("div");
+  div.className = "msg-row";
+
+  // msg.dp may be base64 or image path
+  div.innerHTML = `
+    <img class="msg-dp" src="${msg.dp || 'default_dp.png'}" />
+    <div class="msg-bubble">
+      <strong>${msg.name || 'User'}</strong>
+      <p>${msg.text}</p>
+    </div>
+  `;
+  messagesBox.appendChild(div);
+  messagesBox.scrollTop = messagesBox.scrollHeight;
+});
+
+// logout
 logoutBtn.onclick = async () => {
   await signOut(auth);
   window.location.href = "login.html";
 };
-
-function loadMessages() {
-  const messagesRef = ref(db, "messages");
-  onChildAdded(messagesRef, async (snap) => {
-    const m = snap.val();
-    if (!m) return;
-
-    const el = document.createElement("div");
-    el.className = "message-row " + (m.uid === myUid ? "my-msg" : "other-msg");
-    el.innerHTML = `
-      <img src="${m.dp || 'default_dp.png'}" class="msg-dp" />
-      <div class="msg-bubble"><strong>${m.name || 'User'}</strong><br>${escapeHtml(m.text)}</div>
-    `;
-    messagesBox.appendChild(el);
-    messagesBox.scrollTop = messagesBox.scrollHeight;
-  });
-}
-
-// basic escape to avoid broken HTML
-function escapeHtml(text) {
-  const el = document.createElement("div");
-  el.textContent = text;
-  return el.innerHTML;
-}
