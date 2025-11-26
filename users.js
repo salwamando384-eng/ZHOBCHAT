@@ -1,36 +1,29 @@
 // users.js
-import { auth, db } from "./firebase_config.js";
+import { db, auth } from "./firebase_config.js";
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const usersList = document.getElementById("usersList");
 
-auth.onAuthStateChanged(user => {
-  if (!user) { window.location.href = "login.html"; return; }
-  loadUsers(user.uid);
-});
+const usersRef = ref(db, "users");
+onValue(usersRef, (snapshot) => {
+  usersList.innerHTML = "";
+  snapshot.forEach(child => {
+    const user = child.val();
+    const uid = child.key;
 
-function loadUsers(currentUid) {
-  const usersRef = ref(db, "users");
-  onValue(usersRef, snapshot => {
-    usersList.innerHTML = "";
-    snapshot.forEach(child => {
-      const uid = child.key;
-      if (uid === currentUid) return; // skip self
-      const u = child.val();
-      const card = document.createElement("div");
-      card.className = "user-card";
-      card.innerHTML = `
-        <img src="${u.dp || 'default_dp.png'}" alt="dp" />
-        <div class="user-info">
-          <h3>${u.name || 'Unknown'}</h3>
-          <p>${u.city || ''}</p>
-        </div>
-      `;
-      card.onclick = () => {
-        // open private chat with uid
-        location.href = `private_chat.html?uid=${uid}`;
-      };
-      usersList.appendChild(card);
-    });
+    const card = document.createElement("div");
+    card.className = "user-card";
+    card.innerHTML = `
+      <img src="${user.dp || 'default_dp.png'}" class="user-dp" />
+      <div class="user-info">
+        <h3>${user.name || 'User'}</h3>
+        <p>${user.city || ''}</p>
+      </div>
+    `;
+    card.onclick = () => {
+      localStorage.setItem("chatUser", uid);
+      location.href = "private_chat.html";
+    };
+    usersList.appendChild(card);
   });
-}
+});
