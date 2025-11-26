@@ -1,15 +1,12 @@
 // signup.js
-import { auth, db, storage } from "./firebase_config.js";
+import { auth, db } from "./firebase_config.js";
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { set, ref as dbRef } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { uploadBytes, getDownloadURL, ref as sRef } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const signupBtn = document.getElementById("signupBtn");
-const msg = document.getElementById("msg");
+const msgEl = document.getElementById("msg");
 
 signupBtn.onclick = async () => {
-  msg.style.color = "green";
-  msg.textContent = "Creating account...";
   const name = document.getElementById("name").value.trim();
   const age = document.getElementById("age").value.trim();
   const gender = document.getElementById("gender").value;
@@ -18,34 +15,49 @@ signupBtn.onclick = async () => {
   const password = document.getElementById("password").value.trim();
   const dpFile = document.getElementById("dpFile").files[0];
 
-  if (!email || !password) { msg.style.color = "red"; msg.textContent = "Enter email & password"; return; }
+  if (!email || !password) {
+    msgEl.innerText = "Email and password required.";
+    return;
+  }
+
+  signupBtn.innerText = "Signing up...";
+  msgEl.innerText = "";
 
   try {
     const userCred = await createUserWithEmailAndPassword(auth, email, password);
     const uid = userCred.user.uid;
 
-    let dpUrl = "default_dp.png";
+    // Default dp value (can be default image filename or data URL)
+    let dpValue = "default_dp.png";
+
+    // If file chosen → convert to base64 data URL and store in DB
     if (dpFile) {
-      const dpRef = sRef(storage, "dp/" + uid + ".jpg");
-      await uploadBytes(dpRef, dpFile);
-      dpUrl = await getDownloadURL(dpRef);
+      const reader = new FileReader();
+      const base64 = await new Promise((res, rej) => {
+        reader.onload = () => res(reader.result);
+        reader.onerror = err => rej(err);
+        reader.readAsDataURL(dpFile);
+      });
+      dpValue = base64;
     }
 
-    await set(dbRef(db, "users/" + uid), {
-      name: name || email.split("@")[0],
+    // Save initial user profile to Realtime Database
+    await set(ref(db, "users/" + uid), {
+      name: name || "New User",
       age: age || "",
-      city: city || "",
       gender: gender || "",
-      email,
-      dp: dpUrl
+      city: city || "",
+      email: email,
+      dp: dpValue
     });
 
-    msg.style.color = "green";
-    msg.textContent = "Signup Successful! Redirecting...";
-    setTimeout(() => { window.location.href = "login.html"; }, 1200);
+    msgEl.innerText = "Signup successful!";
+    signupBtn.innerText = "Success";
 
-  } catch (error) {
-    msg.style.color = "red";
-    msg.textContent = error.message;
+    setTimeout(() => { window.location.href = "login.html"; }, 1200);
+  } catch (err) {
+    console.error(err);
+    msgEl.innerText = err.message || "Signup error";
+    signupBtn.innerText = "Sign Up";
   }
 };
