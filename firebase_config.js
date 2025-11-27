@@ -1,8 +1,8 @@
 // firebase_config.js
+// (Use the exact config values you already have)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
@@ -18,6 +18,5 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
-const storage = getStorage(app);
 
-export { auth, db, storage };
+export { auth, db };
