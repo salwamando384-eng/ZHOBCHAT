@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebase
 import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const signupBtn = document.getElementById("signupBtn");
-const msgEl = document.getElementById("msg");
+const status = document.getElementById("signupStatus");
 
 signupBtn.onclick = async () => {
   const name = document.getElementById("name").value.trim();
@@ -12,52 +12,48 @@ signupBtn.onclick = async () => {
   const gender = document.getElementById("gender").value;
   const city = document.getElementById("city").value.trim();
   const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const password = document.getElementById("password").value;
   const dpFile = document.getElementById("dpFile").files[0];
 
-  if (!email || !password) {
-    msgEl.innerText = "Email and password required.";
-    return;
-  }
+  if (!email || !password) { status.innerText = "Email and password required"; return; }
 
   signupBtn.innerText = "Signing up...";
-  msgEl.innerText = "";
+  status.innerText = "";
 
   try {
     const userCred = await createUserWithEmailAndPassword(auth, email, password);
     const uid = userCred.user.uid;
 
-    // Default dp value (can be default image filename or data URL)
-    let dpValue = "default_dp.png";
+    // default dp: small placeholder
+    let dpData = "default_dp.png";
 
-    // If file chosen → convert to base64 data URL and store in DB
     if (dpFile) {
-      const reader = new FileReader();
-      const base64 = await new Promise((res, rej) => {
-        reader.onload = () => res(reader.result);
-        reader.onerror = err => rej(err);
-        reader.readAsDataURL(dpFile);
+      // read as base64 data URL
+      dpData = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.onerror = () => rej("File read error");
+        r.readAsDataURL(dpFile);
       });
-      dpValue = base64;
     }
 
-    // Save initial user profile to Realtime Database
     await set(ref(db, "users/" + uid), {
-      name: name || "New User",
+      name: name || "User",
       age: age || "",
       gender: gender || "",
       city: city || "",
       email: email,
-      dp: dpValue
+      dp: dpData,
+      role: "user" // role: user (owner can be set manually in DB)
     });
 
-    msgEl.innerText = "Signup successful!";
-    signupBtn.innerText = "Success";
+    status.innerText = "Signup successful! Redirecting...";
+    signupBtn.innerText = "Done";
 
-    setTimeout(() => { window.location.href = "login.html"; }, 1200);
+    setTimeout(() => { window.location.href = "login.html"; }, 1000);
   } catch (err) {
     console.error(err);
-    msgEl.innerText = err.message || "Signup error";
+    status.innerText = err.message || "Signup error";
     signupBtn.innerText = "Sign Up";
   }
 };
