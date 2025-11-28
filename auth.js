@@ -1,93 +1,45 @@
-// auth.js
-import { auth, db, storage } from "./firebase_config.js";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
-import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { auth, db, OWNER_UID } from "./firebase_config.js";
+import { set, ref } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-const signupBtn = document.getElementById("signupBtn");
-const loginBtn = document.getElementById("loginBtn");
-const toLogin = document.getElementById("toLogin");
-const toSignup = document.getElementById("toSignup");
+const signupBtn = document.getElementById("btnSignup");
+const signupDp = document.getElementById("signupDp");
 
-const signupForm = document.getElementById("signupForm");
-const loginForm = document.getElementById("loginForm");
-
-const suName = document.getElementById("suName");
-const suGender = document.getElementById("suGender");
-const suAge = document.getElementById("suAge");
-const suCity = document.getElementById("suCity");
-const suAbout = document.getElementById("suAbout");
-const suEmail = document.getElementById("suEmail");
-const suPass = document.getElementById("suPass");
-const suDp = document.getElementById("suDp");
-const suMsg = document.getElementById("suMsg");
-
-const liEmail = document.getElementById("liEmail");
-const liPass = document.getElementById("liPass");
-const liMsg = document.getElementById("liMsg");
-
-toLogin.onclick = (e) => { e.preventDefault(); signupForm.classList.add("hidden"); loginForm.classList.remove("hidden"); }
-toSignup.onclick = (e) => { e.preventDefault(); loginForm.classList.add("hidden"); signupForm.classList.remove("hidden"); }
+function fileToBase64(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(file);
+    });
+}
 
 signupBtn.onclick = async () => {
-  suMsg.textContent = "";
-  const name = suName.value.trim();
-  const gender = suGender.value;
-  const age = suAge.value;
-  const city = suCity.value.trim();
-  const about = suAbout.value.trim();
-  const email = suEmail.value.trim();
-  const pass = suPass.value;
+    try {
+        document.getElementById("authError").innerHTML = "Signing up...";
 
-  if (!name || !email || pass.length < 6) { suMsg.textContent = "Please fill name, email and password (6+)."; return; }
+        let dpBase64 = "";
+        if (signupDp.files[0]) {
+            dpBase64 = await fileToBase64(signupDp.files[0]);
+        }
 
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    const uid = cred.user.uid;
+        const email = signupEmail.value;
+        const pass = signupPass.value;
 
-    // upload dp if provided
-    let dpURL = "default_dp.png";
-    if (suDp.files.length > 0) {
-      const file = suDp.files[0];
-      const sref = sRef(storage, `dp/${uid}.jpg`);
-      await uploadBytes(sref, file);
-      dpURL = await getDownloadURL(sref);
+        const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+        const uid = userCred.user.uid;
+
+        await set(ref(db, "users/" + uid), {
+            name: signupName.value,
+            age: signupAge.value,
+            gender: signupGender.value,
+            city: signupCity.value,
+            dp: dpBase64
+        });
+
+        document.getElementById("authSection").classList.add("hide");
+        document.getElementById("mainChat").classList.remove("hide");
     }
-
-    // save profile
-    await set(ref(db, `users/${uid}`), {
-      name, gender, age: age || "", city, about, email, dp: dpURL, online: true, lastSeen: Date.now()
-    });
-
-    // redirect
-    window.location.href = "chat.html";
-  } catch (err) {
-    suMsg.textContent = "Error: " + err.message;
-  }
+    catch (e) {
+        document.getElementById("authError").innerHTML = "Signup error";
+    }
 };
-
-loginBtn.onclick = async () => {
-  liMsg.textContent = "";
-  const email = liEmail.value.trim();
-  const pass = liPass.value;
-  if (!email || !pass) { liMsg.textContent = "Enter email and password."; return; }
-
-  try {
-    const userCred = await signInWithEmailAndPassword(auth, email, pass);
-
-    // mark online
-    const uid = userCred.user.uid;
-    await set(ref(db, `users/${uid}/online`), true);
-    await set(ref(db, `users/${uid}/lastSeen`), Date.now());
-
-    window.location.href = "chat.html";
-  } catch (err) {
-    liMsg.textContent = "Error: " + err.message;
-  }
-};
-
-// if already logged in, go to chat
-onAuthStateChanged(auth, (user) => {
-  if (user) window.location.href = "chat.html";
-});
