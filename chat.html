@@ -1,43 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Chat - ZhobChat</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <title>ZHOBCHAT - Chat Room</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="chat-page">
-  <div class="chat-container">
-    <div class="chat-header">
-      <img id="chatDp" class="header-dp" src="default_dp.png" />
-      <h2>ZHOBCHAT</h2>
-      <div class="header-buttons">
-        <button id="usersBtn">Users</button>
-        <button id="profileBtn">Profile</button>
-        <button id="logoutBtn">Logout</button>
-      </div>
+
+<body>
+
+<div class="topbar">
+    <h2>Chat Room</h2>
+
+    <div class="top-buttons">
+        <button onclick="openPage('index.html')">Home</button>
+        <button onclick="openPage('users.html')">Users</button>
+        <button onclick="openPage('profile.html')">Profile</button>
     </div>
+</div>
 
-    <div id="messages" class="messages-box"></div>
+<div id="messages" class="chat-box"></div>
 
-    <div class="input-area">
-      <input id="messageInput" placeholder="Type your message..." />
-      <button id="sendBtn">Send</button>
-    </div>
-  </div>
+<div class="input-area">
+    <input id="messageInput" type="text" placeholder="Type message...">
+    <button onclick="sendMessage()">Send</button>
+</div>
 
-  <!-- Users overlay & detail panel placeholder -->
-  <div id="usersOverlay" class="users-overlay hidden">
-    <div class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <h3 style="color:var(--primary)">All Users</h3>
-        <button id="closeUsers" class="btn">Close</button>
-      </div>
-      <div id="usersListArea"></div>
-      <div id="userDetailArea" class="detail-box hidden"></div>
-    </div>
-  </div>
+<!-- Owner controls -->
+<div id="ownerPanel" class="owner-panel" style="display:none;">
+    <h3>Owner Controls</h3>
+    <button onclick="deleteAllMessages()" class="danger">Delete All Messages</button>
+</div>
 
-  <script type="module" src="chat.js"></script>
+<script>
+function openPage(p) { window.location.href = p; }
+</script>
+
+<script src="firebase_config.js"></script>
+<script src="chat.js"></script>
+
 </body>
 </html>
