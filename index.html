@@ -1,81 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>ZhobChat</title>
-<link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <title>ZHOBCHAT</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div id="topBar">
-    <div id="logo">ZhobChat</div>
-    <button id="btnUsers">Users</button>
-    <button id="btnProfile">Profile</button>
+<div class="topbar">
+    <h2>ZHOBCHAT</h2>
+
+    <div class="top-buttons">
+        <button onclick="openPage('chat.html')">Chat</button>
+        <button onclick="openPage('users.html')">Users</button>
+        <button onclick="openPage('profile.html')">Profile</button>
+        <button onclick="logoutUser()" class="logout">Logout</button>
+    </div>
 </div>
 
-<!-- SIGNUP / LOGIN PAGE -->
-<div id="authSection">
-    <h2>Signup</h2>
-    <input id="signupName" placeholder="Name">
-    <input id="signupAge" placeholder="Age">
-    <input id="signupGender" placeholder="Gender">
-    <input id="signupCity" placeholder="City">
-    <input id="signupEmail" placeholder="Email">
-    <input id="signupPass" placeholder="Password" type="password">
-
-    <input type="file" id="signupDp"> <!-- Base64 Upload -->
-
-    <button id="btnSignup">Signup</button>
-    <p id="authError"></p>
+<div class="main-area">
+    <h3>Welcome to ZHOBCHAT</h3>
+    <p>Select a page from above menu.</p>
 </div>
 
-<!-- MAIN CHAT SECTION -->
-<div id="mainChat" class="hide">
-    <h2>Main Chat</h2>
-
-    <div id="messages"></div>
-
-    <textarea id="msgBox" placeholder="Write message..."></textarea>
-    <button id="btnSend">Send</button>
-
-    <button id="btnDeleteAll" class="ownerOnly hide">Delete All Messages</button>
-</div>
-
-<!-- USERS POPUP -->
-<div id="usersPopup" class="popup hide">
-    <h3>All Users</h3>
-    <div id="userList"></div>
-</div>
-
-<!-- USER PROFILE POPUP -->
-<div id="userDetailsPopup" class="popup hide">
-    <h3>User Details</h3>
-    <img id="detailDp">
-    <p id="detailName"></p>
-    <p id="detailAge"></p>
-    <p id="detailGender"></p>
-    <p id="detailCity"></p>
-
-    <button id="btnSendPM">Private Message</button>
-    <button id="btnFriendReq">Friend Request</button>
-</div>
-
-<!-- PROFILE PAGE -->
-<div id="profilePage" class="popup hide">
-    <h3>Your Profile</h3>
-    <img id="myDpPreview" class="dpBig">
-
-    <input type="file" id="myDpFile">
-    <button id="btnSaveDp">Save DP</button>
-
-    <p id="profileMsg"></p>
-</div>
+<script>
+function openPage(page) {
+    window.location.href = page;
+}
+</script>
 
 <script src="firebase_config.js"></script>
-<script src="auth.js"></script>
-<script src="chat.js"></script>
-<script src="users.js"></script>
+<script src="index.js"></script>
 
 </body>
 </html>
