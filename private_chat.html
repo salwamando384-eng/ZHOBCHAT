@@ -1,21 +1,26 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Private Chat</title>
-<link rel="stylesheet" href="style.css" />
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Private Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <div class="chat-container">
-    <div class="chat-header">
-      <a class="btn" href="users.html">Back</a>
-      <h2 id="chatWith">Private Chat</h2>
-    </div>
-    <div id="pMessages" class="messages-box"></div>
-    <div class="input-area">
-      <input id="pMessageInput" placeholder="Type private message..." />
-      <button id="pSendBtn">Send</button>
-    </div>
-  </div>
 
-  <script type="module" src="private_chat.js"></script>
-</body></html>
+<body class="page colorful-bg">
+
+    <header class="topbar">
+        <button class="backBtn" onclick="history.back()">← Back</button>
+        <h2 id="chatUserName">Private Chat</h2>
+    </header>
+
+    <div id="messages" class="messages"></div>
+
+    <div class="input-area">
+        <input type="text" id="msgInput" placeholder="Write message...">
+        <button id="sendBtn">Send</button>
+    </div>
+
+    <script type="module" src="private_chat.js"></script>
+</body>
+</html>
