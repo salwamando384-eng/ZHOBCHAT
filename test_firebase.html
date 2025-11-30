@@ -1,40 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Firebase Test</title>
+    <meta charset="UTF-8">
+    <title>Firebase Test</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <h2>Testing Firebase Connection...</h2>
-  <div id="status">Checking...</div>
+<body class="test-page">
+    <div class="card">
+        <h2>Firebase Connection Test</h2>
+        <button id="testBtn">Test Firebase</button>
+        <p id="result"></p>
+    </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    <script type="module">
+        import { app, db } from "./firebase_config.js";
+        import { ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
-      authDomain: "zhobchat-33d8e.firebaseapp.com",
-      databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "zhobchat-33d8e",
-      storageBucket: "zhobchat-33d8e.appspot.com",
-      messagingSenderId: "116466089929",
-      appId: "1:116466089929:web:06e914c8ed81ba9391f218",
-      measurementId: "G-LX9P9LRLV8"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    try {
-      await set(ref(db, 'testConnection'), {
-        time: new Date().toISOString(),
-        status: "connected"
-      });
-      document.getElementById("status").textContent = "✅ Firebase connected successfully!";
-    } catch (error) {
-      document.getElementById("status").textContent = "❌ Connection failed: " + error.message;
-    }
-  </script>
+        document.getElementById("testBtn").onclick = async () => {
+            try {
+                const snapshot = await get(ref(db, "test"));
+                if (snapshot.exists()) {
+                    document.getElementById("result").innerText = "Firebase Connected! Value: " + snapshot.val();
+                } else {
+                    document.getElementById("result").innerText = "Connected, but no 'test' value found.";
+                }
+            } catch (error) {
+                document.getElementById("result").innerText = "Error: " + error;
+            }
+        };
+    </script>
 </body>
 </html>
