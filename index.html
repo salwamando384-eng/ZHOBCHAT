@@ -1,37 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>ZHOBCHAT</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ZHOBCHAT — Welcome</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-
-<div class="topbar">
-    <h2>ZHOBCHAT</h2>
-
-    <div class="top-buttons">
-        <button onclick="openPage('chat.html')">Chat</button>
-        <button onclick="openPage('users.html')">Users</button>
-        <button onclick="openPage('profile.html')">Profile</button>
-        <button onclick="logoutUser()" class="logout">Logout</button>
+  <div class="center-card">
+    <h1>ZHOBCHAT</h1>
+    <p class="muted">A simple group chat app (Base64 DP — no billing)</p>
+    <div class="btn-row">
+      <button onclick="location.href='login.html'">Login</button>
+      <button onclick="location.href='signup.html'">Signup</button>
     </div>
-</div>
-
-<div class="main-area">
-    <h3>Welcome to ZHOBCHAT</h3>
-    <p>Select a page from above menu.</p>
-</div>
-
-<script>
-function openPage(page) {
-    window.location.href = page;
-}
-</script>
-
-<script src="firebase_config.js"></script>
-<script src="index.js"></script>
-
+  </div>
 </body>
 </html>
