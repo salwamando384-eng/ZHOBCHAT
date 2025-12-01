@@ -3,49 +3,46 @@ import { auth, db } from "./firebase_config.js";
 import { ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-const messagesBox = document.getElementById("messages");
-const inp = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
+const privateMessagesEl = document.getElementById("privateMessages");
+const privateInput = document.getElementById("privateInput");
+const privateSend = document.getElementById("privateSend");
 
-let meUid = null;
-let otherUid = localStorage.getItem("chatUser") || null;
-let myProfile = { name: "You", dp: "default_dp.png" };
+let currentUid = null;
+let otherUid = localStorage.getItem("chatUser"); // set when clicking user
 
-onAuthStateChanged(auth, async (u) => {
-  if (!u) return window.location.href = "login.html";
-  meUid = u.uid;
-  const snap = await get(ref(db, "users/" + meUid));
-  if (snap.exists()) {
-    const d = snap.val();
-    myProfile.name = d.name || myProfile.name;
-    myProfile.dp = d.dp || myProfile.dp;
-  }
-  loadPrivateMessages();
-});
-
-function chatPath(a, b) {
-  // deterministic path for 1:1 chat: "privateChats/uid1_uid2" sorted
-  const arr = [a, b].sort();
-  return `privateChats/${arr[0]}_${arr[1]}`;
+if (!otherUid) {
+  alert("No chat user selected.");
+  location.href = "chat.html";
 }
 
-function loadPrivateMessages() {
-  if (!meUid || !otherUid) return;
-  const p = chatPath(meUid, otherUid);
-  onChildAdded(ref(db, p), (snap) => {
+onAuthStateChanged(auth, async user => {
+  if (!user) { location.href = "login.html"; return; }
+  currentUid = user.uid;
+  startPrivateChat();
+});
+
+function chatId(a,b){
+  return [a,b].sort().join("_");
+}
+
+async function startPrivateChat(){
+  const id = chatId(currentUid, otherUid);
+  const chatRef = ref(db, `private_chats/${id}`);
+
+  // load existing
+  onChildAdded(chatRef, snap => {
     const m = snap.val();
-    const el = document.createElement("div");
-    el.className = (m.from === meUid) ? "my-msg" : "other-msg";
-    el.innerHTML = `<img src="${m.dp}" class="msg-dp" /><div class="msg-bubble"><b>${m.name}</b><br>${m.text}</div>`;
-    messagesBox.appendChild(el);
-    messagesBox.scrollTop = messagesBox.scrollHeight;
+    const div = document.createElement("div");
+    div.className = m.from === currentUid ? "msg-row my-msg" : "msg-row";
+    div.innerHTML = `<div class="msg-bubble">${m.text}</div>`;
+    privateMessagesEl.appendChild(div);
+    privateMessagesEl.scrollTop = privateMessagesEl.scrollHeight;
   });
-}
 
-sendBtn && sendBtn.addEventListener("click", async () => {
-  const text = (inp.value || "").trim();
-  if (!text) return;
-  const p = chatPath(meUid, otherUid);
-  await push(ref(db, p), { from: meUid, name: myProfile.name, dp: myProfile.dp, text, time: Date.now() });
-  inp.value = "";
-});
+  privateSend.onclick = async () => {
+    const text = privateInput.value.trim();
+    if (!text) return;
+    await push(chatRef, { from: currentUid, to: otherUid, text, time: Date.now() });
+    privateInput.value = "";
+  };
+}
