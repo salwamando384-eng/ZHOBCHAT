@@ -1,67 +1,54 @@
-/* -------------------- GLOBAL -------------------- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
+/* style.css - colorful and simple */
+
+:root{
+  --accent1: #4a6cff;
+  --accent2: #7b61ff;
+  --muted: #666;
 }
 
-body {
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    min-height: 100vh;
-    padding: 20px;
-    color: #fff;
-}
+/* global */
+*{box-sizing:border-box;font-family:Inter,system-ui,Arial;line-height:1.2}
+body{margin:0;background:linear-gradient(180deg,#eef2ff,#ffffff);color:#111}
 
-/* Center Card */
-.card {
-    width: 90%;
-    max-width: 400px;
-    margin: auto;
-    background: #ffffff;
-    color: #333;
-    border-radius: 18px;
-    padding: 25px;
-    box-shadow: 0px 4px 20px rgba(0,0,0,0.2);
-    text-align: center;
-}
+/* center card */
+.center-card{max-width:420px;margin:60px auto;padding:24px;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(50,50,93,0.08);text-align:center}
+.center-card h1{margin:0 0 8px}
+.center-card .muted{color:var(--muted);margin-bottom:12px}
+.btn-row{display:flex;gap:12px;justify-content:center}
+button{cursor:pointer;border:none;padding:10px 14px;border-radius:10px;background:var(--accent1);color:#fff;font-weight:600}
+button.small-btn{padding:6px 10px;background:#fff;color:var(--accent1);border:1px solid #ddd}
 
-/* Buttons */
-button {
-    width: 100%;
-    padding: 15px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    background: #2575fc;
-    color: white;
-    font-size: 16px;
-    margin-top: 15px;
-    transition: 0.3s;
-}
+/* form card */
+.form-card{max-width:420px;margin:40px auto;padding:18px;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(50,50,93,0.06)}
+.form-card h2{margin:6px 0 12px}
+.form-card input, .form-card select, .form-card textarea{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid #e6e6e6}
+.file-label{font-size:13px;color:#666;margin-top:6px}
 
-button:hover {
-    background: #1b5ed1;
-}
+/* chat page */
+.chat-page{max-width:720px;margin:18px auto;height:92vh;display:flex;flex-direction:column;background:transparent}
+.chat-header{display:flex;justify-content:space-between;align-items:center;padding:12px;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#fff;border-radius:12px}
+.chat-header .left{display:flex;align-items:center;gap:12px}
+.header-dp{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.4)}
+.messages-box{flex:1;overflow:auto;padding:12px;margin-top:12px}
+.msg-row{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start}
+.msg-dp{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.msg-bubble{background:#f4f7ff;padding:10px;border-radius:10px;max-width:75%}
+.msg-row.my-msg{flex-direction:row-reverse}
+.msg-row.my-msg .msg-bubble{background:#dff7de}
 
-/* Input fields */
-input {
-    width: 100%;
-    padding: 14px;
-    border-radius: 10px;
-    border: 2px solid #ddd;
-    font-size: 15px;
-    margin-top: 10px;
-}
+/* footer input */
+.input-area{display:flex;gap:8px;padding:12px;align-items:center}
+.input-area input{flex:1;padding:10px;border-radius:8px;border:1px solid #eaeaea}
+.input-area button{padding:10px 12px;border-radius:8px;background:var(--accent2);color:white}
 
-/* Headings */
-h2 {
-    margin-bottom: 15px;
-}
+/* small components */
+.dp-thumb{width:60px;height:60px;border-radius:50%;object-fit:cover}
+.user-card{display:flex;align-items:center;padding:10px;background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.04);margin-bottom:10px}
+.profile-dp{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--accent1)}
 
-/* Test Page Special */
-.test-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+/* responsive */
+@media (max-width:600px){
+  .chat-page{margin:6px;height:100vh}
+  .center-card,.form-card{margin:12px}
+  .header-dp{width:36px;height:36px}
+    }
