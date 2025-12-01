@@ -1,26 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Private Chat</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Private Chat — ZHOBCHAT</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
-<body class="page colorful-bg">
-
-    <header class="topbar">
-        <button class="backBtn" onclick="history.back()">← Back</button>
-        <h2 id="chatUserName">Private Chat</h2>
+<body>
+  <div class="chat-page">
+    <header class="chat-header">
+      <button onclick="location.href='chat.html'">← Back</button>
+      <h2>Private Chat</h2>
     </header>
 
-    <div id="messages" class="messages"></div>
+    <main id="privateMessages" class="messages-box"></main>
 
-    <div class="input-area">
-        <input type="text" id="msgInput" placeholder="Write message...">
-        <button id="sendBtn">Send</button>
-    </div>
+    <footer class="input-area">
+      <input id="privateInput" placeholder="Type private message..." />
+      <button id="privateSend">Send</button>
+    </footer>
+  </div>
 
-    <script type="module" src="private_chat.js"></script>
+  <script type="module" src="private_chat.js"></script>
 </body>
 </html>
