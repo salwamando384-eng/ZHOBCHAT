@@ -1,93 +1,80 @@
 // profile.js
 import { auth, db } from "./firebase_config.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { ref, get, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-const dpInput = document.getElementById("profilePicInput") || document.getElementById("dpFile");
-const dpPreview = document.getElementById("profilePicPreview") || document.getElementById("dpPreview");
-const nameInput = document.getElementById("nameInput") || document.getElementById("name");
-const ageInput = document.getElementById("ageInput") || document.getElementById("age");
-const genderInput = document.getElementById("genderInput") || document.getElementById("gender");
-const cityInput = document.getElementById("cityInput") || document.getElementById("city");
-const aboutInput = document.getElementById("aboutInput") || document.getElementById("about");
-const saveBtn = document.getElementById("saveProfileBtn") || document.getElementById("saveBtn");
-const backBtn = document.getElementById("backBtn");
-const msgEl = document.getElementById("profileMsg") || document.getElementById("msg");
+const dpFile = document.getElementById("dpFile");
+const dpPreview = document.getElementById("dpPreview");
+const nameEl = document.getElementById("p_name");
+const ageEl = document.getElementById("p_age");
+const genderEl = document.getElementById("p_gender");
+const cityEl = document.getElementById("p_city");
+const saveBtn = document.getElementById("saveProfileBtn");
+const saveMsg = document.getElementById("saveMsg");
 
 let currentUid = null;
-onAuthStateChanged(auth, async (user) => {
+
+onAuthStateChanged(auth, async user => {
   if (!user) {
-    window.location.href = "login.html";
+    location.href = "login.html";
     return;
   }
   currentUid = user.uid;
-  // load DB profile
   const snap = await get(ref(db, "users/" + currentUid));
   if (snap.exists()) {
-    const data = snap.val();
-    if (dpPreview && data.dp) dpPreview.src = data.dp;
-    if (nameInput && data.name) nameInput.value = data.name;
-    if (ageInput && data.age) ageInput.value = data.age;
-    if (genderInput && data.gender) genderInput.value = data.gender;
-    if (cityInput && data.city) cityInput.value = data.city;
-    if (aboutInput && data.about) aboutInput.value = data.about;
+    const d = snap.val();
+    dpPreview.src = d.dp || "default_dp.png";
+    nameEl.value = d.name || "";
+    ageEl.value = d.age || "";
+    genderEl.value = d.gender || "";
+    cityEl.value = d.city || "";
   }
 });
 
-// Preview chosen image
-if (dpInput) {
-  dpInput.addEventListener("change", () => {
-    const f = dpInput.files?.[0];
-    if (f && dpPreview) dpPreview.src = URL.createObjectURL(f);
-  });
-}
+dpFile.onchange = () => {
+  const f = dpFile.files[0];
+  if (!f) return;
+  const fr = new FileReader();
+  fr.onload = () => dpPreview.src = fr.result;
+  fr.readAsDataURL(f);
+};
 
-// Save handler
-if (saveBtn) {
-  saveBtn.addEventListener("click", async () => {
-    if (!currentUid) return alert("Not signed in");
-    saveBtn.disabled = true;
-    const origText = saveBtn.innerText;
-    saveBtn.innerText = "Saving...";
+saveBtn.onclick = async () => {
+  if (!currentUid) return;
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Saving...";
 
-    try {
-      const updates = {};
-      updates.name = (nameInput?.value || "").trim();
-      updates.age = (ageInput?.value || "").trim();
-      updates.gender = (genderInput?.value || "").trim();
-      updates.city = (cityInput?.value || "").trim();
-      updates.about = (aboutInput?.value || "").trim();
+  const toUpdate = {
+    name: nameEl.value.trim(),
+    age: ageEl.value.trim(),
+    gender: genderEl.value,
+    city: cityEl.value.trim()
+  };
 
-      const file = dpInput?.files?.[0];
-      if (file) {
-        // convert to base64
-        updates.dp = await fileToDataURL(file);
-      }
+  if (dpFile.files[0]) {
+    const base64 = await readFileAsDataURL(dpFile.files[0]);
+    toUpdate.dp = base64;
+  }
 
-      await update(ref(db, "users/" + currentUid), updates);
-      if (msgEl) msgEl.innerText = "Profile saved";
-      else alert("Profile saved");
-    } catch (err) {
-      console.error(err);
-      if (msgEl) msgEl.innerText = err.message;
-      else alert(err.message || "Save failed");
-    } finally {
-      saveBtn.disabled = false;
-      saveBtn.innerText = origText;
-    }
-  });
-}
+  try {
+    await update(ref(db, "users/" + currentUid), toUpdate);
+    saveMsg.style.color = "green";
+    saveMsg.textContent = "Profile saved!";
+  } catch (err) {
+    saveMsg.style.color = "red";
+    saveMsg.textContent = "Save error: " + err.message;
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Save Profile";
+    setTimeout(()=> saveMsg.textContent = "", 2000);
+  }
+};
 
-// Back button
-if (backBtn) backBtn.addEventListener("click", () => {
-  window.location.href = "chat.html";
-});
-
-function fileToDataURL(file) {
+function readFileAsDataURL(file){
   return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onerror = () => rej(new Error("File read error"));
-    r.onload = () => res(r.result);
-    r.readAsDataURL(file);
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
   });
 }
