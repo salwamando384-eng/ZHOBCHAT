@@ -4,35 +4,38 @@ import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebase
 import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const signupBtn = document.getElementById("signupBtn");
-const msgEl = document.getElementById("msg"); // if present
+const msgEl = document.getElementById("signupMsg");
 
-signupBtn && signupBtn.addEventListener("click", async () => {
+signupBtn.onclick = async () => {
+  const name = document.getElementById("name").value.trim();
+  const age = document.getElementById("age").value.trim();
+  const gender = document.getElementById("gender").value;
+  const city = document.getElementById("city").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const dpFile = document.getElementById("dpFile").files[0];
+
+  if (!email || !password) {
+    msgEl.textContent = "Email and password required.";
+    return;
+  }
+
   signupBtn.disabled = true;
-  const originalText = signupBtn.innerText;
-  signupBtn.innerText = "Signing up...";
+  signupBtn.textContent = "Signing up...";
 
   try {
-    const name = (document.getElementById("name")?.value || "").trim();
-    const age = (document.getElementById("age")?.value || "").trim();
-    const gender = (document.getElementById("gender")?.value || "").trim();
-    const city = (document.getElementById("city")?.value || "").trim();
-    const email = (document.getElementById("email")?.value || "").trim();
-    const password = (document.getElementById("password")?.value || "").trim();
-    const dpFile = document.getElementById("dpFile")?.files?.[0];
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = cred.user.uid;
 
-    if (!email || !password) throw new Error("Email and password required");
-
-    const userCred = await createUserWithEmailAndPassword(auth, email, password);
-    const uid = userCred.user.uid;
-
-    // Default dp
+    // default dp
     let dp = "default_dp.png";
 
-    // If file selected, read as base64 and save into DB
+    // if dp file chosen -> read as dataURL (base64)
     if (dpFile) {
-      dp = await fileToDataURL(dpFile);
+      dp = await readFileAsDataURL(dpFile);
     }
 
+    // save user data in Realtime DB
     await set(ref(db, "users/" + uid), {
       name: name || "User",
       age: age || "",
@@ -42,24 +45,22 @@ signupBtn && signupBtn.addEventListener("click", async () => {
       dp: dp
     });
 
-    if (msgEl) msgEl.innerText = "Signup successful!";
-    signupBtn.innerText = "Signed up";
-    setTimeout(() => window.location.href = "chat.html", 900);
+    msgEl.style.color = "green";
+    msgEl.textContent = "Signup successful — redirecting...";
+    setTimeout(() => location.href = "chat.html", 1200);
   } catch (err) {
-    console.error(err);
-    if (msgEl) msgEl.innerText = err.message || "Signup error";
-    alert(err.message || "Signup error");
-  } finally {
+    msgEl.style.color = "red";
+    msgEl.textContent = "Signup error: " + err.message;
     signupBtn.disabled = false;
-    signupBtn.innerText = originalText;
+    signupBtn.textContent = "Sign Up";
   }
-});
+};
 
-function fileToDataURL(file) {
+function readFileAsDataURL(file) {
   return new Promise((res, rej) => {
-    const reader = new FileReader();
-    reader.onerror = () => rej(new Error("File read error"));
-    reader.onload = () => res(reader.result);
-    reader.readAsDataURL(file);
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
   });
 }
