@@ -1,33 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Firebase Test</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body class="test-page">
-    <div class="card">
-        <h2>Firebase Connection Test</h2>
-        <button id="testBtn">Test Firebase</button>
-        <p id="result"></p>
-    </div>
-
-    <script type="module">
-        import { app, db } from "./firebase_config.js";
-        import { ref, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-
-        document.getElementById("testBtn").onclick = async () => {
-            try {
-                const snapshot = await get(ref(db, "test"));
-                if (snapshot.exists()) {
-                    document.getElementById("result").innerText = "Firebase Connected! Value: " + snapshot.val();
-                } else {
-                    document.getElementById("result").innerText = "Connected, but no 'test' value found.";
-                }
-            } catch (error) {
-                document.getElementById("result").innerText = "Error: " + error;
-            }
-        };
-    </script>
+<html>
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body>
+  <h3>Firebase Test</h3>
+  <p>Open console to see logs.</p>
+  <script type="module">
+    import { auth, db } from "./firebase_config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    onAuthStateChanged(auth, u => console.log("auth state:", u));
+    import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    onValue(ref(db, "messages"), s => console.log("messages:", s.val()));
+  </script>
 </body>
 </html>
