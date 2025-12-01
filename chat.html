@@ -1,42 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>ZHOBCHAT - Chat Room</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chat — ZHOBCHAT</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
+  <div class="chat-page">
 
-<div class="topbar">
-    <h2>Chat Room</h2>
+    <header class="chat-header">
+      <div class="left">
+        <button id="openUsersTop" class="small-btn">Users</button>
+        <h1>ZHOBCHAT</h1>
+      </div>
+      <div class="right">
+        <img id="myDpHeader" class="header-dp" src="default_dp.png" />
+        <button id="profileBtn" class="small-btn">Profile</button>
+        <button id="logoutBtn" class="small-btn">Logout</button>
+      </div>
+    </header>
 
-    <div class="top-buttons">
-        <button onclick="openPage('index.html')">Home</button>
-        <button onclick="openPage('users.html')">Users</button>
-        <button onclick="openPage('profile.html')">Profile</button>
-    </div>
-</div>
+    <main id="messages" class="messages-box"></main>
 
-<div id="messages" class="chat-box"></div>
+    <footer class="input-area">
+      <input id="messageInput" placeholder="Type a message..." />
+      <button id="sendBtn">Send</button>
+      <button id="delAllBtn" class="danger" title="Owner only, deletes all messages" style="display:none;">Delete All</button>
+    </footer>
 
-<div class="input-area">
-    <input id="messageInput" type="text" placeholder="Type message...">
-    <button onclick="sendMessage()">Send</button>
-</div>
+  </div>
 
-<!-- Owner controls -->
-<div id="ownerPanel" class="owner-panel" style="display:none;">
-    <h3>Owner Controls</h3>
-    <button onclick="deleteAllMessages()" class="danger">Delete All Messages</button>
-</div>
-
-<script>
-function openPage(p) { window.location.href = p; }
-</script>
-
-<script src="firebase_config.js"></script>
-<script src="chat.js"></script>
-
+  <script type="module" src="chat.js"></script>
+  <script src="users_popup_component.js"></script> <!-- adds Users overlay (file provided later) -->
 </body>
 </html>
