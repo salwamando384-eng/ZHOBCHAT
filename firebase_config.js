@@ -1,59 +1,20 @@
-// ----------------------------
-// Firebase Config (Base64 Version)
-// ----------------------------
+/* firebase_config.js – FINAL WORKING FILE */
 
-// Import Firebase core
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// Import Firebase Auth
-import { 
-    getAuth, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword,
-    signOut 
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-// Import Firebase Realtime Database
-import { 
-    getDatabase, 
-    ref, 
-    set, 
-    update, 
-    get, 
-    onValue 
-} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-
-// -----------------------------------
-// ⚠️ Put your actual Firebase config
-// -----------------------------------
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDiso8BvuRZSWko7kTEsBtu99MKKGD7Myk",
+  authDomain: "zhobchat-33d8e.firebaseapp.com",
+  databaseURL: "https://zhobchat-33d8e-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "zhobchat-33d8e",
+  storageBucket: "zhobchat-33d8e.appspot.com",
+  messagingSenderId: "116466089929",
+  appId: "1:116466089929:web:06e914c8ed81ba9391f218"
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-// Initialize Auth & Database
+export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getDatabase(app);
-
-// Export functions
-export {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  ref,
-  set,
-  update,
-  get,
-  onValue
-};
-
-// Owner UID (Admin Controls)
-export const OWNER_UID = "PUT_YOUR_OWNER_UID_HERE";
