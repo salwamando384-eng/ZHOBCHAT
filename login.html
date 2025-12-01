@@ -1,29 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Login - ZHOBCHAT</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login — ZHOBCHAT</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="auth-body">
-
-<div class="auth-box">
+<body>
+  <div class="form-card">
     <h2>Login</h2>
 
-    <input id="loginEmail" type="email" placeholder="Email">
-    <input id="loginPassword" type="password" placeholder="Password">
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
 
-    <button onclick="loginUser()">Login</button>
+    <button id="loginBtn">Login</button>
+    <p id="loginMsg" class="muted"></p>
 
-    <p class="switch-link">
-        Not registered? <a href="signup.html">Create Account</a>
-    </p>
+    <p class="muted">Don't have account? <a href="signup.html">Sign up</a></p>
+  </div>
 
-    <p id="loginError" class="error"></p>
-</div>
-
-<script src="firebase_config.js"></script>
-<script src="login.js"></script>
-
+  <script type="module" src="login.js"></script>
 </body>
 </html>
